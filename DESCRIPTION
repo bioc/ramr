@@ -9,14 +9,15 @@ Authors@R:
            comment = c(ORCID = "0000-0002-5910-4934"))
 Maintainer: Oleksii Nikolaienko <oleksii.nikolaienko@gmail.com>
 Description: ramr is an R package for detection of low-frequency aberrant methylation events in large datasets
-    obtained by methylation profiling using array or high-throughput bisulfite sequencing. In addition, package provides
-    functions to visualize found aberrantly methylated regions, and to generate sets of all possible regions to be used
-    as reference sets for enrichment analysis.
-Depends: 
+    obtained by methylation profiling using array or high-throughput bisulfite sequencing. In addition, package
+    provides functions to visualize found aberrantly methylated regions (AMRs), and to generate sets of all
+    possible regions to be used as reference sets for enrichment analysis.
+Depends:
     GenomicRanges,
     doParallel,
     matrixStats
 Imports:
+    data.table,
     ggplot2,
     EnvStats,
     ExtDist
