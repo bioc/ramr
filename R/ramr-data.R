@@ -1,9 +1,9 @@
-#' Simulated Illumina HumanMethylation 450k dataset with 10000 CpGs and 100 samples
+#' Simulated Illumina HumanMethylation 450k dataset with 3000 CpGs and 100 samples
 #'
 #' Data was simulated using GSE51032 dataset as described in the reference.
 #' Current dataset (\code{"ramr.data"}) contains beta values for 10000 CpGs
-#' and 100 samples (\code{"ramr.samples"}), and carries 20 unique
-#' (\code{"ramr.tp.unique"}) and 51 non-unique (\code{"ramr.tp.nonunique"})
+#' and 100 samples (\code{"ramr.samples"}), and carries 6 unique
+#' (\code{"ramr.tp.unique"}) and 15 non-unique (\code{"ramr.tp.nonunique"})
 #' AMRs containing at least 10 CpGs with their beta values
 #' increased/decreased by 0.5
 #'
