@@ -24,4 +24,4 @@
 #' amrs <- getAMR(ramr.data, ramr.samples, ramr.method="beta", min.cpgs=5, merge.window=1000, qval.cutoff=1e-3)
 #' plotAMR(ramr.data, ramr.samples, amrs[1])
 #' plotAMR(ramr.data, ramr.samples, ramr.tp.nonunique[4], highlight=c("sample7","sample8","sample9"))
-"ramr"
+NULL

@@ -4,7 +4,7 @@ plotAMR <- function (data.ranges,
                       highlight=NULL,
                       window=300)
 {
-  ramr.ranges.reduced  <- reduce(ramr.ranges, min.gapwidth=window, with.revmap=TRUE)
+  ramr.ranges.reduced  <- GenomicRanges::reduce(ramr.ranges, min.gapwidth=window, with.revmap=TRUE)
   ramr.ranges.relisted <- relist(ramr.ranges[unlist(ramr.ranges.reduced$revmap)], ramr.ranges.reduced$revmap)
   plot.list <- list()
 
@@ -13,7 +13,7 @@ plotAMR <- function (data.ranges,
     revmap.rows <- unique(unlist(plot.ranges$revmap))
     data.hits   <- unique(queryHits(findOverlaps(data.ranges, plot.ranges, maxgap=window, ignore.strand=TRUE)))
     if (length(data.hits)>0) {
-      plot.data   <- data.frame(data.ranges[data.hits, data.samples], check.names=FALSE, stringsAsFactors=FALSE)
+      plot.data <- data.frame(data.ranges[data.hits, data.samples], check.names=FALSE, stringsAsFactors=FALSE)
       colnames(plot.data) <- c(colnames(plot.data)[1:5], data.samples)
       plot.data$median <- matrixStats::rowMedians(as.matrix(plot.data[,data.samples]), na.rm=TRUE)
 
