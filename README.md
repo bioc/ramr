@@ -71,7 +71,8 @@ amrs <- getAMR(ramr.data, ramr.samples, ramr.method="beta", min.cpgs=5, merge.wi
 amrs
 plotAMR(ramr.data, ramr.samples, amrs[1])
 
-# generate the set of all possible genomic regions using sample dataset and the same parameters as for AMR search
+# generate the set of all possible genomic regions using sample dataset and
+# the same parameters as for AMR search
 universe <- getUniverse(ramr.data, min.cpgs=5, merge.window=1000)
 
 # enrichment analysis of AMRs using R library LOLA
@@ -102,7 +103,7 @@ geo.soft <- getGEO(GEO="GSE51032", GSEMatrix=FALSE, destdir=dest.dir)
 # downloading and unpacking raw IDAT files
 suppl.files <- getGEOSuppFiles("GSE51032", baseDir=dest.dir, makeDirectory=FALSE, filter_regex="RAW")
 untar(paste(dest.dir, suppl.files$fname, sep="/"))
-idat.files <- list.files(dest.dir, pattern="idat.gz$", full.names=TRUE)
+idat.files  <- list.files(dest.dir, pattern="idat.gz$", full.names=TRUE)
 sapply(idat.files, gunzip, overwrite=TRUE)
 
 # reading IDAT files
@@ -141,8 +142,9 @@ min.beta <- 0.001
 max.beta <- 0.999
 
 # reading and uniting methylation values
-meth.data.raw <- methRead(as.list(file.list), as.list(sample.ids), assembly="hg19", header=TRUE, context=context,
-                          resolution="base", treatment=rep(0,length(sample.ids)), pipeline="bismarkCytosineReport")
+meth.data.raw <- methRead(as.list(file.list), as.list(sample.ids), assembly="hg19", header=TRUE,
+                          context=context, resolution="base", treatment=rep(0,length(sample.ids)),
+                          pipeline="bismarkCytosineReport")
 meth.data.utd <- unite(meth.data.raw, destrand=isTRUE(context=="CpG"))
 
 # creating the GRanges object with beta values
