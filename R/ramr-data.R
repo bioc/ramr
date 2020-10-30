@@ -22,8 +22,11 @@
 #' (\href{https://www.biorxiv.org/content/10.1101/draft}{bioRxiv})
 #'
 #' @examples
-#' data(ramr)
-#' amrs <- getAMR(ramr.data, ramr.samples, ramr.method="beta", min.cpgs=5, merge.window=1000, qval.cutoff=1e-3)
-#' plotAMR(ramr.data, ramr.samples, amrs[1])
-#' plotAMR(ramr.data, ramr.samples, ramr.tp.nonunique[4], highlight=c("sample7","sample8","sample9"))
-c("ramr.data", "ramr.samples", "ramr.tp.unique", "ramr.tp.nonunique")
+#' \dontrun{
+#'   data(ramr)
+#'   amrs <- getAMR(ramr.data, ramr.samples, ramr.method="beta", min.cpgs=5,
+#'                  merge.window=1000, qval.cutoff=1e-3)
+#'   plotAMR(ramr.data, ramr.samples, amrs[1])
+#'   plotAMR(ramr.data, ramr.samples, ramr.tp.nonunique[4], highlight=c("sample7","sample8","sample9"))
+#' }
+"ramr.data" #c("ramr.data", "ramr.samples", "ramr.tp.unique", "ramr.tp.nonunique")
