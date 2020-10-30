@@ -51,6 +51,13 @@
 #'   getAMR(ramr.data, ramr.samples, ramr.method="beta",
 #'          min.cpgs=5, merge.window=1000, qval.cutoff=1e-3)
 #' }
+#' @import parallel
+#' @import doParallel
+#' @import GenomicRanges
+#' @importFrom EnvStats ebeta
+#' @importFrom ExtDist eBeta pBeta
+#' @importFrom matrixStats rowMedians rowIQRs
+#' @importFrom foreach foreach %dopar%
 #' @export
 getAMR <- function (data.ranges,
                     data.samples,
@@ -90,7 +97,7 @@ getAMR <- function (data.ranges,
       # )
       # return(x.pvals)
       beta.fit <- suppressWarnings( EnvStats::ebeta(as.numeric(x), ...) )
-      pvals    <- EnvStats::pbeta(x, beta.fit$parameters[1], beta.fit$parameters[2])
+      pvals    <- stats::pbeta(x, beta.fit$parameters[1], beta.fit$parameters[2])
       pvals[x>x.median] <- 1 - pvals[x>x.median]
       return(pvals)
     })
@@ -182,7 +189,7 @@ getAMR <- function (data.ranges,
     if (length(ranges)>0) {
       ranges$ncpg   <- unlist(lapply(ranges$revmap, length))
       ranges$sample <- column
-      ranges        <- subset(ranges, ncpg>=min.cpgs & width>=max(3,min.width))
+      ranges        <- subset(ranges, `ncpg`>=min.cpgs & `width`>=max(1,min.width))
       ranges$dbeta  <- sapply(ranges$revmap, function (revmap) {
         mean(betas[not.na[revmap],column,drop=FALSE] - medians[not.na[revmap]])
       })

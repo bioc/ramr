@@ -15,11 +15,14 @@ Description: ramr is an R package for detection of low-frequency aberrant methyl
 Depends:
     R (>= 3.5.0),
     GenomicRanges,
+    parallel,
     doParallel,
+    foreach,
     matrixStats
 Imports:
     data.table,
     ggplot2,
+    reshape2,
     EnvStats,
     ExtDist
 License: Artistic-2.0
