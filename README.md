@@ -65,7 +65,8 @@ library(ramr)
 data(ramr)
 
 # search for AMRs
-amrs <- getAMR(ramr.data, ramr.samples, ramr.method="beta", min.cpgs=5, merge.window=1000, qval.cutoff=1e-3)
+amrs <- getAMR(ramr.data, ramr.samples, ramr.method="beta", min.cpgs=5,
+               merge.window=1000, qval.cutoff=1e-3)
 
 # inspect
 amrs
@@ -160,7 +161,7 @@ mcols(data.ranges) <- data.betas
 
 
 -------
-# Citing ramr
+# Citing ramr - TBA
 Nikolaienko et al. (2020) bioRxiv
 
 License
