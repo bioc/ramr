@@ -23,7 +23,7 @@
 #' @param window An optional integer constant to expand genomic ranges of the
 #' `ramr.ranges` object.
 #' @return The output is a list of `ggplot` objects.
-#' @seealso \code{\link{getAMR}} for identification of AMRs, \code{\link{getUniverse}} for
+#' @seealso \code{\link{getAMR}} for identification of AMRs, \code{\link{getUniverse}} or README for
 #' info on enrichment analysis
 #' @examples
 #' \dontrun{
@@ -32,10 +32,13 @@
 #'   # library(gridExtra)
 #'   do.call("grid.arrange", c(plotAMR(ramr.data, ramr.samples, ramr.tp.nonunique), ncol=2))
 #' }
+#' @importFrom BiocGenerics relist
 #' @import GenomicRanges
 #' @import ggplot2
 #' @importFrom matrixStats rowMedians
 #' @importFrom reshape2 melt
+# @importFrom utils relist
+#' @importFrom S4Vectors queryHits
 
 #' @export
 plotAMR <- function (data.ranges,
@@ -46,23 +49,19 @@ plotAMR <- function (data.ranges,
                      window=300)
 {
   ramr.ranges.reduced  <- GenomicRanges::reduce(ramr.ranges, min.gapwidth=window, with.revmap=TRUE)
-  ramr.ranges.relisted <- relist(ramr.ranges[unlist(ramr.ranges.reduced$revmap)], ramr.ranges.reduced$revmap)
+  ramr.ranges.relisted <- BiocGenerics::relist(ramr.ranges[unlist(ramr.ranges.reduced$revmap)], ramr.ranges.reduced$revmap)
   plot.list <- list()
 
   for (i in 1:length(ramr.ranges.relisted)) {
     plot.ranges <- unlist(ramr.ranges.relisted[i])
     revmap.rows <- unique(unlist(plot.ranges$revmap))
-    data.hits   <- unique(queryHits(findOverlaps(data.ranges, plot.ranges, maxgap=window, ignore.strand=TRUE)))
+    data.hits   <- unique(S4Vectors::queryHits(GenomicRanges::findOverlaps(data.ranges, plot.ranges, maxgap=window, ignore.strand=TRUE)))
     if (length(data.hits)>0) {
       plot.data <- data.frame(data.ranges[data.hits, data.samples], check.names=FALSE, stringsAsFactors=FALSE)
       colnames(plot.data) <- c(colnames(plot.data)[1:5], data.samples)
       plot.data$median <- matrixStats::rowMedians(as.matrix(plot.data[,data.samples]), na.rm=TRUE)
 
-      if (is.null(highlight))
-        highlight <- unique(plot.ranges$sample)
-      if (is.null(title))
-        title <- as.character(reduce(plot.ranges))
-      colorify       <- c("median",highlight)
+      colorify       <- c("median", if (is.null(highlight)) unique(plot.ranges$sample), highlight)
       plot.data.melt <- reshape2::melt(plot.data, id.vars=c("seqnames","start","end","width","strand"),
                                        variable.name="sample", value.name="beta")
       plot.data.melt <- cbind(plot.data.melt, list(alpha=0.5,color=factor("lightgrey",levels=c("lightgrey",colorify))))
@@ -81,7 +80,7 @@ plotAMR <- function (data.ranges,
         theme(legend.text=element_text(size=8), #legend.position="none", legend.title=element_blank(),
               axis.text.x=element_text(size=8, angle=0), #, color=.data.cpgs.colors),
               axis.text.y=element_text(size=8)) +
-        ggtitle(title)
+        ggtitle(if (is.null(title)) as.character(reduce(plot.ranges)), title)
 
       # print(gene.plot)
       plot.list[length(plot.list)+1] <- list(gene.plot)

@@ -13,7 +13,7 @@ getAMR(
   qval.cutoff = NULL,
   merge.window = 300,
   min.cpgs = 7,
-  min.width = NULL,
+  min.width = 1,
   exclude.range = NULL,
   cores = max(1, parallel::detectCores() - 1),
   ...
@@ -29,8 +29,11 @@ column names).}
 \item{ramr.method}{A character scalar: when ramr.method is "IQR" (the default),
 the filtering based on interquantile range is used (`iqr.cutoff` value is then
 used as a threshold). When "beta" or "wbeta" - filtering based on fitting
-non-weighted or weighted beta distributions, respectively, is used, and
-`pval.cutoff` or `qval.cutoff` (if not `NULL`) is used as a threshold.}
+non-weighted (EnvStats::ebeta) or weighted (ExtDist::eBeta) beta distributions,
+respectively, is used, and `pval.cutoff` or `qval.cutoff` (if not `NULL`) is
+used as a threshold. For "wbeta", weights directly correlate with bin contents
+(number of values per bin) and inversly - with the distances from the median
+value, thus narrowing the estimated distribution and emphasizing outliers.}
 
 \item{iqr.cutoff}{A single integer >= 1. Methylation beta values differing from
 the median value by more than `iqr.cutoff` interquartile ranges are considered
@@ -52,8 +55,8 @@ create AMRs.}
 \item{min.cpgs}{A single integer >= 1. All AMRs containing less than `min.cpgs`
 significant genomic locations are filtered out.}
 
-\item{min.width}{A single integer >= 1 or `NULL` (the default). If not `NULL`,
-only AMRs with the width of at least `min.width` are returned.}
+\item{min.width}{A single integer >= 1 (the default). Only AMRs with the width
+of at least `min.width` are returned.}
 
 \item{exclude.range}{A numeric vector of length two. If not `NULL`, all
 `data.ranges` genomic locations with their median methylation beta value within

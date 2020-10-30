@@ -15,8 +15,11 @@
 #' @param ramr.method A character scalar: when ramr.method is "IQR" (the default),
 #' the filtering based on interquantile range is used (`iqr.cutoff` value is then
 #' used as a threshold). When "beta" or "wbeta" - filtering based on fitting
-#' non-weighted or weighted beta distributions, respectively, is used, and
-#' `pval.cutoff` or `qval.cutoff` (if not `NULL`) is used as a threshold.
+#' non-weighted (EnvStats::ebeta) or weighted (ExtDist::eBeta) beta distributions,
+#' respectively, is used, and `pval.cutoff` or `qval.cutoff` (if not `NULL`) is
+#' used as a threshold. For "wbeta", weights directly correlate with bin contents
+#' (number of values per bin) and inversly - with the distances from the median
+#' value, thus narrowing the estimated distribution and emphasizing outliers.
 #' @param iqr.cutoff A single integer >= 1. Methylation beta values differing from
 #' the median value by more than `iqr.cutoff` interquartile ranges are considered
 #' to be significant.
@@ -32,8 +35,8 @@
 #' create AMRs.
 #' @param min.cpgs A single integer >= 1. All AMRs containing less than `min.cpgs`
 #' significant genomic locations are filtered out.
-#' @param min.width A single integer >= 1 or `NULL` (the default). If not `NULL`,
-#' only AMRs with the width of at least `min.width` are returned.
+#' @param min.width A single integer >= 1 (the default). Only AMRs with the width
+#' of at least `min.width` are returned.
 #' @param exclude.range A numeric vector of length two. If not `NULL`, all
 #' `data.ranges` genomic locations with their median methylation beta value within
 #' the `exclude.range` interval are filtered out.
@@ -58,6 +61,7 @@
 #' @importFrom ExtDist eBeta pBeta
 #' @importFrom matrixStats rowMedians rowIQRs
 #' @importFrom foreach foreach %dopar%
+#' @importFrom methods as
 #' @export
 getAMR <- function (data.ranges,
                     data.samples,
@@ -67,7 +71,7 @@ getAMR <- function (data.ranges,
                     qval.cutoff=NULL,
                     merge.window=300,
                     min.cpgs=7,
-                    min.width=NULL,
+                    min.width=1,
                     exclude.range=NULL, #c(0.3,0.7)
                     cores=max(1,parallel::detectCores()-1),
                     ...)
@@ -107,13 +111,9 @@ getAMR <- function (data.ranges,
     chunk.filt  <- apply(data.chunk, 1, function (x) {
       x.median    <- stats::median(x, na.rm=TRUE)
       x[is.na(x)] <- x.median
-      # # weight: bin contents
-      #   c           <- cut(x, c(0:100)/100)
-      #   b           <- table(c)
-      #   w           <- as.numeric(b[c])
-      # # weight: distance from median
-      #   w           <- (1 - abs(x-x.median))**3
-      # weight: bin contents and distance
+      # weight directly correlates with bin contents (number of values per bin)
+      # and inversly - with the distance from the median value, thus narrowing
+      # the estimated distribution and emphasizing outliers
       c           <- cut(x, c(0:100)/100)
       b           <- table(c)
       w           <- as.numeric(b[c]) * (1 - abs(x-x.median))

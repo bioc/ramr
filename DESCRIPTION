@@ -18,13 +18,16 @@ Depends:
     parallel,
     doParallel,
     foreach,
-    matrixStats
+    matrixStats,
+    methods
 Imports:
+    BiocGenerics,
     data.table,
     ggplot2,
     reshape2,
     EnvStats,
-    ExtDist
+    ExtDist,
+    S4Vectors
 License: Artistic-2.0
 URL: https://github.com/BBCG/ramr
 Encoding: UTF-8

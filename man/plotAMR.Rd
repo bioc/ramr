@@ -54,6 +54,6 @@ methylation profiles ('sample' column of `ramr.ranges` object) are highlighted.
 }
 }
 \seealso{
-\code{\link{getAMR}} for identification of AMRs, \code{\link{getUniverse}} for
+\code{\link{getAMR}} for identification of AMRs, \code{\link{getUniverse}} or README for
 info on enrichment analysis
 }
