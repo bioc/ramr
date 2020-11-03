@@ -18,7 +18,7 @@
 #'
 #' @keywords datasets
 #'
-#' @references Nikolaienko et al. (2020) bioRxiv
+#' @references Nikolaienko et al., 2020
 #' (\href{https://www.biorxiv.org/content/10.1101/draft}{bioRxiv})
 #'
 #' @examples

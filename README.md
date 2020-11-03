@@ -162,7 +162,7 @@ mcols(data.ranges) <- data.betas
 
 -------
 # Citing ramr - TBA
-Nikolaienko et al. (2020) bioRxiv
+[Nikolaienko et al., 2020 bioRxiv](https://www.biorxiv.org/content/10.1101/draft)
 
 License
 ---------

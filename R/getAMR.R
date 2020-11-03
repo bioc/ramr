@@ -1,7 +1,7 @@
 #' Search for aberrantly methylated regions
 #'
 #' @description
-#' `getAMR` returns a GRanges object with all the aberrantly methylated
+#' `getAMR` returns a `GRanges` object with all the aberrantly methylated
 #' regions (AMRs) for all samples in a dataset.
 #'
 #' @details
@@ -15,7 +15,8 @@
 #' @param ramr.method A character scalar: when ramr.method is "IQR" (the default),
 #' the filtering based on interquantile range is used (`iqr.cutoff` value is then
 #' used as a threshold). When "beta" or "wbeta" - filtering based on fitting
-#' non-weighted (EnvStats::ebeta) or weighted (ExtDist::eBeta) beta distributions,
+#' non-weighted (\code{\link[EnvStats::ebeta]{EnvStats::ebeta}) or weighted
+#' (\code{\link[ExtDist::eBeta]{ExtDist::eBeta}) beta distributions,
 #' respectively, is used, and `pval.cutoff` or `qval.cutoff` (if not `NULL`) is
 #' used as a threshold. For "wbeta", weights directly correlate with bin contents
 #' (number of values per bin) and inversly - with the distances from the median
