@@ -15,8 +15,7 @@
 #' @param ramr.method A character scalar: when ramr.method is "IQR" (the default),
 #' the filtering based on interquantile range is used (`iqr.cutoff` value is then
 #' used as a threshold). When "beta" or "wbeta" - filtering based on fitting
-#' non-weighted (\code{\link[EnvStats::ebeta]{EnvStats::ebeta}) or weighted
-#' (\code{\link[ExtDist::eBeta]{ExtDist::eBeta}) beta distributions,
+#' non-weighted (EnvStats::ebeta) or weighted (ExtDist::eBeta) beta distributions,
 #' respectively, is used, and `pval.cutoff` or `qval.cutoff` (if not `NULL`) is
 #' used as a threshold. For "wbeta", weights directly correlate with bin contents
 #' (number of values per bin) and inversly - with the distances from the median
@@ -154,7 +153,8 @@ getAMR <- function (data.ranges,
     qval.cutoff <- pval.cutoff/nrow(betas)
   # names(dimnames(betas)) <- c("cpg", "sample")
 
-  chunks  <- split(1:nrow(betas), cut(1:nrow(betas),cores))
+  # chunks  <- split(1:nrow(betas), cut(1:nrow(betas),cores))
+  chunks  <- split(1:nrow(betas), if (cores>1) cut(1:nrow(betas),cores) else 1)
   medians <- foreach (chunk=chunks, .combine=c) %dopar% matrixStats::rowMedians(betas[chunk,], na.rm=TRUE)
 
   if (ramr.method=="IQR") {

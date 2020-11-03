@@ -30,7 +30,7 @@ increased/decreased by 0.5
 }
 }
 \references{
-Nikolaienko et al. (2020) bioRxiv
+Nikolaienko et al., 2020
 (\href{https://www.biorxiv.org/content/10.1101/draft}{bioRxiv})
 }
 \keyword{datasets}
