@@ -1,0 +1,33 @@
+---
+title: "ramr -- detection of rare aberrantly methylated regions"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ramr}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+devtools::load_all(".")   # delete later
+```
+
+```{r setup}
+library(gridExtra)
+library(ramr)
+data(ramr)
+```
+
+```{r search, fig.width=10, fig.height=6, out.width="100%", out.height="100%"}
+# identify AMRs
+amrs <- getAMR(ramr.data, ramr.samples, ramr.method="beta", min.cpgs=5,
+               merge.window=1000, qval.cutoff=1e-3, cores=2)
+
+# inspect
+sort(amrs)
+do.call("grid.arrange", c(plotAMR(ramr.data, ramr.samples, amrs[1:10]), ncol=2))
+
+```

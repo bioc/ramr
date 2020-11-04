@@ -3,10 +3,12 @@ ramr
 
 # Introduction
 
-ramr is an R package for detection of low-frequency aberrant methylation events in large datasets
+*`ramr`* is an R package for detection of low-frequency aberrant methylation events in large datasets
 obtained by methylation profiling using array or high-throughput bisulfite sequencing. In addition, package provides
 functions to visualize found aberrantly methylated regions (AMRs), and to generate sets of all possible regions to be used
 as reference sets for enrichment analysis.
+
+This readme contains condensed info on *`ramr`* usage. For more, please check function-specific help pages and vignettes.
 
 ## Current Features
 
@@ -19,7 +21,7 @@ as reference sets for enrichment analysis.
 
 ## Installation
 
-### install via Bioconductor - TBA
+### install via Bioconductor - TBA in a future
 ```r
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
@@ -88,7 +90,7 @@ The input object may be obtained using data from various sources. Here we provid
 
 ### Using data from NCBI GEO
 
-The following code pulls (NB: very large) raw files from NCBI GEO database, performes normalization and creates *`GRanges`* object for further analysis using *`ramr`* 
+The following code pulls (NB: very large) raw files from NCBI GEO database, performes normalization and creates *`GRanges`* object for further analysis using *`ramr`* (system requirements: 22GB of disk space, 64GB of RAM)
 ```r
 library(minfi)
 library(GEOquery)
@@ -98,12 +100,9 @@ library(IlluminaHumanMethylation450kanno.ilmn12.hg19)
 # destination for temporary files
 dest.dir <- tempdir()
 
-# SOFT file
-geo.soft <- getGEO(GEO="GSE51032", GSEMatrix=FALSE, destdir=dest.dir)
-
 # downloading and unpacking raw IDAT files
 suppl.files <- getGEOSuppFiles("GSE51032", baseDir=dest.dir, makeDirectory=FALSE, filter_regex="RAW")
-untar(paste(dest.dir, suppl.files$fname, sep="/"))
+untar(rownames(suppl.files), exdir=dest.dir, verbose=TRUE)
 idat.files  <- list.files(dest.dir, pattern="idat.gz$", full.names=TRUE)
 sapply(idat.files, gunzip, overwrite=TRUE)
 
@@ -138,7 +137,8 @@ sample.ids
 # methylation context string, defines if the reads covering both strands will be merged
 context <- "CpG"
 
-# minimum and maximum beta values
+# fitting beta distribution (filtering using ramr.method "beta" or "wbeta") requires
+# that most of the beta values are not equal to 0 or 1
 min.beta <- 0.001
 max.beta <- 0.999
 
