@@ -26,6 +26,15 @@ beta values included as metadata.}
 \item{data.samples}{A character vector with sample names (a subset of metadata
 column names).}
 
+\item{ramr.method}{A character scalar: when ramr.method is "IQR" (the default),
+the filtering based on interquantile range is used (`iqr.cutoff` value is then
+used as a threshold). When "beta" or "wbeta" - filtering based on fitting
+non-weighted (EnvStats::ebeta) or weighted (ExtDist::eBeta) beta distributions,
+respectively, is used, and `pval.cutoff` or `qval.cutoff` (if not `NULL`) is
+used as a threshold. For "wbeta", weights directly correlate with bin contents
+(number of values per bin) and inversly - with the distances from the median
+value, thus narrowing the estimated distribution and emphasizing outliers.}
+
 \item{iqr.cutoff}{A single integer >= 1. Methylation beta values differing from
 the median value by more than `iqr.cutoff` interquartile ranges are considered
 to be significant.}
