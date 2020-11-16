@@ -128,10 +128,10 @@ mcols(data.ranges) <- data.betas
 library(methylKit)
 library(GenomicRanges)
 
-# file.list is a character vector with full file names of Bismark cytosine report files
+# file.list is a user-defined character vector with full file names of Bismark cytosine report files
 file.list
 
-# sample.ids is a character vector holding sample names
+# sample.ids is a user-defined character vector holding sample names
 sample.ids
 
 # methylation context string, defines if the reads covering both strands will be merged
