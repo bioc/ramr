@@ -21,7 +21,7 @@ This readme contains condensed info on *`ramr`* usage. For more, please check fu
 
 ## Installation
 
-### install via Bioconductor - TBA in a future
+### install via Bioconductor - NOT AVAILABLE YET
 ```r
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
@@ -30,11 +30,22 @@ BiocManager::install("ramr")
 
 ### Install the latest version via install_github
 ```r
+install.packages("https://cran.r-project.org/src/contrib/Archive/ExtDist/ExtDist_0.6-3.tar.gz", repos=NULL)
+
 library(devtools)
-install_github("BBCG/ramr", build_vignettes=FALSE,
+install_github("BBCG/ramr", build_vignettes=TRUE,
   repos=BiocManager::repositories(),
   dependencies=TRUE, type="source")
 ```
+
+
+-------
+
+## Citing the *`ramr`* package
+[Nikolaienko et al., 2020 bioRxiv](https://www.biorxiv.org/content/10.1101/draft)
+
+## The data underlying *`ramr`* manuscript
+[Replication Data for: "ramr: an R package for detection of rare aberrantly methylated regions"](https://doi.org/10.18710/ED8HSD)
 
 -------
 
@@ -158,11 +169,6 @@ mcols(data.ranges) <- data.betas
 # data.ranges and sample.ids objects are now ready for AMR search using ramr
 ```
 
-
-
--------
-# Citing ramr - TBA
-[Nikolaienko et al., 2020 bioRxiv](https://www.biorxiv.org/content/10.1101/draft)
 
 License
 ---------

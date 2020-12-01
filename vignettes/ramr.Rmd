@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
   width = 100
 )
 options(width=100)
-devtools::load_all(".")   # delete later
+# devtools::load_all(".")   # delete later
 ```
 
 # Introduction
@@ -191,6 +191,9 @@ core.hits   <- runLOLA(amrs, universe, hg19.coredb, cores=1, redefineUserSets=TR
 
 ## Citing the *`ramr`* package
 [Nikolaienko et al., 2020 bioRxiv](https://www.biorxiv.org/content/10.1101/draft)
+
+## The data underlying *`ramr`* manuscript
+[Replication Data for: "ramr: an R package for detection of rare aberrantly methylated regions"](https://doi.org/10.18710/ED8HSD)
 
 ## Session Info
 

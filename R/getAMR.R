@@ -124,26 +124,16 @@ getAMR <- function (data.ranges,
     })
     return(t(chunk.filt))
   }
-  # getPValues.logn <- function(data.chunk, ...){
-  #   chunk.filt  <- apply(data.chunk, 1, function(x){
-  #     x.quantiles <- quantile(x, na.rm=TRUE)
-  #     x[is.na(x)] <- x.quantiles[3]
-  #     logn.fit    <- suppressWarnings( logitnorm::twCoefLogitnorm(x.quantiles[3], x.quantiles[4], perc=0.75, ...) )
-  #     pvals       <- plogitnorm(x, logn.fit[1], logn.fit[2])
-  #     pvals[x>x.quantiles[3]] <- 1 - pvals[x>x.quantiles[3]]
-  #     return(pvals)
-  #   })
-  #   return(t(chunk.filt))
-  # }
+
   #####################################################################################
 
 
   doParallel::registerDoParallel(cores)
   cl <- parallel::makeCluster(cores)
 
-  # TODO: all multicore                 - DONE (almost)
+  # TODO: all multicore                 - DONE
   # TODO: tile window                   - no use?
-  # TODO: distributions for outliers    - DONE (beta & logitnorm, but maybe try other skew-normal such as fGarch::snormFit)
+  # TODO: distributions for outliers    - DONE (beta & wbeta, but maybe try other skew-normal such as fGarch::snormFit)
 
   universe      <- getUniverse(data.ranges, merge.window=merge.window, min.cpgs=min.cpgs)
   universe.cpgs <- unlist(universe$revmap)
@@ -151,7 +141,6 @@ getAMR <- function (data.ranges,
   betas <- as.matrix(mcols(data.ranges)[universe.cpgs,data.samples,drop=FALSE])
   if (is.null(qval.cutoff))
     qval.cutoff <- pval.cutoff/nrow(betas)
-  # names(dimnames(betas)) <- c("cpg", "sample")
 
   # chunks  <- split(1:nrow(betas), cut(1:nrow(betas),cores))
   chunks  <- split(1:nrow(betas), if (cores>1) cut(1:nrow(betas),cores) else 1)
@@ -170,12 +159,6 @@ getAMR <- function (data.ranges,
     betas.filtered <- foreach (chunk=chunks) %dopar% getPValues.wbeta(betas[chunk,], ...)
     betas.filtered <- do.call(rbind, betas.filtered)
     betas.filtered[betas.filtered>=qval.cutoff] <- NA
-  # } else if (ramr.method=="logn") {
-  #   warning("logit-normal ramr.method doesn't work really...")
-  #   # multi-threaded logitnorm::twCoefLogitnorm
-  #   betas.filtered <- foreach (chunk=chunks) %dopar% getPValues.logn(betas[chunk,], ...)
-  #   betas.filtered <- do.call(rbind, betas.filtered)
-  #   betas.filtered[betas.filtered>=qval.cutoff] <- NA
   } else {
     stop("unknown 'ramr.method'")
   }
@@ -199,48 +182,20 @@ getAMR <- function (data.ranges,
         ranges$xiqr   <- sapply(ranges$revmap, function (revmap) {
           mean(betas.filtered[not.na[revmap],column,drop=FALSE], na.rm=TRUE)
         })
-        # } else {
-        #   ranges$xiqr   <- sapply(ranges$revmap, function (revmap) {
-        #     xiqrs <- (betas[not.na[revmap],column,drop=FALSE] - medians[not.na[revmap]]) / matrixStats::rowIQRs(betas[not.na[revmap],,drop=FALSE], na.rm=TRUE)
-        #     mean(xiqrs)
-        #   })
       }
 
       if (ramr.method=="beta") {
         ranges$pval <- sapply(ranges$revmap, function (revmap) {
           return( 10**mean(log10(betas.filtered[not.na[revmap],column] + .Machine$double.xmin), na.rm=TRUE) )
         })
-        # } else {
-        #   ranges$pval.beta <- sapply(ranges$revmap, function (revmap) {
-        #     range.pvals <- getPValues.beta(betas[not.na[revmap],,drop=FALSE], ...)
-        #     range.pvals[range.pvals==0] <- .Machine$double.xmin
-        #     return( 10**mean(log10(range.pvals[,column]), na.rm=TRUE) )
-        #   })
       }
 
       if (ramr.method=="wbeta") {
         ranges$pval <- sapply(ranges$revmap, function (revmap) {
           return( 10**mean(log10(betas.filtered[not.na[revmap],column] + .Machine$double.xmin), na.rm=TRUE) )
         })
-        # } else {
-        #   ranges$pval.wbeta <- sapply(ranges$revmap, function (revmap) {
-        #     range.pvals <- getPValues.beta(betas[not.na[revmap],,drop=FALSE], ...)
-        #     range.pvals[range.pvals==0] <- .Machine$double.xmin
-        #     return( 10**mean(log10(range.pvals[,column]), na.rm=TRUE) )
-        #   })
       }
 
-      # if (ramr.method=="logn") {
-      #   ranges$pval <- sapply(ranges$revmap, function (revmap) {
-      #     return( 10**mean(log10(betas.filtered[not.na[revmap],column] + .Machine$double.xmin), na.rm=TRUE) )
-      #   })
-      #   # } else {
-      #   #   ranges$pval.logn <- sapply(ranges$revmap, function (revmap) {
-      #   #     range.pvals <- getPValues.logn(betas[not.na[revmap],,drop=FALSE], ...)
-      #   #     range.pvals[range.pvals==0] <- .Machine$double.xmin
-      #   #     return( 10**mean(log10(range.pvals[,column]), na.rm=TRUE) )
-      #   #   })
-      # }
 
       ranges$revmap <- lapply(ranges$revmap, function (i) {universe.cpgs[not.na[i]]})
     }

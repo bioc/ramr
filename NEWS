@@ -1,0 +1,23 @@
+Changes in version 0.3.1 (2020-09-08)
++ made this third iteration of ramr search engine a usable package
++ uploaded to GitHub
+
+Changes in version 0.3.2 (2020-10-30)
++ added function documentation
++ added sample data
++ initial code cleanup
++ fixed single-thread issue in getAMR()
+
+Changes in version 0.3.7 (2020-11-16)
++ added vignettes
++ added unit tests
++ added data documentation
++ fixed issue with plot titles and highlighted samples in plotAMR()
++ fixed all notes and warnings in devtools::check()
+
+Changes in version 0.3.9 (2020-11-20)
++ code cleanup
++ paper submitted to bioRxiv
++ updated README and vignettes
++ added NEWS
++ made GitHub repository public
