@@ -30,7 +30,9 @@ BiocManager::install("ramr")
 
 ### Install the latest version via install_github
 ```r
-install.packages("https://cran.r-project.org/src/contrib/Archive/ExtDist/ExtDist_0.6-3.tar.gz", repos=NULL)
+install.packages("https://cran.r-project.org/src/contrib/Archive/ExtDist/ExtDist_0.6-3.tar.gz",
+  repos=NULL)
+# if fails: please review missing ExtDist dependencies and install them with install.packages()
 
 library(devtools)
 install_github("BBCG/ramr", build_vignettes=TRUE,
@@ -41,10 +43,10 @@ install_github("BBCG/ramr", build_vignettes=TRUE,
 
 -------
 
-## Citing the *`ramr`* package
-[Nikolaienko et al., 2020 bioRxiv](https://www.biorxiv.org/content/10.1101/draft)
+### Citing the *`ramr`* package
+[Nikolaienko et al., 2020 bioRxiv](https://doi.org/10.1101/2020.12.01.403501)
 
-## The data underlying *`ramr`* manuscript
+### The data underlying *`ramr`* manuscript
 [Replication Data for: "ramr: an R package for detection of rare aberrantly methylated regions"](https://doi.org/10.18710/ED8HSD)
 
 -------

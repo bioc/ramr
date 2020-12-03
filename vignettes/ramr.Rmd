@@ -190,7 +190,7 @@ core.hits   <- runLOLA(amrs, universe, hg19.coredb, cores=1, redefineUserSets=TR
 
 
 ## Citing the *`ramr`* package
-[Nikolaienko et al., 2020 bioRxiv](https://www.biorxiv.org/content/10.1101/draft)
+[Nikolaienko et al., 2020 bioRxiv](https://doi.org/10.1101/2020.12.01.403501)
 
 ## The data underlying *`ramr`* manuscript
 [Replication Data for: "ramr: an R package for detection of rare aberrantly methylated regions"](https://doi.org/10.18710/ED8HSD)
