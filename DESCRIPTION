@@ -1,5 +1,5 @@
 Package: ramr
-Title: Detection of rare aberrantly methylated regions in array and NGS data
+Title: Detection of Rare Aberrantly Methylated Regions in Array and NGS Data
 Version: 0.3.9
 Authors@R: 
     person(given = "Oleksii",

@@ -31,6 +31,6 @@ increased/decreased by 0.5
 }
 \references{
 Nikolaienko et al., 2020
-(\href{https://www.biorxiv.org/content/10.1101/draft}{bioRxiv})
+(\href{https://doi.org/10.1101/2020.12.01.403501}{bioRxiv})
 }
 \keyword{datasets}
