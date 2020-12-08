@@ -1,2 +1,4 @@
 ^ramr\.Rproj$
 ^\.Rproj\.user$
+^.git$
+^ramr.Rcheck/.*$

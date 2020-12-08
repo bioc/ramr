@@ -30,10 +30,6 @@ BiocManager::install("ramr")
 
 ### Install the latest version via install_github
 ```r
-install.packages("https://cran.r-project.org/src/contrib/Archive/ExtDist/ExtDist_0.6-3.tar.gz",
-  repos=NULL)
-# if fails: please review missing ExtDist dependencies and install them with install.packages()
-
 library(devtools)
 install_github("BBCG/ramr", build_vignettes=TRUE,
   repos=BiocManager::repositories(),
