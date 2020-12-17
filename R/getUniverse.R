@@ -9,8 +9,8 @@
 #' regions that satisfy filtering criteria, thus creating a `GRanges` object to
 #' be used as a reference set of genomic regions for AMR enrichment analysis.
 #'
-#' @param data.ranges A `GRanges` object with genomic locations and corresponding
-#' beta values included as metadata.
+#' @param data.ranges A `GRanges` object with genomic locations and
+#' corresponding beta values included as metadata.
 #' @param merge.window A positive integer. All `data.ranges` genomic locations
 #' within this distance will be merged.
 #' @param min.cpgs A single integer >= 1. All genomic regions containing less
@@ -19,19 +19,19 @@
 #' width of at least `min.width` are returned.
 #' @return The output is a `GRanges` object that contain all the genomic regions
 #' in `data.ranges` object.
-#' @seealso \code{\link{getAMR}} for identification of AMRs, \code{\link{plotAMR}}
-#' for plotting AMRs
+#' @seealso \code{\link{getAMR}} for identification of AMRs,
+#' \code{\link{plotAMR}} for plotting AMRs
 #' @examples
-#' \dontrun{
+#'   data(ramr)
 #'   universe <- getUniverse(ramr.data, min.cpgs=5, merge.window=1000)
-#'
+#' \dontrun{
 #'   # identify AMRs
 #'   amrs <- getAMR(ramr.data, ramr.samples, ramr.method="beta", min.cpgs=5,
-#'                  merge.window=1000, qval.cutoff=1e-3)
+#'                  merge.window=1000, qval.cutoff=1e-3, cores=2)
 #'
 #'   # AMR enrichment analysis using LOLA
 #'   library(LOLA)
-#'   hg19.extdb  <- loadRegionDB(system.file("LOLAExt",  "hg19", package="LOLA"))
+#'   hg19.extdb  <- loadRegionDB(system.file("LOLAExt", "hg19", package="LOLA"))
 #'   runLOLA(amrs, universe, hg19.extdb, cores=1, redefineUserSets=TRUE)
 #' }
 #' @import GenomicRanges
@@ -41,7 +41,7 @@ getUniverse <- function (data.ranges,
                          min.cpgs=7,
                          min.width=1)
 {
-  if (class(data.ranges)!="GRanges")
+  if (!methods::is(data.ranges,"GRanges"))
     stop("'data.ranges' must be be a GRanges object")
 
   universe.ranges <- GenomicRanges::reduce(data.ranges, min.gapwidth=merge.window, with.revmap=TRUE)

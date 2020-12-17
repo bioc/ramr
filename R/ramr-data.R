@@ -1,4 +1,5 @@
-#' Simulated Illumina HumanMethylation 450k dataset with 3000 CpGs and 100 samples
+#' Simulated Illumina HumanMethylation 450k dataset with 3000 CpGs and 100
+#' samples
 #'
 #' Data was simulated using GSE51032 dataset as described in the reference.
 #' Current dataset (\code{"ramr.data"}) contains beta values for 10000 CpGs
@@ -13,8 +14,8 @@
 #'
 #' @usage data(ramr)
 #'
-#' @format Objects of class \code{"GRanges"} (\code{"ramr.data, ramr.tp.unique, ramr.tp.nonunique"})
-#' and \code{"character"} (\code{"ramr.samples"}).
+#' @format Objects of class \code{"GRanges"} (\code{"ramr.data, ramr.tp.unique,
+#' ramr.tp.nonunique"}) and \code{"character"} (\code{"ramr.samples"}).
 #'
 #' @keywords datasets
 #'
@@ -22,11 +23,11 @@
 #' (\href{https://doi.org/10.1101/2020.12.01.403501}{bioRxiv})
 #'
 #' @examples
-#' \dontrun{
 #'   data(ramr)
 #'   amrs <- getAMR(ramr.data, ramr.samples, ramr.method="beta", min.cpgs=5,
-#'                  merge.window=1000, qval.cutoff=1e-3)
+#'                  merge.window=1000, qval.cutoff=1e-3, cores=2)
 #'   plotAMR(ramr.data, ramr.samples, amrs[1])
-#'   plotAMR(ramr.data, ramr.samples, ramr.tp.nonunique[4], highlight=c("sample7","sample8","sample9"))
-#' }
-"ramr.data" #c("ramr.data", "ramr.samples", "ramr.tp.unique", "ramr.tp.nonunique")
+#'   plotAMR(ramr.data, ramr.samples, ramr.tp.nonunique[4],
+#'           highlight=c("sample7","sample8","sample9"))
+#'
+"ramr.data" #c("ramr.data","ramr.samples","ramr.tp.unique","ramr.tp.nonunique")

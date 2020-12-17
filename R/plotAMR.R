@@ -5,32 +5,35 @@
 #' at particular genomic locations.
 #'
 #' @details
-#' For every non-overapping genomic location from `ramr.ranges` object, `plotAMR`
-#' plots and outputs a line graph of methylation beta values taken from `data.ranges`
-#' for all samples from `data.samples`. Samples bearing significantly different
-#' methylation profiles ('sample' column of `ramr.ranges` object) are highlighted.
+#' For every non-overapping genomic location from `ramr.ranges` object,
+#' `plotAMR` plots and outputs a line graph of methylation beta values taken
+#' from `data.ranges` for all samples from `data.samples`. Samples bearing
+#' significantly different methylation profiles ('sample' column of
+#' `ramr.ranges` object) are highlighted.
 #'
-#' @param data.ranges A `GRanges` object with genomic locations and corresponding
-#' beta values included as metadata.
-#' @param data.samples A character vector with sample names (a subset of metadata
-#' column names) to be included in the plot.
+#' @param data.ranges A `GRanges` object with genomic locations and
+#' corresponding beta values included as metadata.
+#' @param data.samples A character vector with sample names (a subset of
+#' metadata column names) to be included in the plot.
 #' @param ramr.ranges An output of `getAMR` - a `GRanges` object that contain
 #' aberrantly methylated regions (AMRs).
 #' @param highlight An optional list of samples to highlight. If NULL (default),
-#' will contain sample IDs from the `sample` metadata column of `ramr.ranges` object.
+#' will contain sample IDs from the `sample` metadata column of `ramr.ranges`
+#'  object.
 #' @param title An optional title for the plot. If NULL (default), plot title is
 #' set to a genomic location of particular AMR.
 #' @param window An optional integer constant to expand genomic ranges of the
 #' `ramr.ranges` object.
 #' @return The output is a list of `ggplot` objects.
-#' @seealso \code{\link{getAMR}} for identification of AMRs, \code{\link{getUniverse}} or README for
-#' info on enrichment analysis
+#' @seealso \code{\link{getAMR}} for identification of AMRs,
+#' \code{\link{getUniverse}} or README for info on enrichment analysis
 #' @examples
-#' \dontrun{
+#'   data(ramr)
 #'   plotAMR(ramr.data, ramr.samples, ramr.tp.unique[1])
-#'
-#'   # library(gridExtra)
-#'   do.call("grid.arrange", c(plotAMR(ramr.data, ramr.samples, ramr.tp.nonunique), ncol=2))
+#' \dontrun{
+#'   library(gridExtra)
+#'   do.call("grid.arrange",
+#'           c(plotAMR(ramr.data, ramr.samples, ramr.tp.nonunique), ncol=2))
 #' }
 #' @importFrom BiocGenerics relist
 #' @import GenomicRanges
@@ -52,13 +55,13 @@ plotAMR <- function (data.ranges,
   ramr.ranges.relisted <- BiocGenerics::relist(ramr.ranges[unlist(ramr.ranges.reduced$revmap)], ramr.ranges.reduced$revmap)
   plot.list <- list()
 
-  for (i in 1:length(ramr.ranges.relisted)) {
+  for (i in seq_along(ramr.ranges.relisted)) {
     plot.ranges <- unlist(ramr.ranges.relisted[i])
     revmap.rows <- unique(unlist(plot.ranges$revmap))
     data.hits   <- unique(S4Vectors::queryHits(GenomicRanges::findOverlaps(data.ranges, plot.ranges, maxgap=window, ignore.strand=TRUE)))
     if (length(data.hits)>0) {
       plot.data <- data.frame(data.ranges[data.hits, data.samples], check.names=FALSE, stringsAsFactors=FALSE)
-      colnames(plot.data) <- c(colnames(plot.data)[1:5], data.samples)
+      # colnames(plot.data) <- c(colnames(plot.data)[seq_len(5)], data.samples)
       plot.data$median <- matrixStats::rowMedians(as.matrix(plot.data[,data.samples]), na.rm=TRUE)
 
       colorify       <- c("median", if (is.null(highlight)) unique(plot.ranges$sample), highlight)

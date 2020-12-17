@@ -31,7 +31,7 @@ BiocManager::install("ramr")
 ### Install the latest version via install_github
 ```r
 library(devtools)
-install_github("BBCG/ramr", build_vignettes=TRUE,
+install_github("BBCG/ramr", build_vignettes=FALSE,
   repos=BiocManager::repositories(),
   dependencies=TRUE, type="source")
 ```

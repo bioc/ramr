@@ -7,8 +7,8 @@
 getUniverse(data.ranges, merge.window = 300, min.cpgs = 7, min.width = 1)
 }
 \arguments{
-\item{data.ranges}{A `GRanges` object with genomic locations and corresponding
-beta values included as metadata.}
+\item{data.ranges}{A `GRanges` object with genomic locations and
+corresponding beta values included as metadata.}
 
 \item{merge.window}{A positive integer. All `data.ranges` genomic locations
 within this distance will be merged.}
@@ -33,20 +33,20 @@ regions that satisfy filtering criteria, thus creating a `GRanges` object to
 be used as a reference set of genomic regions for AMR enrichment analysis.
 }
 \examples{
-\dontrun{
+  data(ramr)
   universe <- getUniverse(ramr.data, min.cpgs=5, merge.window=1000)
-
+\dontrun{
   # identify AMRs
   amrs <- getAMR(ramr.data, ramr.samples, ramr.method="beta", min.cpgs=5,
-                 merge.window=1000, qval.cutoff=1e-3)
+                 merge.window=1000, qval.cutoff=1e-3, cores=2)
 
   # AMR enrichment analysis using LOLA
   library(LOLA)
-  hg19.extdb  <- loadRegionDB(system.file("LOLAExt",  "hg19", package="LOLA"))
+  hg19.extdb  <- loadRegionDB(system.file("LOLAExt", "hg19", package="LOLA"))
   runLOLA(amrs, universe, hg19.extdb, cores=1, redefineUserSets=TRUE)
 }
 }
 \seealso{
-\code{\link{getAMR}} for identification of AMRs, \code{\link{plotAMR}}
-for plotting AMRs
+\code{\link{getAMR}} for identification of AMRs,
+\code{\link{plotAMR}} for plotting AMRs
 }

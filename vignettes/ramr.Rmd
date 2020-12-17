@@ -165,7 +165,7 @@ do.call("grid.arrange", c(plotAMR(ramr.data, ramr.samples, amrs[1:10]), ncol=2))
 
 If necessary, AMRs can be annotated to known genomic elements using R library *`annotatr`* [^1] or tested for potential enrichment in epigenetic or other marks using R library *`LOLA`* [^2]
 
-```
+```{r}
 # annotating AMRs using R library annotatr
 library(annotatr)
 annotation.types <- c("hg19_cpg_inter", "hg19_cpg_islands", "hg19_cpg_shores",
@@ -174,16 +174,20 @@ annotation.types <- c("hg19_cpg_inter", "hg19_cpg_islands", "hg19_cpg_shores",
 annotations <- build_annotations(genome='hg19', annotations=annotation.types)
 amrs.annots <- annotate_regions(regions=amrs, annotations=annotations, ignore.strand=TRUE, quiet=FALSE)
 summarize_annotations(annotated_regions=amrs.annots, quiet=FALSE)
+```
 
-
+```
 # generate the set of all possible genomic regions using sample dataset and
 # the same parameters as for AMR search
 universe <- getUniverse(ramr.data, min.cpgs=5, merge.window=1000)
 
 # enrichment analysis of AMRs using R library LOLA
 library(LOLA)
+# prepare the core database as described in vignettes
+vignette("usingLOLACore")
+# load the core database and perform the enrichment analysis
 hg19.coredb <- loadRegionDB(system.file("LOLACore", "hg19", package="LOLA"))
-core.hits   <- runLOLA(amrs, universe, hg19.coredb, cores=1, redefineUserSets=TRUE)
+runLOLA(amrs, universe, hg19.coredb, cores=1, redefineUserSets=TRUE)
 ```
 
 

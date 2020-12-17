@@ -21,3 +21,7 @@ Changes in version 0.3.9 (2020-11-20)
 + updated README and vignettes
 + added NEWS
 + made GitHub repository public
+
+Changes in version 0.99.0 (2020-12-24)
++ code cleanup for bioconductor
++ initial submission to bioconductor

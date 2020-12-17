@@ -6,54 +6,56 @@
 #'
 #' @details
 #' In the provided dataset `getAMR` compares methylation beta values of each
-#' sample with other samples to identify rare long-range methylation aberrations.
+#' sample with other samples to identify rare long-range methylation
+#' aberrations.
 #'
-#' @param data.ranges A `GRanges` object with genomic locations and corresponding
-#' beta values included as metadata.
-#' @param data.samples A character vector with sample names (a subset of metadata
-#' column names).
-#' @param ramr.method A character scalar: when ramr.method is "IQR" (the default),
-#' the filtering based on interquantile range is used (`iqr.cutoff` value is then
-#' used as a threshold). When "beta" or "wbeta" - filtering based on fitting
-#' non-weighted (EnvStats::ebeta) or weighted (ExtDist::eBeta) beta distributions,
-#' respectively, is used, and `pval.cutoff` or `qval.cutoff` (if not `NULL`) is
-#' used as a threshold. For "wbeta", weights directly correlate with bin contents
-#' (number of values per bin) and inversly - with the distances from the median
-#' value, thus narrowing the estimated distribution and emphasizing outliers.
-#' @param iqr.cutoff A single integer >= 1. Methylation beta values differing from
-#' the median value by more than `iqr.cutoff` interquartile ranges are considered
-#' to be significant.
-#' @param pval.cutoff A numeric scalar. Bonferroni correction of `pval.cutoff` by
-#' the length of the `data.ranges` object is used to calculate `qval.cutoff` if
-#' the latter is `NULL`.
+#' @param data.ranges A `GRanges` object with genomic locations and
+#' corresponding beta values included as metadata.
+#' @param data.samples A character vector with sample names (a subset of
+#' metadata column names).
+#' @param ramr.method A character scalar: when ramr.method is "IQR" (the
+#' default), the filtering based on interquantile range is used (`iqr.cutoff`
+#' value is then used as a threshold). When "beta" or "wbeta" - filtering based
+#' on fitting non-weighted (EnvStats::ebeta) or weighted (ExtDist::eBeta) beta
+#' distributions, respectively, is used, and `pval.cutoff` or `qval.cutoff` (if
+#' not `NULL`) is used as a threshold. For "wbeta", weights directly correlate
+#' with bin contents (number of values per bin) and inversly - with the
+#' distances from the median value, thus narrowing the estimated distribution
+#' and emphasizing outliers.
+#' @param iqr.cutoff A single integer >= 1. Methylation beta values differing
+#' from the median value by more than `iqr.cutoff` interquartile ranges are
+#' considered to be significant.
+#' @param pval.cutoff A numeric scalar. Bonferroni correction of `pval.cutoff`
+#' by the length of the `data.ranges` object is used to calculate `qval.cutoff`
+#' if the latter is `NULL`.
 #' @param qval.cutoff A numeric scalar. Used as a threshold for filtering based
-#' on fitting non-weighted or weighted beta distributions: all p-values lower than
-#' `qval.cutoff` are considered to be significant. If `NULL` (the default), it is
-#' calculated using `pval.cutoff`
-#' @param merge.window A positive integer. All significant (survived the filtering
-#' stage) `data.ranges` genomic locations within this distance will be merged to
-#' create AMRs.
-#' @param min.cpgs A single integer >= 1. All AMRs containing less than `min.cpgs`
-#' significant genomic locations are filtered out.
-#' @param min.width A single integer >= 1 (the default). Only AMRs with the width
-#' of at least `min.width` are returned.
+#' on fitting non-weighted or weighted beta distributions: all p-values lower
+#' than `qval.cutoff` are considered to be significant. If `NULL` (the default),
+#' it is calculated using `pval.cutoff`
+#' @param merge.window A positive integer. All significant (survived the
+#' filtering stage) `data.ranges` genomic locations within this distance will be
+#' merged to create AMRs.
+#' @param min.cpgs A single integer >= 1. All AMRs containing less than
+#' `min.cpgs` significant genomic locations are filtered out.
+#' @param min.width A single integer >= 1 (the default). Only AMRs with the
+#' width of at least `min.width` are returned.
 #' @param exclude.range A numeric vector of length two. If not `NULL`, all
-#' `data.ranges` genomic locations with their median methylation beta value within
-#' the `exclude.range` interval are filtered out.
-#' @param cores A single integer >= 1. Number of processes for parallel computation.
-#' @param ... Further arguments to be passed to `EnvStats::ebeta` or `ExtDist::eBeta`
-#' functions.
+#' `data.ranges` genomic locations with their median methylation beta value
+#' within the `exclude.range` interval are filtered out.
+#' @param cores A single integer >= 1. Number of processes for parallel
+#' computation.
+#' @param ... Further arguments to be passed to `EnvStats::ebeta` or
+#' `ExtDist::eBeta` functions.
 #' @return The output is a `GRanges` object that contain all the aberrantly
-#' methylated regions (AMRs) for all `data.samples` samples in `data.ranges` object.
-#' The `sample` metadata column contains an identifier of a sample to which
-#' corresponding AMR belongs to.
-#' @seealso \code{\link{plotAMR}} for plotting AMRs, \code{\link{getUniverse}} for
-#' info on enrichment analysis
+#' methylated regions (AMRs) for all `data.samples` samples in `data.ranges`
+#' object. The `sample` metadata column contains an identifier of a sample to
+#' which corresponding AMR belongs to.
+#' @seealso \code{\link{plotAMR}} for plotting AMRs, \code{\link{getUniverse}}
+#' for info on enrichment analysis
 #' @examples
-#' \dontrun{
+#'   data(ramr)
 #'   getAMR(ramr.data, ramr.samples, ramr.method="beta",
-#'          min.cpgs=5, merge.window=1000, qval.cutoff=1e-3)
-#' }
+#'          min.cpgs=5, merge.window=1000, qval.cutoff=1e-3, cores=2)
 #' @import parallel
 #' @import doParallel
 #' @import GenomicRanges
@@ -76,7 +78,7 @@ getAMR <- function (data.ranges,
                     cores=max(1,parallel::detectCores()-1),
                     ...)
 {
-  if (class(data.ranges)!="GRanges")
+  if (!methods::is(data.ranges,"GRanges"))
     stop("'data.ranges' must be be a GRanges object")
   if (!all(data.samples %in% colnames(GenomicRanges::mcols(data.ranges))))
     stop("'data.ranges' metadata must include 'data.samples'")
@@ -142,8 +144,8 @@ getAMR <- function (data.ranges,
   if (is.null(qval.cutoff))
     qval.cutoff <- pval.cutoff/nrow(betas)
 
-  # chunks  <- split(1:nrow(betas), cut(1:nrow(betas),cores))
-  chunks  <- split(1:nrow(betas), if (cores>1) cut(1:nrow(betas),cores) else 1)
+  # chunks  <- split(seq_len(nrow(betas)), cut(seq_len(nrow(betas)),cores))
+  chunks  <- split(seq_len(nrow(betas)), if (cores>1) cut(seq_len(nrow(betas)),cores) else 1)
   medians <- foreach (chunk=chunks, .combine=c) %dopar% matrixStats::rowMedians(betas[chunk,], na.rm=TRUE)
 
   if (ramr.method=="IQR") {
@@ -174,28 +176,21 @@ getAMR <- function (data.ranges,
       ranges$ncpg   <- unlist(lapply(ranges$revmap, length))
       ranges$sample <- column
       ranges        <- subset(ranges, `ncpg`>=min.cpgs & `width`>=max(1,min.width))
-      ranges$dbeta  <- sapply(ranges$revmap, function (revmap) {
+      ranges$dbeta  <- vapply(ranges$revmap, function (revmap) {
         mean(betas[not.na[revmap],column,drop=FALSE] - medians[not.na[revmap]])
-      })
+      }, numeric(1))
 
       if (ramr.method=="IQR") {
-        ranges$xiqr   <- sapply(ranges$revmap, function (revmap) {
+        ranges$xiqr   <- vapply(ranges$revmap, function (revmap) {
           mean(betas.filtered[not.na[revmap],column,drop=FALSE], na.rm=TRUE)
-        })
+        }, numeric(1))
       }
 
-      if (ramr.method=="beta") {
-        ranges$pval <- sapply(ranges$revmap, function (revmap) {
+      if (ramr.method=="beta" | ramr.method=="wbeta") {
+        ranges$pval <- vapply(ranges$revmap, function (revmap) {
           return( 10**mean(log10(betas.filtered[not.na[revmap],column] + .Machine$double.xmin), na.rm=TRUE) )
-        })
+        }, numeric(1))
       }
-
-      if (ramr.method=="wbeta") {
-        ranges$pval <- sapply(ranges$revmap, function (revmap) {
-          return( 10**mean(log10(betas.filtered[not.na[revmap],column] + .Machine$double.xmin), na.rm=TRUE) )
-        })
-      }
-
 
       ranges$revmap <- lapply(ranges$revmap, function (i) {universe.cpgs[not.na[i]]})
     }
