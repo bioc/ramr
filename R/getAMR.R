@@ -130,8 +130,8 @@ getAMR <- function (data.ranges,
   #####################################################################################
 
 
-  doParallel::registerDoParallel(cores)
   cl <- parallel::makeCluster(cores)
+  doParallel::registerDoParallel(cl)
 
   # TODO: all multicore                 - DONE
   # TODO: tile window                   - no use?
