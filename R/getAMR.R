@@ -90,18 +90,6 @@ getAMR <- function (data.ranges,
     chunk.filt <- apply(data.chunk, 1, function (x) {
       x.median    <- stats::median(x, na.rm=TRUE)
       x[is.na(x)] <- x.median
-      # x.pvals <- tryCatch(
-      #   {
-      #     beta.fit <- suppressWarnings( EnvStats::ebeta(as.numeric(x), ...) )
-      #     pvals    <- pbeta(x, beta.fit$parameters[1], beta.fit$parameters[2])
-      #     pvals[x>x.median] <- 1 - pvals[x>x.median]
-      #     pvals
-      #   },
-      #   error   = function (e) {
-      #     return(rep(1, length(x)))
-      #   }
-      # )
-      # return(x.pvals)
       beta.fit <- suppressWarnings( EnvStats::ebeta(as.numeric(x), ...) )
       pvals    <- stats::pbeta(x, beta.fit$parameters[1], beta.fit$parameters[2])
       pvals[x>x.median] <- 1 - pvals[x>x.median]
@@ -133,10 +121,6 @@ getAMR <- function (data.ranges,
   cl <- parallel::makeCluster(cores)
   doParallel::registerDoParallel(cl)
 
-  # TODO: all multicore                 - DONE
-  # TODO: tile window                   - no use?
-  # TODO: distributions for outliers    - DONE (beta & wbeta, but maybe try other skew-normal such as fGarch::snormFit)
-
   universe      <- getUniverse(data.ranges, merge.window=merge.window, min.cpgs=min.cpgs)
   universe.cpgs <- unlist(universe$revmap)
 
@@ -144,7 +128,6 @@ getAMR <- function (data.ranges,
   if (is.null(qval.cutoff))
     qval.cutoff <- pval.cutoff/nrow(betas)
 
-  # chunks  <- split(seq_len(nrow(betas)), cut(seq_len(nrow(betas)),cores))
   chunks  <- split(seq_len(nrow(betas)), if (cores>1) cut(seq_len(nrow(betas)),cores) else 1)
   medians <- foreach (chunk=chunks, .combine=c) %dopar% matrixStats::rowMedians(betas[chunk,], na.rm=TRUE)
 

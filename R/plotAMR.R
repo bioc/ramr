@@ -30,17 +30,14 @@
 #' @examples
 #'   data(ramr)
 #'   plotAMR(ramr.data, ramr.samples, ramr.tp.unique[1])
-#' \dontrun{
 #'   library(gridExtra)
 #'   do.call("grid.arrange",
 #'           c(plotAMR(ramr.data, ramr.samples, ramr.tp.nonunique), ncol=2))
-#' }
 #' @importFrom BiocGenerics relist
 #' @import GenomicRanges
 #' @import ggplot2
 #' @importFrom matrixStats rowMedians
 #' @importFrom reshape2 melt
-# @importFrom utils relist
 #' @importFrom S4Vectors queryHits
 
 #' @export
@@ -61,7 +58,6 @@ plotAMR <- function (data.ranges,
     data.hits   <- unique(S4Vectors::queryHits(GenomicRanges::findOverlaps(data.ranges, plot.ranges, maxgap=window, ignore.strand=TRUE)))
     if (length(data.hits)>0) {
       plot.data <- data.frame(data.ranges[data.hits, data.samples], check.names=FALSE, stringsAsFactors=FALSE)
-      # colnames(plot.data) <- c(colnames(plot.data)[seq_len(5)], data.samples)
       plot.data$median <- matrixStats::rowMedians(as.matrix(plot.data[,data.samples]), na.rm=TRUE)
 
       colorify       <- c("median", if (is.null(highlight)) unique(plot.ranges$sample), highlight)
@@ -80,12 +76,11 @@ plotAMR <- function (data.ranges,
         scale_y_continuous(name="beta value", limits=c(-0, 1), breaks=c(0, 0.25, 0.5, 0.75, 1)) +
         scale_color_discrete(name="samples", limits=colorify) +
         scale_alpha_continuous(guide="none") +
-        theme(legend.text=element_text(size=8), #legend.position="none", legend.title=element_blank(),
-              axis.text.x=element_text(size=8, angle=0), #, color=.data.cpgs.colors),
+        theme(legend.text=element_text(size=8),
+              axis.text.x=element_text(size=8, angle=0),
               axis.text.y=element_text(size=8)) +
         ggtitle(if (is.null(title)) as.character(reduce(plot.ranges)), title)
 
-      # print(gene.plot)
       plot.list[length(plot.list)+1] <- list(gene.plot)
     }
   }

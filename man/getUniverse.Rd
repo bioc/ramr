@@ -35,15 +35,19 @@ be used as a reference set of genomic regions for AMR enrichment analysis.
 \examples{
   data(ramr)
   universe <- getUniverse(ramr.data, min.cpgs=5, merge.window=1000)
-\dontrun{
+\donttest{
   # identify AMRs
   amrs <- getAMR(ramr.data, ramr.samples, ramr.method="beta", min.cpgs=5,
                  merge.window=1000, qval.cutoff=1e-3, cores=2)
 
   # AMR enrichment analysis using LOLA
   library(LOLA)
-  hg19.extdb  <- loadRegionDB(system.file("LOLAExt", "hg19", package="LOLA"))
-  runLOLA(amrs, universe, hg19.extdb, cores=1, redefineUserSets=TRUE)
+  # download LOLA region databases from http://databio.org/regiondb
+  hg19.extdb.file <- system.file("LOLAExt", "hg19", package="LOLA")
+  if (file.exists(hg19.extdb.file)) {
+    hg19.extdb  <- loadRegionDB(hg19.extdb.file)
+    runLOLA(amrs, universe, hg19.extdb, cores=1, redefineUserSets=TRUE)
+  }
 }
 }
 \seealso{

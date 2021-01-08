@@ -8,8 +8,10 @@
 \alias{ramr.tp.nonunique}
 \title{Simulated Illumina HumanMethylation 450k dataset with 3000 CpGs and 100
 samples}
-\format{Objects of class \code{"GRanges"} (\code{"ramr.data, ramr.tp.unique,
-ramr.tp.nonunique"}) and \code{"character"} (\code{"ramr.samples"}).}
+\format{
+Objects of class \code{"GRanges"} (\code{"ramr.data, ramr.tp.unique,
+ramr.tp.nonunique"}) and \code{"character"} (\code{"ramr.samples"}).
+}
 \usage{
 data(ramr)
 }

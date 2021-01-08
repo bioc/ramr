@@ -111,6 +111,9 @@ dest.dir <- tempdir()
 
 # downloading and unpacking raw IDAT files
 suppl.files <- getGEOSuppFiles("GSE51032", baseDir=dest.dir, makeDirectory=FALSE, filter_regex="RAW")
+# The default timeout for downloading files in R 4.1 is 60 seconds.
+# If code above fails because of that, change your timeout using 
+# options(timeout=600)
 untar(rownames(suppl.files), exdir=dest.dir, verbose=TRUE)
 idat.files  <- list.files(dest.dir, pattern="idat.gz$", full.names=TRUE)
 sapply(idat.files, gunzip, overwrite=TRUE)

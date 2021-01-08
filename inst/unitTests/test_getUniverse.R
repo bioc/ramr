@@ -1,4 +1,5 @@
 test_getUniverse <- function () {
+  data(ramr)
   checkEquals(
     length( getUniverse(ramr.data, min.cpgs=1, merge.window=1) ),
     length(ramr.data)
