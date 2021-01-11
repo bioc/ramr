@@ -21,10 +21,14 @@ This readme contains condensed info on *`ramr`* usage. For more, please check fu
 
 ## Installation
 
-### install via Bioconductor - NOT AVAILABLE YET
+### install via Bioconductor (devel only)
 ```r
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
+
+# The following initializes usage of Bioc devel
+BiocManager::install(version='devel')
+
 BiocManager::install("ramr")
 ```
 
@@ -44,6 +48,9 @@ install_github("BBCG/ramr", build_vignettes=FALSE,
 
 ### The data underlying *`ramr`* manuscript
 [Replication Data for: "ramr: an R package for detection of rare aberrantly methylated regions"](https://doi.org/10.18710/ED8HSD)
+
+### *`ramr`* at Bioconductor
+[Bioconductor - ramr (development version)](https://bioconductor.org/packages/devel/bioc/html/ramr.html)
 
 -------
 
