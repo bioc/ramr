@@ -118,8 +118,8 @@ getAMR <- function (data.ranges,
   #####################################################################################
 
 
+  doParallel::registerDoParallel(cores)
   cl <- parallel::makeCluster(cores)
-  doParallel::registerDoParallel(cl)
 
   universe      <- getUniverse(data.ranges, merge.window=merge.window, min.cpgs=min.cpgs)
   universe.cpgs <- unlist(universe$revmap)
