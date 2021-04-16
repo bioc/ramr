@@ -1,6 +1,10 @@
 ramr
 ========
 
+[![](https://github.com/BBCG/ramr/workflows/R-CMD-check-bioc/badge.svg)](https://github.com/BBCG/ramr/actions)
+[![](https://codecov.io/gh/BBCG/ramr/branch/master/graph/badge.svg)](https://codecov.io/gh/BBCG/ramr)
+[![](https://bioconductor.org/shields/years-in-bioc/ramr.svg)](https://bioconductor.org/packages/devel/bioc/html/ramr.html)
+
 # Introduction
 
 *`ramr`* is an R package for detection of low-frequency aberrant methylation events in large datasets
@@ -55,6 +59,12 @@ install_github("BBCG/ramr", build_vignettes=FALSE,
 -------
 
 # How to Use
+
+Please read package vignettes
+at [GitHub pages](https://bbcg.github.io/ramr/articles/ramr.html)
+or within the R environment: `vignette("ramr", package="ramr")`, or
+consult the function's help pages for the extensive information on usage,
+parameters and output values.
 
 *`ramr`* methods operate on objects of the class *`GRanges`*. The input object for AMR search must in addition contain metadata columns with sample beta values. A typical input object looks like this:
 
