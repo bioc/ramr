@@ -51,6 +51,7 @@ install_github("BBCG/ramr", build_vignettes=FALSE,
 [Replication Data for: "ramr: an R package for detection of rare aberrantly methylated regions"](https://doi.org/10.18710/ED8HSD)
 
 ### *`ramr`* at Bioconductor
+[Bioconductor - ramr (release)](https://bioconductor.org/packages/release/bioc/html/ramr.html)
 [Bioconductor - ramr (development version)](https://bioconductor.org/packages/devel/bioc/html/ramr.html)
 
 -------
