@@ -3,7 +3,7 @@ ramr
 
 [![](https://github.com/BBCG/ramr/workflows/R-CMD-check-bioc/badge.svg)](https://github.com/BBCG/ramr/actions)
 [![](https://codecov.io/gh/BBCG/ramr/branch/master/graph/badge.svg)](https://codecov.io/gh/BBCG/ramr)
-[![](https://bioconductor.org/shields/years-in-bioc/ramr.svg)](https://bioconductor.org/packages/devel/bioc/html/ramr.html)
+[![](https://bioconductor.org/shields/years-in-bioc/ramr.svg)](https://bioconductor.org/packages/release/bioc/html/ramr.html)
 
 # Introduction
 
@@ -25,13 +25,10 @@ This readme contains condensed info on *`ramr`* usage. For more, please check fu
 
 ## Installation
 
-### install via Bioconductor (devel only)
+### install via Bioconductor
 ```r
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
-
-# The following initializes usage of Bioc devel
-BiocManager::install(version='devel')
 
 BiocManager::install("ramr")
 ```

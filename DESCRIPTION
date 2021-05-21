@@ -1,6 +1,6 @@
 Package: ramr
 Title: Detection of Rare Aberrantly Methylated Regions in Array and NGS Data
-Version: 0.99.5
+Version: 1.1.0
 Authors@R: 
     person(given = "Oleksii",
            family = "Nikolaienko",
@@ -15,7 +15,7 @@ Description: ramr is an R package for detection of low-frequency aberrant
     and to generate sets of all possible regions to be used as reference sets
     for enrichment analysis.
 Depends:
-    R (>= 4.0),
+    R (>= 4.1),
     GenomicRanges,
     parallel,
     doParallel,
