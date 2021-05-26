@@ -12,9 +12,9 @@
 #' @param data.ranges A `GRanges` object with genomic locations and
 #' corresponding beta values included as metadata.
 #' @param merge.window A positive integer. All `data.ranges` genomic locations
-#' within this distance will be merged.
+#' within this distance will be merged (the default: 300).
 #' @param min.cpgs A single integer >= 1. All genomic regions containing less
-#' than `min.cpgs` genomic locations are filtered out.
+#' than `min.cpgs` genomic locations are filtered out (the default: 7).
 #' @param min.width A single integer >= 1 (the default). Only regions with the
 #' width of at least `min.width` are returned.
 #' @return The output is a `GRanges` object that contain all the genomic regions

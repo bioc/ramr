@@ -24,26 +24,26 @@
 #' and emphasizing outliers.
 #' @param iqr.cutoff A single integer >= 1. Methylation beta values differing
 #' from the median value by more than `iqr.cutoff` interquartile ranges are
-#' considered to be significant.
-#' @param pval.cutoff A numeric scalar. Bonferroni correction of `pval.cutoff`
-#' by the length of the `data.ranges` object is used to calculate `qval.cutoff`
-#' if the latter is `NULL`.
+#' considered to be significant (the default: 5).
+#' @param pval.cutoff A numeric scalar (the default: 5e-2). Bonferroni
+#' correction of `pval.cutoff` by the length of the `data.ranges` object is
+#' used to calculate `qval.cutoff` if the latter is `NULL`.
 #' @param qval.cutoff A numeric scalar. Used as a threshold for filtering based
 #' on fitting non-weighted or weighted beta distributions: all p-values lower
 #' than `qval.cutoff` are considered to be significant. If `NULL` (the default),
 #' it is calculated using `pval.cutoff`
 #' @param merge.window A positive integer. All significant (survived the
 #' filtering stage) `data.ranges` genomic locations within this distance will be
-#' merged to create AMRs.
+#' merged to create AMRs (the default: 300).
 #' @param min.cpgs A single integer >= 1. All AMRs containing less than
-#' `min.cpgs` significant genomic locations are filtered out.
+#' `min.cpgs` significant genomic locations are filtered out (the default: 7).
 #' @param min.width A single integer >= 1 (the default). Only AMRs with the
 #' width of at least `min.width` are returned.
-#' @param exclude.range A numeric vector of length two. If not `NULL`, all
-#' `data.ranges` genomic locations with their median methylation beta value
-#' within the `exclude.range` interval are filtered out.
+#' @param exclude.range A numeric vector of length two. If not `NULL` (the
+#' default), all `data.ranges` genomic locations with their median methylation
+#' beta value within the `exclude.range` interval are filtered out.
 #' @param cores A single integer >= 1. Number of processes for parallel
-#' computation.
+#' computation (the default: all but one cores).
 #' @param ... Further arguments to be passed to `EnvStats::ebeta` or
 #' `ExtDist::eBeta` functions.
 #' @return The output is a `GRanges` object that contain all the aberrantly

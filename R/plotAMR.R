@@ -17,13 +17,13 @@
 #' metadata column names) to be included in the plot.
 #' @param ramr.ranges An output of `getAMR` - a `GRanges` object that contain
 #' aberrantly methylated regions (AMRs).
-#' @param highlight An optional list of samples to highlight. If NULL (default),
-#' will contain sample IDs from the `sample` metadata column of `ramr.ranges`
-#'  object.
-#' @param title An optional title for the plot. If NULL (default), plot title is
-#' set to a genomic location of particular AMR.
-#' @param window An optional integer constant to expand genomic ranges of the
+#' @param highlight An optional list of samples to highlight. If NULL (the
+#' default), will contain sample IDs from the `sample` metadata column of
 #' `ramr.ranges` object.
+#' @param title An optional title for the plot. If NULL (the default), plot
+#' title is set to a genomic location of particular AMR.
+#' @param window An optional integer constant to expand genomic ranges of the
+#' `ramr.ranges` object (the default: 300).
 #' @return The output is a list of `ggplot` objects.
 #' @seealso \code{\link{getAMR}} for identification of AMRs,
 #' \code{\link{getUniverse}} or README for info on enrichment analysis
