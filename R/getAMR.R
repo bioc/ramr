@@ -80,7 +80,7 @@ getAMR <- function (data.ranges,
                     ...)
 {
   if (!methods::is(data.ranges,"GRanges"))
-    stop("'data.ranges' must be be a GRanges object")
+    stop("'data.ranges' must be a GRanges object")
   if (!all(data.samples %in% colnames(GenomicRanges::mcols(data.ranges))))
     stop("'data.ranges' metadata must include 'data.samples'")
   if (length(data.samples)<3)

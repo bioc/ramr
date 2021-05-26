@@ -47,7 +47,7 @@ getUniverse <- function (data.ranges,
                          min.width=1)
 {
   if (!methods::is(data.ranges,"GRanges"))
-    stop("'data.ranges' must be be a GRanges object")
+    stop("'data.ranges' must be a GRanges object")
 
   universe.ranges <- GenomicRanges::reduce(data.ranges, min.gapwidth=merge.window, with.revmap=TRUE)
   if (length(universe.ranges)>0) {
