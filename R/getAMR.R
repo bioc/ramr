@@ -56,14 +56,15 @@
 #'   data(ramr)
 #'   getAMR(ramr.data, ramr.samples, ramr.method="beta",
 #'          min.cpgs=5, merge.window=1000, qval.cutoff=1e-3, cores=2)
-#' @import parallel
-#' @import doParallel
-#' @import GenomicRanges
+#' @importFrom parallel detectCores makeCluster stopCluster
+#' @importFrom doParallel registerDoParallel
+#' @importFrom GenomicRanges mcols reduce
 #' @importFrom EnvStats ebeta
 #' @importFrom ExtDist eBeta pBeta
 #' @importFrom matrixStats rowMedians rowIQRs
 #' @importFrom foreach foreach %dopar%
-#' @importFrom methods as
+#' @importFrom methods as is
+#' @importFrom stats median pbeta
 #' @export
 getAMR <- function (data.ranges,
                     data.samples,
@@ -121,7 +122,7 @@ getAMR <- function (data.ranges,
   doParallel::registerDoParallel(cores)
   cl <- parallel::makeCluster(cores)
 
-  universe      <- getUniverse(data.ranges, merge.window=merge.window, min.cpgs=min.cpgs)
+  universe      <- getUniverse(data.ranges, merge.window=merge.window, min.cpgs=min.cpgs, min.width=min.width)
   universe.cpgs <- unlist(universe$revmap)
 
   betas <- as.matrix(mcols(data.ranges)[universe.cpgs,data.samples,drop=FALSE])
@@ -183,5 +184,5 @@ getAMR <- function (data.ranges,
   amr.ranges <- foreach (column=colnames(betas.filtered)) %dopar% getMergedRanges(column)
 
   parallel::stopCluster(cl)
-  return(unlist(as(amr.ranges, "GRangesList")))
+  return(unlist(methods::as(amr.ranges, "GRangesList")))
 }
