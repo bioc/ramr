@@ -46,7 +46,7 @@
 #' computation (the default: all but one cores).
 #' @param ... Further arguments to be passed to `EnvStats::ebeta` or
 #' `ExtDist::eBeta` functions.
-#' @return The output is a `GRanges` object that contain all the aberrantly
+#' @return The output is a `GRanges` object that contains all the aberrantly
 #' methylated regions (AMRs) for all `data.samples` samples in `data.ranges`
 #' object. The `sample` metadata column contains an identifier of a sample to
 #' which corresponding AMR belongs to.
