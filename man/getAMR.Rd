@@ -38,11 +38,11 @@ and emphasizing outliers.}
 
 \item{iqr.cutoff}{A single integer >= 1. Methylation beta values differing
 from the median value by more than `iqr.cutoff` interquartile ranges are
-considered to be significant.}
+considered to be significant (the default: 5).}
 
-\item{pval.cutoff}{A numeric scalar. Bonferroni correction of `pval.cutoff`
-by the length of the `data.ranges` object is used to calculate `qval.cutoff`
-if the latter is `NULL`.}
+\item{pval.cutoff}{A numeric scalar (the default: 5e-2). Bonferroni
+correction of `pval.cutoff` by the length of the `data.ranges` object is
+used to calculate `qval.cutoff` if the latter is `NULL`.}
 
 \item{qval.cutoff}{A numeric scalar. Used as a threshold for filtering based
 on fitting non-weighted or weighted beta distributions: all p-values lower
@@ -51,29 +51,37 @@ it is calculated using `pval.cutoff`}
 
 \item{merge.window}{A positive integer. All significant (survived the
 filtering stage) `data.ranges` genomic locations within this distance will be
-merged to create AMRs.}
+merged to create AMRs (the default: 300).}
 
 \item{min.cpgs}{A single integer >= 1. All AMRs containing less than
-`min.cpgs` significant genomic locations are filtered out.}
+`min.cpgs` significant genomic locations are filtered out (the default: 7).}
 
 \item{min.width}{A single integer >= 1 (the default). Only AMRs with the
 width of at least `min.width` are returned.}
 
-\item{exclude.range}{A numeric vector of length two. If not `NULL`, all
-`data.ranges` genomic locations with their median methylation beta value
-within the `exclude.range` interval are filtered out.}
+\item{exclude.range}{A numeric vector of length two. If not `NULL` (the
+default), all `data.ranges` genomic locations with their median methylation
+beta value within the `exclude.range` interval are filtered out.}
 
 \item{cores}{A single integer >= 1. Number of processes for parallel
-computation.}
+computation (the default: all but one cores).}
 
 \item{...}{Further arguments to be passed to `EnvStats::ebeta` or
 `ExtDist::eBeta` functions.}
 }
 \value{
-The output is a `GRanges` object that contain all the aberrantly
+The output is a `GRanges` object that contains all the aberrantly
 methylated regions (AMRs) for all `data.samples` samples in `data.ranges`
-object. The `sample` metadata column contains an identifier of a sample to
-which corresponding AMR belongs to.
+object. The following metadata columns may be present:
+\itemize{
+  \item `sample` -- contains an identifier of a sample to which
+  corresponding AMR belongs
+  \item `dbeta` -- average deviation of beta values for significant CpGs from
+  their corresponding median values
+  \item `pval` -- geometric mean of p-values for significant CpGs
+  \item `xiqr` -- average IQR-normalised deviation of beta values for
+  significant CpGs from their corresponding median values
+}
 }
 \description{
 `getAMR` returns a `GRanges` object with all the aberrantly methylated
@@ -91,5 +99,7 @@ aberrations.
 }
 \seealso{
 \code{\link{plotAMR}} for plotting AMRs, \code{\link{getUniverse}}
-for info on enrichment analysis
+for info on enrichment analysis, \code{\link{simulateAMR}} and
+\code{\link{simulateData}} for the generation of simulated test data sets,
+and `ramr` vignettes for the description of usage and sample data.
 }

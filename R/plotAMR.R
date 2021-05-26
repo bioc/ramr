@@ -26,7 +26,10 @@
 #' `ramr.ranges` object (the default: 300).
 #' @return The output is a list of `ggplot` objects.
 #' @seealso \code{\link{getAMR}} for identification of AMRs,
-#' \code{\link{getUniverse}} or README for info on enrichment analysis
+#' \code{\link{getUniverse}} for info on enrichment analysis,
+#' \code{\link{simulateAMR}} and \code{\link{simulateData}} for the generation
+#' of simulated test data sets, and `ramr` vignettes for the description of
+#' usage and sample data.
 #' @examples
 #'   data(ramr)
 #'   plotAMR(ramr.data, ramr.samples, ramr.tp.unique[1])

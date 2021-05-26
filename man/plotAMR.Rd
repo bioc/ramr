@@ -23,15 +23,15 @@ metadata column names) to be included in the plot.}
 \item{ramr.ranges}{An output of `getAMR` - a `GRanges` object that contain
 aberrantly methylated regions (AMRs).}
 
-\item{highlight}{An optional list of samples to highlight. If NULL (default),
-will contain sample IDs from the `sample` metadata column of `ramr.ranges`
- object.}
+\item{highlight}{An optional list of samples to highlight. If NULL (the
+default), will contain sample IDs from the `sample` metadata column of
+`ramr.ranges` object.}
 
-\item{title}{An optional title for the plot. If NULL (default), plot title is
-set to a genomic location of particular AMR.}
+\item{title}{An optional title for the plot. If NULL (the default), plot
+title is set to a genomic location of particular AMR.}
 
 \item{window}{An optional integer constant to expand genomic ranges of the
-`ramr.ranges` object.}
+`ramr.ranges` object (the default: 300).}
 }
 \value{
 The output is a list of `ggplot` objects.
@@ -56,5 +56,8 @@ significantly different methylation profiles ('sample' column of
 }
 \seealso{
 \code{\link{getAMR}} for identification of AMRs,
-\code{\link{getUniverse}} or README for info on enrichment analysis
+\code{\link{getUniverse}} for info on enrichment analysis,
+\code{\link{simulateAMR}} and \code{\link{simulateData}} for the generation
+of simulated test data sets, and `ramr` vignettes for the description of
+usage and sample data.
 }

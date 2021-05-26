@@ -11,10 +11,10 @@ getUniverse(data.ranges, merge.window = 300, min.cpgs = 7, min.width = 1)
 corresponding beta values included as metadata.}
 
 \item{merge.window}{A positive integer. All `data.ranges` genomic locations
-within this distance will be merged.}
+within this distance will be merged (the default: 300).}
 
 \item{min.cpgs}{A single integer >= 1. All genomic regions containing less
-than `min.cpgs` genomic locations are filtered out.}
+than `min.cpgs` genomic locations are filtered out (the default: 7).}
 
 \item{min.width}{A single integer >= 1 (the default). Only regions with the
 width of at least `min.width` are returned.}
@@ -52,5 +52,7 @@ be used as a reference set of genomic regions for AMR enrichment analysis.
 }
 \seealso{
 \code{\link{getAMR}} for identification of AMRs,
-\code{\link{plotAMR}} for plotting AMRs
+\code{\link{plotAMR}} for plotting AMRs, \code{\link{simulateAMR}} and
+\code{\link{simulateData}} for the generation of simulated test data sets,
+and `ramr` vignettes for the description of usage and sample data.
 }

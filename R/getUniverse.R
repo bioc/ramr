@@ -20,7 +20,9 @@
 #' @return The output is a `GRanges` object that contain all the genomic regions
 #' in `data.ranges` object.
 #' @seealso \code{\link{getAMR}} for identification of AMRs,
-#' \code{\link{plotAMR}} for plotting AMRs
+#' \code{\link{plotAMR}} for plotting AMRs, \code{\link{simulateAMR}} and
+#' \code{\link{simulateData}} for the generation of simulated test data sets,
+#' and `ramr` vignettes for the description of usage and sample data.
 #' @examples
 #'   data(ramr)
 #'   universe <- getUniverse(ramr.data, min.cpgs=5, merge.window=1000)

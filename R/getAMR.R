@@ -48,10 +48,20 @@
 #' `ExtDist::eBeta` functions.
 #' @return The output is a `GRanges` object that contains all the aberrantly
 #' methylated regions (AMRs) for all `data.samples` samples in `data.ranges`
-#' object. The `sample` metadata column contains an identifier of a sample to
-#' which corresponding AMR belongs to.
+#' object. The following metadata columns may be present:
+#' \itemize{
+#'   \item `sample` -- contains an identifier of a sample to which
+#'   corresponding AMR belongs
+#'   \item `dbeta` -- average deviation of beta values for significant CpGs from
+#'   their corresponding median values
+#'   \item `pval` -- geometric mean of p-values for significant CpGs
+#'   \item `xiqr` -- average IQR-normalised deviation of beta values for
+#'   significant CpGs from their corresponding median values
+#' }
 #' @seealso \code{\link{plotAMR}} for plotting AMRs, \code{\link{getUniverse}}
-#' for info on enrichment analysis
+#' for info on enrichment analysis, \code{\link{simulateAMR}} and
+#' \code{\link{simulateData}} for the generation of simulated test data sets,
+#' and `ramr` vignettes for the description of usage and sample data.
 #' @examples
 #'   data(ramr)
 #'   getAMR(ramr.data, ramr.samples, ramr.method="beta",
