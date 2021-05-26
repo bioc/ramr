@@ -19,76 +19,89 @@ simulateAMR(
 )
 }
 \arguments{
-\item{merge.window}{A positive integer. All significant (survived the
-filtering stage) `data.ranges` genomic locations within this distance will be
-merged to create AMRs.}
+\item{template.ranges}{A `GRanges` object with genomic locations (same object
+must be supplied to this and to the `simulateData` functions).}
+
+\item{nsamples}{A single integer >= 1 indicating the number of samples to
+which AMRs will be assigned.}
+
+\item{exclude.ranges}{A `GRanges` object with genomic locations. None of the
+simulated AMRs in the output will overlap with any of regions from
+`exclude.ranges`. If `NULL` (the default), AMRs are not restricted by their
+genomic location.}
+
+\item{regions.per.sample}{A single integer >= 1 (the default). Number of AMRs
+to be assigned to every sample. Message is shown and the `regions.per.sample`
+value is limited to `maxnAMR %/% nsamples` if it is greater than this number
+(where maxnAMR is the maximum number of potential AMRs for the
+`template.ranges`).}
+
+\item{samples.per.region}{A single integer >= 1 (the default). Number of
+samples to which the same AMR will be assigned. Message is shown and the
+`samples.per.region` value is limited to `nsamples` if the former is greater
+than the latter.}
+
+\item{sample.names}{A character vector with sample names. If `NULL` (the
+default), sample names will be computed as
+`paste0("sample", seq_len(nsamples))`. When specified, the length of the
+`sample.names` vector must not be smaller than the value of `nsamples`.}
+
+\item{merge.window}{A positive integer. All `template.ranges` genomic
+locations within this distance will be merged to create a list of potential
+AMRs (which will be later filtered from regions overlapping with any regions
+from the `exclude.ranges`).}
 
 \item{min.cpgs}{A single integer >= 1. All AMRs containing less than
-`min.cpgs` significant genomic locations are filtered out.}
+`min.cpgs` genomic locations are filtered out. The default: 7.}
+
+\item{max.cpgs}{A single integer >= 1. All AMRs containing more than
+`max.cpgs` genomic locations are filtered out. The default: `Inf`.}
 
 \item{min.width}{A single integer >= 1 (the default). Only AMRs with the
 width of at least `min.width` are returned.}
 
-\item{data.ranges}{A `GRanges` object with genomic locations and
-corresponding beta values included as metadata.}
-
-\item{data.samples}{A character vector with sample names (a subset of
-metadata column names).}
-
-\item{ramr.method}{A character scalar: when ramr.method is "IQR" (the
-default), the filtering based on interquantile range is used (`iqr.cutoff`
-value is then used as a threshold). When "beta" or "wbeta" - filtering based
-on fitting non-weighted (EnvStats::ebeta) or weighted (ExtDist::eBeta) beta
-distributions, respectively, is used, and `pval.cutoff` or `qval.cutoff` (if
-not `NULL`) is used as a threshold. For "wbeta", weights directly correlate
-with bin contents (number of values per bin) and inversly - with the
-distances from the median value, thus narrowing the estimated distribution
-and emphasizing outliers.}
-
-\item{iqr.cutoff}{A single integer >= 1. Methylation beta values differing
-from the median value by more than `iqr.cutoff` interquartile ranges are
-considered to be significant.}
-
-\item{pval.cutoff}{A numeric scalar. Bonferroni correction of `pval.cutoff`
-by the length of the `data.ranges` object is used to calculate `qval.cutoff`
-if the latter is `NULL`.}
-
-\item{qval.cutoff}{A numeric scalar. Used as a threshold for filtering based
-on fitting non-weighted or weighted beta distributions: all p-values lower
-than `qval.cutoff` are considered to be significant. If `NULL` (the default),
-it is calculated using `pval.cutoff`}
-
-\item{exclude.range}{A numeric vector of length two. If not `NULL`, all
-`data.ranges` genomic locations with their median methylation beta value
-within the `exclude.range` interval are filtered out.}
-
-\item{cores}{A single integer >= 1. Number of processes for parallel
-computation.}
-
-\item{...}{Further arguments to be passed to `EnvStats::ebeta` or
-`ExtDist::eBeta` functions.}
+\item{dbeta}{A single non-negative numeric value in the range [0,1] or a
+numeric vector of such values (with as many elements as there are AMRs).
+Used to populate the `dbeta` metadata column, defines a desired absolute
+deviation of corresponding AMR from the median for the `simulateData`
+function.}
 }
 \value{
-The output is a `GRanges` object that contain all the aberrantly
-methylated regions (AMRs) for all `data.samples` samples in `data.ranges`
-object. The `sample` metadata column contains an identifier of a sample to
-which corresponding AMR belongs to.
+The output is a `GRanges` object that contains a subset of
+aberrantly methylated regions (AMRs) randomly selected from all the possible
+AMRs for the provided `template.ranges` object. The following metadata
+columns are included:
+\itemize{
+  \item `sample` -- contains an identifier of a sample to which
+  corresponding AMR belongs
+  \item `dbeta` -- equals to supplied `dbeta` parameter
+}
 }
 \description{
-`simulateAMR` returns a `GRanges` object with all the aberrantly methylated
-regions (AMRs) for all samples in a dataset.
+`simulateAMR` returns a `GRanges` object containing a set of randomly
+selected aberrantly methylated regions (AMRs) to be used as an input for the
+`simulateData` method.
 }
 \details{
-In the provided dataset `getAMR` compares methylation beta values of each
-sample with other samples to identify rare long-range methylation
-aberrations.
+Using provided template (`GRanges` object) `simulateAMR` randomly selects
+genomic regions satisfying various criteria (number of CpGs, width of the
+region) and assigns them to samples according to specified parameters
+(number of AMRs per sample, number of samples per AMR). Its output is meant
+to be used as the set of true positive AMRs for the `simulateData` function.
 }
 \examples{
   data(ramr)
-  getAMR(ramr.data, ramr.samples, ramr.method="beta",
-         min.cpgs=5, merge.window=1000, qval.cutoff=1e-3, cores=2)
+  amrs.unique <-
+    simulateAMR(ramr.data, nsamples=4, regions.per.sample=2,
+                min.cpgs=5, merge.window=1000)
+  amrs.nonunique <-
+    simulateAMR(ramr.data, nsamples=3, samples.per.region=2,
+                min.cpgs=5, merge.window=1000)
 }
 \seealso{
+\code{\link{simulateData}} for the generation of simulated test
+data sets, \code{\link{getAMR}} for identification of AMRs,
 \code{\link{plotAMR}} for plotting AMRs, \code{\link{getUniverse}}
-for info on enrichment analysis
+for info on enrichment analysis, and `ramr` vignettes for the description of
+usage and sample data.
 }

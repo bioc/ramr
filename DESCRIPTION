@@ -23,6 +23,7 @@ Depends:
     matrixStats,
     methods
 Imports:
+    IRanges,
     BiocGenerics,
     ggplot2,
     reshape2,
