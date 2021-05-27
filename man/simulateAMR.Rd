@@ -33,7 +33,7 @@ genomic location.}
 \item{regions.per.sample}{A single integer >= 1 (the default). Number of AMRs
 to be assigned to every sample. Message is shown and the `regions.per.sample`
 value is limited to `maxnAMR %/% nsamples` if it is greater than this number
-(where maxnAMR is the maximum number of potential AMRs for the
+(where `maxnAMR` is the maximum number of potential AMRs for the
 `template.ranges`).}
 
 \item{samples.per.region}{A single integer >= 1 (the default). Number of
@@ -93,10 +93,10 @@ to be used as the set of true positive AMRs for the `simulateData` function.
   data(ramr)
   amrs.unique <-
     simulateAMR(ramr.data, nsamples=4, regions.per.sample=2,
-                min.cpgs=5, merge.window=1000)
+                min.cpgs=5, merge.window=1000, dbeta=0.2)
   amrs.nonunique <-
-    simulateAMR(ramr.data, nsamples=3, samples.per.region=2,
-                min.cpgs=5, merge.window=1000)
+    simulateAMR(ramr.data, nsamples=3, exclude.ranges=amrs.unique,
+                samples.per.region=2, min.cpgs=5, merge.window=1000)
 }
 \seealso{
 \code{\link{simulateData}} for the generation of simulated test

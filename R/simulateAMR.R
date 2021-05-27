@@ -23,7 +23,7 @@
 #' @param regions.per.sample A single integer >= 1 (the default). Number of AMRs
 #' to be assigned to every sample. Message is shown and the `regions.per.sample`
 #' value is limited to `maxnAMR %/% nsamples` if it is greater than this number
-#' (where maxnAMR is the maximum number of potential AMRs for the
+#' (where `maxnAMR` is the maximum number of potential AMRs for the
 #' `template.ranges`).
 #' @param samples.per.region A single integer >= 1 (the default). Number of
 #' samples to which the same AMR will be assigned. Message is shown and the
@@ -66,10 +66,10 @@
 #'   data(ramr)
 #'   amrs.unique <-
 #'     simulateAMR(ramr.data, nsamples=4, regions.per.sample=2,
-#'                 min.cpgs=5, merge.window=1000)
+#'                 min.cpgs=5, merge.window=1000, dbeta=0.2)
 #'   amrs.nonunique <-
-#'     simulateAMR(ramr.data, nsamples=3, samples.per.region=2,
-#'                 min.cpgs=5, merge.window=1000)
+#'     simulateAMR(ramr.data, nsamples=3, exclude.ranges=amrs.unique,
+#'                 samples.per.region=2, min.cpgs=5, merge.window=1000)
 #' @importFrom methods is
 #' @importFrom utils head tail
 #' @importFrom IRanges `%outside%`
@@ -111,6 +111,10 @@ simulateAMR <- function (template.ranges,
   if (is.null(sample.names))
     sample.names <- paste0("sample", seq_len(nsamples))
   
+  if (nsamples > length(universe.ranges)) {
+    nsamples <- length(universe.ranges)
+    message("'nsamples' has been set to the maximum possible value of ", nsamples)
+  }
   if (regions.per.sample > length(universe.ranges) %/% nsamples) {
     regions.per.sample <- length(universe.ranges) %/% nsamples
     message("'regions.per.sample' has been set to the maximum possible value of ", regions.per.sample)
