@@ -126,7 +126,7 @@ simulateAMR <- function (template.ranges,
   
   amr.ranges        <- rep(sample(universe.ranges, nsamples * regions.per.sample), samples.per.region)
   amr.ranges$sample <- repRotate(rep(sample(sample.names, nsamples), regions.per.sample), times=samples.per.region, shift=1)
-  amr.ranges$dbeta  <- dbeta
+  amr.ranges$dbeta  <- as.numeric(dbeta)
   
   return(amr.ranges)
 }
