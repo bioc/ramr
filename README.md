@@ -9,8 +9,9 @@ ramr
 
 *`ramr`* is an R package for detection of low-frequency aberrant methylation events in large datasets
 obtained by methylation profiling using array or high-throughput bisulfite sequencing. In addition, package provides
-functions to visualize found aberrantly methylated regions (AMRs), and to generate sets of all possible regions to be used
-as reference sets for enrichment analysis.
+functions to visualize found aberrantly methylated regions (AMRs), to generate sets of all possible regions to be used
+as reference sets for enrichment analysis, and to generate biologically relevant test datasets for
+performance evaluation of AMR/DMR search algorithms.
 
 This readme contains condensed info on *`ramr`* usage. For more, please check function-specific help pages and vignettes.
 
@@ -19,6 +20,7 @@ This readme contains condensed info on *`ramr`* usage. For more, please check fu
  * Identification of aberrantly methylated regions (AMRs)
  * AMR visualization
  * Generation of reference sets for third-party analyses (e.g. enrichment)
+ * Generation of test datasets for performance evaluation of algorithms for search of differentially (DMR) or aberrantly (AMR) methylated regions
 
 
 -------
@@ -108,9 +110,24 @@ hg19.coredb <- loadRegionDB(system.file("LOLACore", "hg19", package="LOLA"))
 core.hits   <- runLOLA(amrs, universe, hg19.coredb, cores=1, redefineUserSets=TRUE)
 ```
 
+The following code generates random AMRs and methylation beta values using provided dataset as a template:
+
+```r
+# unique random AMRs
+amrs.unique <- simulateAMR(ramr.data, nsamples=10, regions.per.sample=2,
+                           min.cpgs=5, merge.window=1000, dbeta=0.2)
+
+# methylation data with AMRs and noise
+data.with.amrs <- simulateData(ramr.data, nsamples=10,
+                               amr.ranges=amrs.unique, cores=2)
+  
+# that's how regions look like
+library(gridExtra)
+do.call("grid.arrange", c(plotAMR(data.with.amrs, NULL, amrs.unique[1:2]), ncol=2))
+```
 
 
-The input object may be obtained using data from various sources. Here we provide two examples:
+The input (or template) object may be obtained using data from various sources. Here we provide two examples:
 
 ### Using data from NCBI GEO
 
