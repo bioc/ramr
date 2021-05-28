@@ -21,7 +21,7 @@ width of at least `min.width` are returned.}
 }
 \value{
 The output is a `GRanges` object that contain all the genomic regions
-in `data.ranges` object.
+in `data.ranges` object (in other words, all potential AMRs).
 }
 \description{
 `getUniverse` returns a GRanges object with all the genomic regions in a
@@ -53,6 +53,6 @@ be used as a reference set of genomic regions for AMR enrichment analysis.
 \seealso{
 \code{\link{getAMR}} for identification of AMRs,
 \code{\link{plotAMR}} for plotting AMRs, \code{\link{simulateAMR}} and
-\code{\link{simulateData}} for the generation of simulated test data sets,
+\code{\link{simulateData}} for the generation of simulated test datasets,
 and `ramr` vignettes for the description of usage and sample data.
 }

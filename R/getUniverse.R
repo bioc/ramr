@@ -18,10 +18,10 @@
 #' @param min.width A single integer >= 1 (the default). Only regions with the
 #' width of at least `min.width` are returned.
 #' @return The output is a `GRanges` object that contain all the genomic regions
-#' in `data.ranges` object.
+#' in `data.ranges` object (in other words, all potential AMRs).
 #' @seealso \code{\link{getAMR}} for identification of AMRs,
 #' \code{\link{plotAMR}} for plotting AMRs, \code{\link{simulateAMR}} and
-#' \code{\link{simulateData}} for the generation of simulated test data sets,
+#' \code{\link{simulateData}} for the generation of simulated test datasets,
 #' and `ramr` vignettes for the description of usage and sample data.
 #' @examples
 #'   data(ramr)
