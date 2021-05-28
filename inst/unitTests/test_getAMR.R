@@ -4,9 +4,6 @@ test_getAMR <- function () {
     getAMR(c())
   )
   RUnit::checkException(
-    getAMR(ramr.data)
-  )
-  RUnit::checkException(
     getAMR(ramr.data, ramr.samples[1:2])
   )
   RUnit::checkException(
