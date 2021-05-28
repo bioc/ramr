@@ -7,13 +7,13 @@
 #' regions was provided. The output can be used to evaluate performance
 #' of algorithms for search of differentially (DMR) or aberrantly (AMR)
 #' methylated regions.
-#' 
+#'
 #' @details
 #' For every genomic location in the template dataset (`GRanges` object with
 #' genomic locations and corresponding beta values included as metadata)
 #' `simulateData` estimates the parameters of beta distribution by means of
 #' `EnvStats::ebeta` function, and then uses estimated parameters to generate
-#' `nsamples` random beta values by means of `stats::rbeta` function. This 
+#' `nsamples` random beta values by means of `stats::rbeta` function. This
 #' results in "smoothed" dataset that has biologically relevant distribution
 #' of beta values at every genomic location, but does not contain methylation
 #' aberrations. If the `amr.ranges` parameter points to a `GRanges` object with
@@ -34,7 +34,7 @@
 #' generate.
 #' @param amr.ranges A `GRanges` object with genomic locations of (rare)
 #' methylation aberrations. If `NULL` (the default), no aberrations is
-#' introduced, and function will return "smoothed" dataset. If supplied, 
+#' introduced, and function will return "smoothed" dataset. If supplied,
 #' `GRanges` object must contain the following metadata columns:
 #' \itemize{
 #'   \item `revmap` -- integer list of `template.ranges` genomic locations that
@@ -58,10 +58,11 @@
 #' in the generated dataset above this value will be assigned this value.
 #' The default: 0.999.
 #' @param cores A single integer >= 1. Number of processes for parallel
-#' computation (the default: all but one cores).
+#' computation (the default: all but one cores). Results of parallel processing
+#' are fully reproducible when the same seed is used (thanks to doRNG::%dorng%).
 #' @return The output is a `GRanges` object with genomic ranges that are equal
 #' to the genomic ranges of the provided template and metadata columns
-#' containing generated methylation beta values for `nsamples` samples. If 
+#' containing generated methylation beta values for `nsamples` samples. If
 #' `amr.ranges` object was supplied, then randomly generated beta values will be
 #' modified accordingly.
 #' @seealso \code{\link{simulateAMR}} for the generation of random methylation
@@ -84,7 +85,8 @@
 #' @importFrom doParallel registerDoParallel
 #' @importFrom GenomicRanges mcols `mcols<-` granges
 #' @importFrom EnvStats ebeta
-#' @importFrom foreach foreach %dopar%
+#' @importFrom foreach foreach
+#' @importFrom doRNG %dorng%
 #' @importFrom methods is
 #' @importFrom stats median na.omit rbeta
 #' @export
@@ -100,7 +102,7 @@ simulateData <- function (template.ranges,
     stop("'template.ranges' must be a GRanges object")
   if (!is.null(sample.names) & length(sample.names)!=nsamples)
     stop("'sample.names' length must be equal to 'nsamples'")
-  
+
   if (is.null(sample.names))
     sample.names <- paste0("sample", seq_len(nsamples))
   if (!is.null(amr.ranges)) {
@@ -113,9 +115,9 @@ simulateData <- function (template.ranges,
     if ( !is.numeric(amr.ranges$dbeta) | !all(stats::na.omit(amr.ranges$dbeta)>=0) | !all(stats::na.omit(amr.ranges$dbeta)<=1) )
       stop("Malformed 'amr.ranges' object: 'dbeta' field is missing or is outside the range c(0,1)")
   }
-    
+
   #####################################################################################
-  
+
   getRandomBeta <- function(data.chunk) {
     chunk.filt <- apply(data.chunk, 1, function(x) {
       x.median    <- stats::median(x, na.rm=TRUE)
@@ -126,19 +128,19 @@ simulateData <- function (template.ranges,
     })
     return(t(chunk.filt))
   }
-  
+
   #####################################################################################
-  
+
   template.betas <- as.matrix(GenomicRanges::mcols(template.ranges, use.names=FALSE))
   chunks <- split(seq_len(nrow(template.betas)), if (cores>1) cut(seq_len(nrow(template.betas)), cores) else 1)
-  
+
   doParallel::registerDoParallel(cores)
   cl <- parallel::makeCluster(cores)
-  random.betas <- foreach (chunk=chunks) %dopar% getRandomBeta(template.betas[chunk,])
+  random.betas <- foreach (chunk=chunks) %dorng% getRandomBeta(template.betas[chunk,])
   random.betas <- do.call(rbind, random.betas)
   colnames(random.betas) <- sample.names
   parallel::stopCluster(cl)
-  
+
   amr.mcols <- if (is.null(amr.ranges)) data.frame() else GenomicRanges::mcols(amr.ranges)
   for (i in seq_len(nrow(amr.mcols))) {
     revmap <- unlist(amr.mcols$revmap[i])
@@ -148,9 +150,9 @@ simulateData <- function (template.ranges,
   }
   random.betas[random.betas>max.beta] <- max.beta
   random.betas[random.betas<min.beta] <- min.beta
-  
+
   data.ranges <- GenomicRanges::granges(template.ranges)
   GenomicRanges::mcols(data.ranges) <- random.betas
-  
+
   return(data.ranges)
 }

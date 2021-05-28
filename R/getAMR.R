@@ -5,9 +5,19 @@
 #' regions (AMRs) for all samples in a dataset.
 #'
 #' @details
-#' In the provided dataset `getAMR` compares methylation beta values of each
+#' In the provided dataset, `getAMR` compares methylation beta values of each
 #' sample with other samples to identify rare long-range methylation
-#' aberrations.
+#' aberrations. For `ramr.method=="IQR"`: for every genomic location (CpG) in
+#' `data.ranges` the IQR-normalized deviation from the median value is
+#' calculated, and all CpGs with such normalized deviation not smaller than the
+#' `iqr.cutoff` are retained. For `ramr.method=="*beta"`: parameters of beta
+#' distribution are estimated by means of `EnvStats::ebeta` or `ExtDist::eBeta`
+#' functions, and then used to calculate the probability values, followed by the
+#' filtering when all CpGs with p-values not greater than `qval.cutoff` are
+#' retained. Another filtering is then performed to exclude all CpGs within
+#' `exclude.range`. Next, the retained (significant) CpGs are merged with
+#' the window of `merge.window`, and final filtering is applied to AMR genomic
+#' ranges (by `min.cpgs` and `min.width`).
 #'
 #' @param data.ranges A `GRanges` object with genomic locations and
 #' corresponding beta values included as metadata.
@@ -17,12 +27,12 @@
 #' @param ramr.method A character scalar: when ramr.method is "IQR" (the
 #' default), the filtering based on interquantile range is used (`iqr.cutoff`
 #' value is then used as a threshold). When "beta" or "wbeta" - filtering based
-#' on fitting non-weighted (EnvStats::ebeta) or weighted (ExtDist::eBeta) beta
-#' distributions, respectively, is used, and `pval.cutoff` or `qval.cutoff` (if
-#' not `NULL`) is used as a threshold. For "wbeta", weights directly correlate
-#' with bin contents (number of values per bin) and inversly - with the
-#' distances from the median value, thus narrowing the estimated distribution
-#' and emphasizing outliers.
+#' on fitting non-weighted (`EnvStats::ebeta`) or weighted (`ExtDist::eBeta`)
+#' beta distributions, respectively, is used, and `pval.cutoff` or `qval.cutoff`
+#' (if not `NULL`) is used as a threshold. For "wbeta", weights directly
+#' correlate with bin contents (number of values per bin) and inversly - with
+#' the distances from the median value, thus narrowing the estimated
+#' distribution and emphasizing outliers.
 #' @param iqr.cutoff A single integer >= 1. Methylation beta values differing
 #' from the median value by more than `iqr.cutoff` interquartile ranges are
 #' considered to be significant (the default: 5).
@@ -44,13 +54,17 @@
 #' default), all `data.ranges` genomic locations with their median methylation
 #' beta value within the `exclude.range` interval are filtered out.
 #' @param cores A single integer >= 1. Number of processes for parallel
-#' computation (the default: all but one cores).
+#' computation (the default: all but one cores). Results of parallel processing
+#' are fully reproducible when the same seed is used (thanks to doRNG::%dorng%).
 #' @param ... Further arguments to be passed to `EnvStats::ebeta` or
 #' `ExtDist::eBeta` functions.
 #' @return The output is a `GRanges` object that contains all the aberrantly
 #' methylated regions (AMRs) for all `data.samples` samples in `data.ranges`
 #' object. The following metadata columns may be present:
 #' \itemize{
+#'   \item `revmap` -- integer list of significant CpGs (`data.ranges` genomic
+#'   locations) that are included in this AMR region
+#'   \item `ncpg` -- number of significant CpGs within this AMR region
 #'   \item `sample` -- contains an identifier of a sample to which
 #'   corresponding AMR belongs
 #'   \item `dbeta` -- average deviation of beta values for significant CpGs from
@@ -73,7 +87,8 @@
 #' @importFrom EnvStats ebeta
 #' @importFrom ExtDist eBeta pBeta
 #' @importFrom matrixStats rowMedians rowIQRs
-#' @importFrom foreach foreach %dopar%
+#' @importFrom foreach foreach
+#' @importFrom doRNG %dorng%
 #' @importFrom methods as is
 #' @importFrom stats median pbeta
 #' @export
@@ -143,19 +158,19 @@ getAMR <- function (data.ranges,
     qval.cutoff <- pval.cutoff/nrow(betas)
 
   chunks  <- split(seq_len(nrow(betas)), if (cores>1) cut(seq_len(nrow(betas)),cores) else 1)
-  medians <- foreach (chunk=chunks, .combine=c) %dopar% matrixStats::rowMedians(betas[chunk,], na.rm=TRUE)
+  medians <- foreach (chunk=chunks, .combine=c) %dorng% matrixStats::rowMedians(betas[chunk,], na.rm=TRUE)
 
   if (ramr.method=="IQR") {
-    iqrs <- foreach (chunk=chunks, .combine=c) %dopar% matrixStats::rowIQRs(betas[chunk,], na.rm=TRUE)
+    iqrs <- foreach (chunk=chunks, .combine=c) %dorng% matrixStats::rowIQRs(betas[chunk,], na.rm=TRUE)
     betas.filtered <- (betas-medians)/iqrs
     betas.filtered[abs(betas.filtered)<iqr.cutoff]  <- NA
   } else if (ramr.method=="beta") {
     # multi-threaded EnvStats::ebeta (speed: mme=mmue>mle>>>fitdistrplus::fitdist)
-    betas.filtered <- foreach (chunk=chunks) %dopar% getPValues.beta(betas[chunk,], ...)
+    betas.filtered <- foreach (chunk=chunks) %dorng% getPValues.beta(betas[chunk,], ...)
     betas.filtered <- do.call(rbind, betas.filtered)
     betas.filtered[betas.filtered>=qval.cutoff] <- NA
   } else if (ramr.method=="wbeta") {
-    betas.filtered <- foreach (chunk=chunks) %dopar% getPValues.wbeta(betas[chunk,], ...)
+    betas.filtered <- foreach (chunk=chunks) %dorng% getPValues.wbeta(betas[chunk,], ...)
     betas.filtered <- do.call(rbind, betas.filtered)
     betas.filtered[betas.filtered>=qval.cutoff] <- NA
   } else {
@@ -194,7 +209,7 @@ getAMR <- function (data.ranges,
     return(ranges)
   }
 
-  amr.ranges <- foreach (column=colnames(betas.filtered)) %dopar% getMergedRanges(column)
+  amr.ranges <- foreach (column=colnames(betas.filtered)) %dorng% getMergedRanges(column)
 
   parallel::stopCluster(cl)
   return(unlist(methods::as(amr.ranges, "GRangesList")))
