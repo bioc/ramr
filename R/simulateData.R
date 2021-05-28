@@ -59,7 +59,7 @@
 #' The default: 0.999.
 #' @param cores A single integer >= 1. Number of processes for parallel
 #' computation (the default: all but one cores). Results of parallel processing
-#' are fully reproducible when the same seed is used (thanks to doRNG::%dorng%).
+#' are fully reproducible when the same seed is used (thanks to doRNG).
 #' @return The output is a `GRanges` object with genomic ranges that are equal
 #' to the genomic ranges of the provided template and metadata columns
 #' containing generated methylation beta values for `nsamples` samples. If

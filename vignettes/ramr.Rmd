@@ -4,7 +4,7 @@ author: "Oleksii Nikolaienko"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 abstract: |
   A comprehensive guide to using the ramr package for detection
-  of rare aberrantly methylated regions
+  of rare aberrantly methylated regions.
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{ramr}
@@ -147,7 +147,7 @@ mcols(data.ranges) <- data.betas
 
 # Simulating data
 
-*`ramr`* provides methods to create sets of random AMRs and to generate biologically relevant methylation beta values using real datasets as templates. The following code provides an example, however it is recommended to use a real experimental data (e.g. GSE51032) to create a test dataset for assessment performance of *`ramr`* or other AMR/DMR search engines.
+*`ramr`* provides methods to create sets of random AMRs and to generate biologically relevant methylation beta values using real datasets as templates. The following code provides an example, however it is recommended to use a real experimental data (e.g. GSE51032) to create a test dataset for assessing the performance of *`ramr`* or other AMR/DMR search engines. The results of parallel data generation are fully reproducible when the same seed has been set (thanks to doRNG::%dorng%).
 
 ```{r, fig.width=10, fig.height=6, out.width="100%", out.height="100%"}
 # set the seed if reproducible results required
@@ -182,7 +182,7 @@ mcols(data.ranges) <- data.betas
   library(gridExtra)
 
   do.call("grid.arrange", c(plotAMR(noisy.data, NULL, amrs.unique[1:2]), ncol=2))
-  do.call("grid.arrange", c(plotAMR(noisy.data, NULL, amrs.nonunique[1:2]), ncol=2))
+  do.call("grid.arrange", c(plotAMR(noisy.data, NULL, sort(amrs.nonunique)[1:6]), ncol=2))
   do.call("grid.arrange", c(plotAMR(noisy.data, NULL, noise[1:2]), ncol=2))
   
 # can we find them?
@@ -220,6 +220,7 @@ sort(amrs)
 do.call("grid.arrange", c(plotAMR(ramr.data, ramr.samples, amrs[1:10]), ncol=2))
 ```
 
+Again, the results of parallel processing are fully reproducible if the same seed has been set.
 
 # AMR annotation and enrichment analysis
 

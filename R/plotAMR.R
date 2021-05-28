@@ -5,7 +5,7 @@
 #' at particular genomic locations.
 #'
 #' @details
-#' For every non-overapping genomic location from `ramr.ranges` object,
+#' For every non-overlapping genomic location from `ramr.ranges` object,
 #' `plotAMR` plots and outputs a line graph of methylation beta values taken
 #' from `data.ranges` for all samples from `data.samples`. Samples bearing
 #' significantly different methylation profiles ('sample' column of

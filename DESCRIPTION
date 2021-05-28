@@ -21,7 +21,7 @@ Depends:
     parallel,
     doParallel,
     foreach,
-    matrixStats,
+    doRNG,
     methods
 Imports:
     IRanges,
@@ -30,6 +30,7 @@ Imports:
     reshape2,
     EnvStats,
     ExtDist,
+    matrixStats,
     S4Vectors
 Suggests:
     RUnit,

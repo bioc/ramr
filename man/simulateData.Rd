@@ -24,7 +24,7 @@ generate.}
 
 \item{amr.ranges}{A `GRanges` object with genomic locations of (rare)
 methylation aberrations. If `NULL` (the default), no aberrations is
-introduced, and function will return "smoothed" dataset. If supplied, 
+introduced, and function will return "smoothed" dataset. If supplied,
 `GRanges` object must contain the following metadata columns:
 \itemize{
   \item `revmap` -- integer list of `template.ranges` genomic locations that
@@ -52,12 +52,13 @@ in the generated dataset above this value will be assigned this value.
 The default: 0.999.}
 
 \item{cores}{A single integer >= 1. Number of processes for parallel
-computation (the default: all but one cores).}
+computation (the default: all but one cores). Results of parallel processing
+are fully reproducible when the same seed is used (thanks to doRNG).}
 }
 \value{
 The output is a `GRanges` object with genomic ranges that are equal
 to the genomic ranges of the provided template and metadata columns
-containing generated methylation beta values for `nsamples` samples. If 
+containing generated methylation beta values for `nsamples` samples. If
 `amr.ranges` object was supplied, then randomly generated beta values will be
 modified accordingly.
 }
@@ -74,7 +75,7 @@ For every genomic location in the template dataset (`GRanges` object with
 genomic locations and corresponding beta values included as metadata)
 `simulateData` estimates the parameters of beta distribution by means of
 `EnvStats::ebeta` function, and then uses estimated parameters to generate
-`nsamples` random beta values by means of `stats::rbeta` function. This 
+`nsamples` random beta values by means of `stats::rbeta` function. This
 results in "smoothed" dataset that has biologically relevant distribution
 of beta values at every genomic location, but does not contain methylation
 aberrations. If the `amr.ranges` parameter points to a `GRanges` object with

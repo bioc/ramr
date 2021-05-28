@@ -55,7 +55,7 @@
 #' beta value within the `exclude.range` interval are filtered out.
 #' @param cores A single integer >= 1. Number of processes for parallel
 #' computation (the default: all but one cores). Results of parallel processing
-#' are fully reproducible when the same seed is used (thanks to doRNG::%dorng%).
+#' are fully reproducible when the same seed is used (thanks to doRNG).
 #' @param ... Further arguments to be passed to `EnvStats::ebeta` or
 #' `ExtDist::eBeta` functions.
 #' @return The output is a `GRanges` object that contains all the aberrantly
