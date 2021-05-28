@@ -151,7 +151,7 @@ mcols(data.ranges) <- data.betas
 
 ```{r, fig.width=10, fig.height=6, out.width="100%", out.height="100%"}
 # set the seed if reproducible results required
-# set.seed(999)
+  set.seed(999)
 
 # unique random AMRs
   amrs.unique <-
@@ -186,14 +186,23 @@ mcols(data.ranges) <- data.betas
   do.call("grid.arrange", c(plotAMR(noisy.data, NULL, noise[1:2]), ncol=2))
   
 # can we find them?
-  found <- getAMR(noisy.data, ramr.method="beta", min.cpgs=5,
-                  merge.window=1000, qval.cutoff=1e-2, cores=2)
+  system.time(found <- getAMR(noisy.data, ramr.method="beta", min.cpgs=5,
+                              merge.window=1000, qval.cutoff=1e-2, cores=2))
   
-# how many overlap with true positive regions
+# all possible regions
+  all.ranges <- getUniverse(noisy.data, min.cpgs=5, merge.window=1000)
+  
+# true positives
   sum(found %over% c(amrs.unique, amrs.nonunique))
   
-# how many are false positives
-  sum(!(found %over% c(amrs.unique, amrs.nonunique)))
+# false positives
+  sum(found %outside% c(amrs.unique, amrs.nonunique))
+
+# true negatives
+  length(all.ranges %outside% c(amrs.unique, amrs.nonunique))
+  
+# false negatives
+  sum(c(amrs.unique, amrs.nonunique) %outside% found)
 ```
 
 # AMR identification
