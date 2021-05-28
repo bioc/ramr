@@ -13,7 +13,7 @@ functions to visualize found aberrantly methylated regions (AMRs), to generate s
 as reference sets for enrichment analysis, and to generate biologically relevant test datasets for
 performance evaluation of AMR/DMR search algorithms.
 
-This readme contains condensed info on *`ramr`* usage. For more, please check function-specific help pages and vignettes.
+This readme contains condensed info on *`ramr`* usage. For more, please check function-specific help pages and vignettes within the R environment or at [GitHub pages](https://bbcg.github.io/ramr/articles/ramr.html).
 
 ## Current Features
 
@@ -123,7 +123,7 @@ data.with.amrs <- simulateData(ramr.data, nsamples=10,
   
 # that's how regions look like
 library(gridExtra)
-do.call("grid.arrange", c(plotAMR(data.with.amrs, NULL, amrs.unique[1:2]), ncol=2))
+do.call("grid.arrange", c(plotAMR(data.with.amrs, amr.ranges=amrs.unique[1:2]), ncol=2))
 ```
 
 

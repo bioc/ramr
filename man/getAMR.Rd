@@ -106,7 +106,7 @@ distribution are estimated by means of `EnvStats::ebeta` or `ExtDist::eBeta`
 functions, and then used to calculate the probability values, followed by the
 filtering when all CpGs with p-values not greater than `qval.cutoff` are
 retained. Another filtering is then performed to exclude all CpGs within
-`exclude.range`. Next, the retained (significant) CpGs are merged with
+`exclude.range`. Next, the retained (significant) CpGs are merged within
 the window of `merge.window`, and final filtering is applied to AMR genomic
 ranges (by `min.cpgs` and `min.width`).
 }

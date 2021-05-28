@@ -10,7 +10,7 @@ getUniverse(data.ranges, merge.window = 300, min.cpgs = 7, min.width = 1)
 \item{data.ranges}{A `GRanges` object with genomic locations and
 corresponding beta values included as metadata.}
 
-\item{merge.window}{A positive integer. All `data.ranges` genomic locations
+\item{merge.window}{A single integer >= 1. All `data.ranges` genomic locations
 within this distance will be merged (the default: 300).}
 
 \item{min.cpgs}{A single integer >= 1. All genomic regions containing less
@@ -24,7 +24,7 @@ The output is a `GRanges` object that contain all the genomic regions
 in `data.ranges` object (in other words, all potential AMRs).
 }
 \description{
-`getUniverse` returns a GRanges object with all the genomic regions in a
+`getUniverse` returns a `GRanges` object with all the genomic regions in a
 dataset, that can be used for AMR enrichment analysis
 }
 \details{

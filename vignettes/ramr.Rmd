@@ -160,7 +160,7 @@ mcols(data.ranges) <- data.betas
 
 # non-unique AMRs outside of regions with unique AMRs
   amrs.nonunique <-
-    simulateAMR(ramr.data, nsamples=3, exclude.ranges=amrs.unique,
+    simulateAMR(ramr.data, nsamples=4, exclude.ranges=amrs.unique,
                 samples.per.region=2, min.cpgs=5, merge.window=1000)
   
 # random noise outside of AMR regions
@@ -181,9 +181,9 @@ mcols(data.ranges) <- data.betas
 # that's how regions look like
   library(gridExtra)
 
-  do.call("grid.arrange", c(plotAMR(noisy.data, NULL, amrs.unique[1:2]), ncol=2))
-  do.call("grid.arrange", c(plotAMR(noisy.data, NULL, sort(amrs.nonunique)[1:6]), ncol=2))
-  do.call("grid.arrange", c(plotAMR(noisy.data, NULL, noise[1:2]), ncol=2))
+  do.call("grid.arrange", c(plotAMR(noisy.data, amr.ranges=amrs.unique[1:4]), ncol=2))
+  do.call("grid.arrange", c(plotAMR(noisy.data, amr.ranges=sort(amrs.nonunique)[1:8]), ncol=2))
+  do.call("grid.arrange", c(plotAMR(noisy.data, amr.ranges=noise[1:4]), ncol=2))
   
 # can we find them?
   system.time(found <- getAMR(noisy.data, ramr.method="beta", min.cpgs=5,
@@ -193,16 +193,22 @@ mcols(data.ranges) <- data.betas
   all.ranges <- getUniverse(noisy.data, min.cpgs=5, merge.window=1000)
   
 # true positives
-  sum(found %over% c(amrs.unique, amrs.nonunique))
+  tp <- sum(found %over% c(amrs.unique, amrs.nonunique))
   
 # false positives
-  sum(found %outside% c(amrs.unique, amrs.nonunique))
+  fp <- sum(found %outside% c(amrs.unique, amrs.nonunique))
 
 # true negatives
-  length(all.ranges %outside% c(amrs.unique, amrs.nonunique))
+  tn <- length(all.ranges %outside% c(amrs.unique, amrs.nonunique))
   
 # false negatives
-  sum(c(amrs.unique, amrs.nonunique) %outside% found)
+  fn <- sum(c(amrs.unique, amrs.nonunique) %outside% found)
+  
+# accuracy, MCC
+  acc <- (tp+tn) / (tp+tn+fp+fn)
+  mcc <- (tp*tn - fp*fn) / (sqrt(tp+fp)*sqrt(tp+fn)*sqrt(tn+fp)*sqrt(tn+fn))
+  setNames(c(tp, fp, tn, fn), c("TP", "FP", "TN", "FN"))
+  setNames(c(acc, mcc), c("accuracy", "MCC"))
 ```
 
 # AMR identification
