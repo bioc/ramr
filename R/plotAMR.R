@@ -5,26 +5,26 @@
 #' at particular genomic locations.
 #'
 #' @details
-#' For every non-overlapping genomic location from `ramr.ranges` object,
+#' For every non-overlapping genomic location from `amr.ranges` object,
 #' `plotAMR` plots and outputs a line graph of methylation beta values taken
 #' from `data.ranges` for all samples from `data.samples`. Samples bearing
 #' significantly different methylation profiles ('sample' column of
-#' `ramr.ranges` object) are highlighted.
+#' `amr.ranges` object) are highlighted.
 #'
 #' @param data.ranges A `GRanges` object with genomic locations and
 #' corresponding beta values included as metadata.
 #' @param data.samples A character vector with sample names (a subset of
 #' metadata column names) to be included in the plot. If `NULL` (the default),
 #' then all samples (metadata columns) are included.
-#' @param ramr.ranges An output of `getAMR` - a `GRanges` object that contain
+#' @param amr.ranges An output of `getAMR` - a `GRanges` object that contain
 #' aberrantly methylated regions (AMRs).
 #' @param highlight An optional list of samples to highlight. If NULL (the
 #' default), will contain sample IDs from the `sample` metadata column of
-#' `ramr.ranges` object.
+#' `amr.ranges` object.
 #' @param title An optional title for the plot. If NULL (the default), plot
 #' title is set to a genomic location of particular AMR.
 #' @param window An optional integer constant to expand genomic ranges of the
-#' `ramr.ranges` object (the default: 300).
+#' `amr.ranges` object (the default: 300).
 #' @return The output is a list of `ggplot` objects.
 #' @seealso \code{\link{getAMR}} for identification of AMRs,
 #' \code{\link{getUniverse}} for info on enrichment analysis,
@@ -47,19 +47,19 @@
 #' @export
 plotAMR <- function (data.ranges,
                      data.samples=NULL,
-                     ramr.ranges,
+                     amr.ranges,
                      highlight=NULL,
                      title=NULL,
                      window=300)
 {
   if (is.null(data.samples))
     data.samples <- colnames(GenomicRanges::mcols(data.ranges))
-  ramr.ranges.reduced  <- GenomicRanges::reduce(ramr.ranges, min.gapwidth=window, with.revmap=TRUE)
-  ramr.ranges.relisted <- BiocGenerics::relist(ramr.ranges[unlist(ramr.ranges.reduced$revmap)], ramr.ranges.reduced$revmap)
+  amr.ranges.reduced  <- GenomicRanges::reduce(amr.ranges, min.gapwidth=window, with.revmap=TRUE)
+  amr.ranges.relisted <- BiocGenerics::relist(amr.ranges[unlist(amr.ranges.reduced$revmap)], amr.ranges.reduced$revmap)
   plot.list <- list()
 
-  for (i in seq_along(ramr.ranges.relisted)) {
-    plot.ranges <- unlist(ramr.ranges.relisted[i])
+  for (i in seq_along(amr.ranges.relisted)) {
+    plot.ranges <- unlist(amr.ranges.relisted[i])
     revmap.rows <- unique(unlist(plot.ranges$revmap))
     data.hits   <- unique(S4Vectors::queryHits(GenomicRanges::findOverlaps(data.ranges, plot.ranges, maxgap=window, ignore.strand=TRUE)))
     if (length(data.hits)>0) {
