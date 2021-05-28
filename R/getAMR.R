@@ -12,7 +12,8 @@
 #' @param data.ranges A `GRanges` object with genomic locations and
 #' corresponding beta values included as metadata.
 #' @param data.samples A character vector with sample names (a subset of
-#' metadata column names).
+#' metadata column names). If `NULL` (the default), then all samples (metadata
+#' columns) are included in the analysis.
 #' @param ramr.method A character scalar: when ramr.method is "IQR" (the
 #' default), the filtering based on interquantile range is used (`iqr.cutoff`
 #' value is then used as a threshold). When "beta" or "wbeta" - filtering based
@@ -60,7 +61,7 @@
 #' }
 #' @seealso \code{\link{plotAMR}} for plotting AMRs, \code{\link{getUniverse}}
 #' for info on enrichment analysis, \code{\link{simulateAMR}} and
-#' \code{\link{simulateData}} for the generation of simulated test data sets,
+#' \code{\link{simulateData}} for the generation of simulated test datasets,
 #' and `ramr` vignettes for the description of usage and sample data.
 #' @examples
 #'   data(ramr)
@@ -77,7 +78,7 @@
 #' @importFrom stats median pbeta
 #' @export
 getAMR <- function (data.ranges,
-                    data.samples,
+                    data.samples=NULL,
                     ramr.method="IQR",
                     iqr.cutoff=5,
                     pval.cutoff=5e-2,
@@ -91,6 +92,8 @@ getAMR <- function (data.ranges,
 {
   if (!methods::is(data.ranges,"GRanges"))
     stop("'data.ranges' must be a GRanges object")
+  if (is.null(data.samples))
+    data.samples <- colnames(GenomicRanges::mcols(data.ranges))
   if (!all(data.samples %in% colnames(GenomicRanges::mcols(data.ranges))))
     stop("'data.ranges' metadata must include 'data.samples'")
   if (length(data.samples)<3)

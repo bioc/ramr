@@ -14,7 +14,8 @@
 #' @param data.ranges A `GRanges` object with genomic locations and
 #' corresponding beta values included as metadata.
 #' @param data.samples A character vector with sample names (a subset of
-#' metadata column names) to be included in the plot.
+#' metadata column names) to be included in the plot. If `NULL` (the default),
+#' then all samples (metadata columns) are included.
 #' @param ramr.ranges An output of `getAMR` - a `GRanges` object that contain
 #' aberrantly methylated regions (AMRs).
 #' @param highlight An optional list of samples to highlight. If NULL (the
@@ -28,7 +29,7 @@
 #' @seealso \code{\link{getAMR}} for identification of AMRs,
 #' \code{\link{getUniverse}} for info on enrichment analysis,
 #' \code{\link{simulateAMR}} and \code{\link{simulateData}} for the generation
-#' of simulated test data sets, and `ramr` vignettes for the description of
+#' of simulated test datasets, and `ramr` vignettes for the description of
 #' usage and sample data.
 #' @examples
 #'   data(ramr)
@@ -37,7 +38,7 @@
 #'   do.call("grid.arrange",
 #'           c(plotAMR(ramr.data, ramr.samples, ramr.tp.nonunique), ncol=2))
 #' @importFrom BiocGenerics relist
-#' @importFrom GenomicRanges reduce findOverlaps
+#' @importFrom GenomicRanges reduce findOverlaps mcols
 #' @import ggplot2
 #' @importFrom matrixStats rowMedians
 #' @importFrom reshape2 melt
@@ -45,12 +46,14 @@
 #' @importFrom methods as is
 #' @export
 plotAMR <- function (data.ranges,
-                     data.samples,
+                     data.samples=NULL,
                      ramr.ranges,
                      highlight=NULL,
                      title=NULL,
                      window=300)
 {
+  if (is.null(data.samples))
+    data.samples <- colnames(GenomicRanges::mcols(data.ranges))
   ramr.ranges.reduced  <- GenomicRanges::reduce(ramr.ranges, min.gapwidth=window, with.revmap=TRUE)
   ramr.ranges.relisted <- BiocGenerics::relist(ramr.ranges[unlist(ramr.ranges.reduced$revmap)], ramr.ranges.reduced$revmap)
   plot.list <- list()

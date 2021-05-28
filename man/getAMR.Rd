@@ -6,7 +6,7 @@
 \usage{
 getAMR(
   data.ranges,
-  data.samples,
+  data.samples = NULL,
   ramr.method = "IQR",
   iqr.cutoff = 5,
   pval.cutoff = 0.05,
@@ -24,7 +24,8 @@ getAMR(
 corresponding beta values included as metadata.}
 
 \item{data.samples}{A character vector with sample names (a subset of
-metadata column names).}
+metadata column names). If `NULL` (the default), then all samples (metadata
+columns) are included in the analysis.}
 
 \item{ramr.method}{A character scalar: when ramr.method is "IQR" (the
 default), the filtering based on interquantile range is used (`iqr.cutoff`
@@ -100,6 +101,6 @@ aberrations.
 \seealso{
 \code{\link{plotAMR}} for plotting AMRs, \code{\link{getUniverse}}
 for info on enrichment analysis, \code{\link{simulateAMR}} and
-\code{\link{simulateData}} for the generation of simulated test data sets,
+\code{\link{simulateData}} for the generation of simulated test datasets,
 and `ramr` vignettes for the description of usage and sample data.
 }

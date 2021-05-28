@@ -6,7 +6,7 @@
 \usage{
 plotAMR(
   data.ranges,
-  data.samples,
+  data.samples = NULL,
   ramr.ranges,
   highlight = NULL,
   title = NULL,
@@ -18,7 +18,8 @@ plotAMR(
 corresponding beta values included as metadata.}
 
 \item{data.samples}{A character vector with sample names (a subset of
-metadata column names) to be included in the plot.}
+metadata column names) to be included in the plot. If `NULL` (the default),
+then all samples (metadata columns) are included.}
 
 \item{ramr.ranges}{An output of `getAMR` - a `GRanges` object that contain
 aberrantly methylated regions (AMRs).}
@@ -58,6 +59,6 @@ significantly different methylation profiles ('sample' column of
 \code{\link{getAMR}} for identification of AMRs,
 \code{\link{getUniverse}} for info on enrichment analysis,
 \code{\link{simulateAMR}} and \code{\link{simulateData}} for the generation
-of simulated test data sets, and `ramr` vignettes for the description of
+of simulated test datasets, and `ramr` vignettes for the description of
 usage and sample data.
 }
