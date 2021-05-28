@@ -13,7 +13,7 @@ test_getAMR <- function () {
     getAMR(ramr.data, ramr.samples, ramr.method="zzz")
   )
   RUnit::checkEquals(
-    length( getAMR(ramr.data, ramr.samples, ramr.method="IQR", min.cpgs=5, merge.window=10000, iqr.cutoff=5, cores=1) ),
+    length( getAMR(ramr.data, ramr.method="IQR", min.cpgs=5, merge.window=10000, iqr.cutoff=5, cores=1) ),
     length( c(ramr.tp.unique,ramr.tp.nonunique) )
   )
   RUnit::checkEquals(
