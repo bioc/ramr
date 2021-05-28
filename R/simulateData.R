@@ -131,6 +131,9 @@ simulateData <- function (template.ranges,
 
   #####################################################################################
 
+  message("Simulating data", appendLF=FALSE)
+  tm <- proc.time()
+
   template.betas <- as.matrix(GenomicRanges::mcols(template.ranges, use.names=FALSE))
   chunks <- split(seq_len(nrow(template.betas)), if (cores>1) cut(seq_len(nrow(template.betas)), cores) else 1)
 
@@ -141,13 +144,23 @@ simulateData <- function (template.ranges,
   colnames(random.betas) <- sample.names
   parallel::stopCluster(cl)
 
-  amr.mcols <- if (is.null(amr.ranges)) data.frame() else GenomicRanges::mcols(amr.ranges)
-  for (i in seq_len(nrow(amr.mcols))) {
-    revmap <- unlist(amr.mcols$revmap[i])
-    dbeta  <- sign(0.5 - mean(random.betas[revmap,], na.omit=TRUE)) * amr.mcols$dbeta[i]
-    sample <- amr.mcols$sample[i]
-    random.betas[revmap, sample] <- random.betas[revmap, sample] + dbeta
+  message(sprintf(" [%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
+
+  if (!is.null(amr.ranges)) {
+    message("Introducing epimutations", appendLF=FALSE)
+    tm <- proc.time()
+
+    amr.mcols <- GenomicRanges::mcols(amr.ranges)
+    for (i in seq_len(nrow(amr.mcols))) {
+      revmap <- unlist(amr.mcols$revmap[i])
+      dbeta  <- sign(0.5 - mean(random.betas[revmap,], na.omit=TRUE)) * amr.mcols$dbeta[i]
+      sample <- amr.mcols$sample[i]
+      random.betas[revmap, sample] <- random.betas[revmap, sample] + dbeta
+    }
+
+    message(sprintf(" [%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
   }
+
   random.betas[random.betas>max.beta] <- max.beta
   random.betas[random.betas<min.beta] <- min.beta
 

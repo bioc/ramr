@@ -146,6 +146,8 @@ getAMR <- function (data.ranges,
 
   #####################################################################################
 
+  message("Identifying AMRs", appendLF=FALSE)
+  tm <- proc.time()
 
   doParallel::registerDoParallel(cores)
   cl <- parallel::makeCluster(cores)
@@ -212,5 +214,6 @@ getAMR <- function (data.ranges,
   amr.ranges <- foreach (column=colnames(betas.filtered)) %dorng% getMergedRanges(column)
 
   parallel::stopCluster(cl)
+  message(sprintf(" [%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
   return(unlist(methods::as(amr.ranges, "GRangesList")))
 }
