@@ -1,7 +1,7 @@
 #' Merges, filters and outputs all genomic regions of a given `GRanges` object
 #'
 #' @description
-#' `getUniverse` returns a GRanges object with all the genomic regions in a
+#' `getUniverse` returns a `GRanges` object with all the genomic regions in a
 #' dataset, that can be used for AMR enrichment analysis
 #'
 #' @details
@@ -11,7 +11,7 @@
 #'
 #' @param data.ranges A `GRanges` object with genomic locations and
 #' corresponding beta values included as metadata.
-#' @param merge.window A positive integer. All `data.ranges` genomic locations
+#' @param merge.window A single integer >= 1. All `data.ranges` genomic locations
 #' within this distance will be merged (the default: 300).
 #' @param min.cpgs A single integer >= 1. All genomic regions containing less
 #' than `min.cpgs` genomic locations are filtered out (the default: 7).

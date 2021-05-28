@@ -6,7 +6,7 @@
 #' and 100 samples (\code{"ramr.samples"}), and carries 6 unique
 #' (\code{"ramr.tp.unique"}) and 15 non-unique (\code{"ramr.tp.nonunique"})
 #' true positive AMRs containing at least 10 CpGs with their beta values
-#' increased/decreased by 0.5
+#' increased/decreased by 0.5.
 #'
 #' @docType data
 #'

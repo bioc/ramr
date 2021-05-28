@@ -81,7 +81,7 @@
 #'                 exclude.ranges=amrs, min.cpgs=1, max.cpgs=1, merge.window=1)
 #'   noisy.data <-
 #'     simulateData(ramr.data, nsamples=10, amr.ranges=c(amrs,noise), cores=2)
-#'   plotAMR(noisy.data, NULL, amrs[1])
+#'   plotAMR(noisy.data, amr.ranges=amrs[1])
 #' @importFrom parallel detectCores makeCluster stopCluster
 #' @importFrom doParallel registerDoParallel
 #' @importFrom GenomicRanges mcols `mcols<-` granges
