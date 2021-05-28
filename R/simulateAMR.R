@@ -53,12 +53,16 @@
 #' AMRs for the provided `template.ranges` object. The following metadata
 #' columns are included:
 #' \itemize{
-#'   \item `sample` -- contains an identifier of a sample to which
+#'   \item `revmap` -- integer list of `template.ranges` genomic locations that
+#'   are included in this AMR region
+#'   \item `ncpg` -- number of `template.ranges` genomic locations within
+#'   this AMR region
+#'   \item `sample` -- an identifier of a sample to which
 #'   corresponding AMR belongs
 #'   \item `dbeta` -- equals to supplied `dbeta` parameter
 #' }
 #' @seealso \code{\link{simulateData}} for the generation of simulated test
-#' data sets, \code{\link{getAMR}} for identification of AMRs,
+#' datasets, \code{\link{getAMR}} for identification of AMRs,
 #' \code{\link{plotAMR}} for plotting AMRs, \code{\link{getUniverse}}
 #' for info on enrichment analysis, and `ramr` vignettes for the description of
 #' usage and sample data.
