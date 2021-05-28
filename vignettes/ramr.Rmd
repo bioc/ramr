@@ -155,7 +155,7 @@ mcols(data.ranges) <- data.betas
 
 # unique random AMRs
   amrs.unique <-
-    simulateAMR(ramr.data, nsamples=10, regions.per.sample=2,
+    simulateAMR(ramr.data, nsamples=25, regions.per.sample=2,
                 min.cpgs=5, merge.window=1000, dbeta=0.2)
 
 # non-unique AMRs outside of regions with unique AMRs
@@ -165,17 +165,17 @@ mcols(data.ranges) <- data.betas
   
 # random noise outside of AMR regions
   noise <-
-    simulateAMR(ramr.data, nsamples=10, regions.per.sample=20,
+    simulateAMR(ramr.data, nsamples=25, regions.per.sample=20,
                 exclude.ranges=c(amrs.unique, amrs.nonunique),
                 min.cpgs=1, max.cpgs=1, merge.window=1, dbeta=0.5)
 
 # "smooth" methylation data without AMRs (negative control)
   smooth.data <-
-    simulateData(ramr.data, nsamples=10, cores=2)
+    simulateData(ramr.data, nsamples=25, cores=2)
   
 # methylation data with AMRs and noise
   noisy.data <-
-    simulateData(ramr.data, nsamples=10,
+    simulateData(ramr.data, nsamples=25,
                  amr.ranges=c(amrs.unique, amrs.nonunique, noise), cores=2)
   
 # that's how regions look like
@@ -184,6 +184,16 @@ mcols(data.ranges) <- data.betas
   do.call("grid.arrange", c(plotAMR(noisy.data, NULL, amrs.unique[1:2]), ncol=2))
   do.call("grid.arrange", c(plotAMR(noisy.data, NULL, amrs.nonunique[1:2]), ncol=2))
   do.call("grid.arrange", c(plotAMR(noisy.data, NULL, noise[1:2]), ncol=2))
+  
+# can we find them?
+  found <- getAMR(noisy.data, ramr.method="beta", min.cpgs=5,
+                  merge.window=1000, qval.cutoff=1e-2, cores=2)
+  
+# how many overlap with true positive regions
+  sum(found %over% c(amrs.unique, amrs.nonunique))
+  
+# how many are false positives
+  sum(!(found %over% c(amrs.unique, amrs.nonunique)))
 ```
 
 # AMR identification

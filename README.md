@@ -117,7 +117,7 @@ The following code generates random AMRs and methylation beta values using provi
 amrs.unique <- simulateAMR(ramr.data, nsamples=10, regions.per.sample=2,
                            min.cpgs=5, merge.window=1000, dbeta=0.2)
 
-# methylation data with AMRs and noise
+# methylation data with AMRs
 data.with.amrs <- simulateData(ramr.data, nsamples=10,
                                amr.ranges=amrs.unique, cores=2)
   

@@ -28,3 +28,9 @@ Changes in version 0.99.2 (2020-12-21)
 
 Changes in version 1.1.0 (2021-05-21)
 + released at bioconductor
+
+Changes in version 1.1.1 (2021-05-21)
++ reviewers' suggestions were implemented, docs updated
++ new methods for simulation of AMR and test datasets
++ NULL as a default for data.samples (to use all)
+
