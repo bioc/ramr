@@ -16,6 +16,7 @@ getAMR(
   min.width = 1,
   exclude.range = NULL,
   cores = max(1, parallel::detectCores() - 1),
+  verbose = TRUE,
   ...
 )
 }
@@ -67,6 +68,8 @@ beta value within the `exclude.range` interval are filtered out.}
 \item{cores}{A single integer >= 1. Number of processes for parallel
 computation (the default: all but one cores). Results of parallel processing
 are fully reproducible when the same seed is used (thanks to doRNG).}
+
+\item{verbose}{boolean to report progress and timings (default: TRUE).}
 
 \item{...}{Further arguments to be passed to `EnvStats::ebeta` or
 `ExtDist::eBeta` functions.}

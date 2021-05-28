@@ -60,6 +60,7 @@
 #' @param cores A single integer >= 1. Number of processes for parallel
 #' computation (the default: all but one cores). Results of parallel processing
 #' are fully reproducible when the same seed is used (thanks to doRNG).
+#' @param verbose boolean to report progress and timings (default: TRUE).
 #' @return The output is a `GRanges` object with genomic ranges that are equal
 #' to the genomic ranges of the provided template and metadata columns
 #' containing generated methylation beta values for `nsamples` samples. If
@@ -96,7 +97,8 @@ simulateData <- function (template.ranges,
                           sample.names=NULL,
                           min.beta=0.001,
                           max.beta=0.999,
-                          cores=max(1,parallel::detectCores()-1))
+                          cores=max(1,parallel::detectCores()-1),
+                          verbose=TRUE)
 {
   if (!methods::is(template.ranges,"GRanges"))
     stop("'template.ranges' must be a GRanges object")
@@ -131,7 +133,7 @@ simulateData <- function (template.ranges,
 
   #####################################################################################
 
-  message("Simulating data", appendLF=FALSE)
+  if (verbose) message("Simulating data", appendLF=FALSE)
   tm <- proc.time()
 
   template.betas <- as.matrix(GenomicRanges::mcols(template.ranges, use.names=FALSE))
@@ -144,10 +146,10 @@ simulateData <- function (template.ranges,
   colnames(random.betas) <- sample.names
   parallel::stopCluster(cl)
 
-  message(sprintf(" [%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
+  if (verbose) message(sprintf(" [%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
 
   if (!is.null(amr.ranges)) {
-    message("Introducing epimutations", appendLF=FALSE)
+    if (verbose) message("Introducing epimutations", appendLF=FALSE)
     tm <- proc.time()
 
     amr.mcols <- GenomicRanges::mcols(amr.ranges)
@@ -158,7 +160,7 @@ simulateData <- function (template.ranges,
       random.betas[revmap, sample] <- random.betas[revmap, sample] + dbeta
     }
 
-    message(sprintf(" [%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
+    if (verbose) message(sprintf(" [%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
   }
 
   random.betas[random.betas>max.beta] <- max.beta

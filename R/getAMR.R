@@ -56,6 +56,7 @@
 #' @param cores A single integer >= 1. Number of processes for parallel
 #' computation (the default: all but one cores). Results of parallel processing
 #' are fully reproducible when the same seed is used (thanks to doRNG).
+#' @param verbose boolean to report progress and timings (default: TRUE).
 #' @param ... Further arguments to be passed to `EnvStats::ebeta` or
 #' `ExtDist::eBeta` functions.
 #' @return The output is a `GRanges` object that contains all the aberrantly
@@ -101,8 +102,9 @@ getAMR <- function (data.ranges,
                     merge.window=300,
                     min.cpgs=7,
                     min.width=1,
-                    exclude.range=NULL, #c(0.3,0.7)
+                    exclude.range=NULL,
                     cores=max(1,parallel::detectCores()-1),
+                    verbose=TRUE,
                     ...)
 {
   if (!methods::is(data.ranges,"GRanges"))
@@ -115,6 +117,7 @@ getAMR <- function (data.ranges,
     stop("at least three 'data.samples' must be provided")
 
   #####################################################################################
+
   getPValues.beta <- function (data.chunk, ...) {
     chunk.filt <- apply(data.chunk, 1, function (x) {
       x.median    <- stats::median(x, na.rm=TRUE)
@@ -146,7 +149,7 @@ getAMR <- function (data.ranges,
 
   #####################################################################################
 
-  message("Identifying AMRs", appendLF=FALSE)
+  if (verbose) message("Identifying AMRs", appendLF=FALSE)
   tm <- proc.time()
 
   doParallel::registerDoParallel(cores)
@@ -214,6 +217,6 @@ getAMR <- function (data.ranges,
   amr.ranges <- foreach (column=colnames(betas.filtered)) %dorng% getMergedRanges(column)
 
   parallel::stopCluster(cl)
-  message(sprintf(" [%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
+  if (verbose) message(sprintf(" [%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
   return(unlist(methods::as(amr.ranges, "GRangesList")))
 }
