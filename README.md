@@ -131,7 +131,7 @@ The input (or template) object may be obtained using data from various sources. 
 
 ### Using data from NCBI GEO
 
-The following code pulls (NB: very large) raw files from NCBI GEO database, performes normalization and creates *`GRanges`* object for further analysis using *`ramr`* (system requirements: 22GB of disk space, 64GB of RAM)
+The following code pulls (NB: very large) raw files from NCBI GEO database, performs normalization and creates *`GRanges`* object for further analysis using *`ramr`* (system requirements: 22GB of disk space, 64GB of RAM)
 ```r
 library(minfi)
 library(GEOquery)
