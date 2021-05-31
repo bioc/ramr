@@ -7,10 +7,10 @@ ramr
 
 # Introduction
 
-*`ramr`* is an R package for detection of low-frequency aberrant methylation events in large datasets
+*`ramr`* is an R package for detection of low-frequency aberrant methylation events in large data sets
 obtained by methylation profiling using array or high-throughput bisulfite sequencing. In addition, package provides
 functions to visualize found aberrantly methylated regions (AMRs), to generate sets of all possible regions to be used
-as reference sets for enrichment analysis, and to generate biologically relevant test datasets for
+as reference sets for enrichment analysis, and to generate biologically relevant test data sets for
 performance evaluation of AMR/DMR search algorithms.
 
 This readme contains condensed info on *`ramr`* usage. For more, please check function-specific help pages and vignettes within the R environment or at [GitHub pages](https://bbcg.github.io/ramr/articles/ramr.html).
@@ -20,7 +20,7 @@ This readme contains condensed info on *`ramr`* usage. For more, please check fu
  * Identification of aberrantly methylated regions (AMRs)
  * AMR visualization
  * Generation of reference sets for third-party analyses (e.g. enrichment)
- * Generation of test datasets for performance evaluation of algorithms for search of differentially (DMR) or aberrantly (AMR) methylated regions
+ * Generation of test data sets for performance evaluation of algorithms for search of differentially (DMR) or aberrantly (AMR) methylated regions
 
 
 -------
@@ -100,7 +100,7 @@ amrs <- getAMR(ramr.data, ramr.samples, ramr.method="beta", min.cpgs=5,
 amrs
 plotAMR(ramr.data, ramr.samples, amrs[1])
 
-# generate the set of all possible genomic regions using sample dataset and
+# generate the set of all possible genomic regions using sample data set and
 # the same parameters as for AMR search
 universe <- getUniverse(ramr.data, min.cpgs=5, merge.window=1000)
 
@@ -110,7 +110,7 @@ hg19.coredb <- loadRegionDB(system.file("LOLACore", "hg19", package="LOLA"))
 core.hits   <- runLOLA(amrs, universe, hg19.coredb, cores=1, redefineUserSets=TRUE)
 ```
 
-The following code generates random AMRs and methylation beta values using provided dataset as a template:
+The following code generates random AMRs and methylation beta values using provided data set as a template:
 
 ```r
 # unique random AMRs

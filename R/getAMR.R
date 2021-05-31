@@ -2,10 +2,10 @@
 #'
 #' @description
 #' `getAMR` returns a `GRanges` object with all the aberrantly methylated
-#' regions (AMRs) for all samples in a dataset.
+#' regions (AMRs) for all samples in a data set.
 #'
 #' @details
-#' In the provided dataset, `getAMR` compares methylation beta values of each
+#' In the provided data set, `getAMR` compares methylation beta values of each
 #' sample with other samples to identify rare long-range methylation
 #' aberrations. For `ramr.method=="IQR"`: for every genomic location (CpG) in
 #' `data.ranges` the IQR-normalized deviation from the median value is
@@ -76,7 +76,7 @@
 #' }
 #' @seealso \code{\link{plotAMR}} for plotting AMRs, \code{\link{getUniverse}}
 #' for info on enrichment analysis, \code{\link{simulateAMR}} and
-#' \code{\link{simulateData}} for the generation of simulated test datasets,
+#' \code{\link{simulateData}} for the generation of simulated test data sets,
 #' and `ramr` vignettes for the description of usage and sample data.
 #' @examples
 #'   data(ramr)

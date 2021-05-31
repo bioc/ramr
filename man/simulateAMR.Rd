@@ -104,7 +104,7 @@ to be used as the set of true positive AMRs for the `simulateData` function.
 }
 \seealso{
 \code{\link{simulateData}} for the generation of simulated test
-datasets, \code{\link{getAMR}} for identification of AMRs,
+data sets, \code{\link{getAMR}} for identification of AMRs,
 \code{\link{plotAMR}} for plotting AMRs, \code{\link{getUniverse}}
 for info on enrichment analysis, and `ramr` vignettes for the description of
 usage and sample data.

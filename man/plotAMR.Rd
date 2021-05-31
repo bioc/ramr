@@ -59,6 +59,6 @@ significantly different methylation profiles ('sample' column of
 \code{\link{getAMR}} for identification of AMRs,
 \code{\link{getUniverse}} for info on enrichment analysis,
 \code{\link{simulateAMR}} and \code{\link{simulateData}} for the generation
-of simulated test datasets, and `ramr` vignettes for the description of
+of simulated test data sets, and `ramr` vignettes for the description of
 usage and sample data.
 }

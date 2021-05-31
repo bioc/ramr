@@ -62,7 +62,7 @@
 #'   \item `dbeta` -- equals to supplied `dbeta` parameter
 #' }
 #' @seealso \code{\link{simulateData}} for the generation of simulated test
-#' datasets, \code{\link{getAMR}} for identification of AMRs,
+#' data sets, \code{\link{getAMR}} for identification of AMRs,
 #' \code{\link{plotAMR}} for plotting AMRs, \code{\link{getUniverse}}
 #' for info on enrichment analysis, and `ramr` vignettes for the description of
 #' usage and sample data.
@@ -96,7 +96,7 @@ simulateAMR <- function (template.ranges,
     stop("'sample.names' length must be greater or equal to 'nsamples'")
 
   #####################################################################################
-  
+
   repRotate <- function(v, times=1, shift=1) {
     r <- v
     for (i in seq_len(times-1)) {
@@ -105,16 +105,16 @@ simulateAMR <- function (template.ranges,
     }
     return(r)
   }
-  
+
   #####################################################################################
-  
+
   universe.ranges <- getUniverse(template.ranges, merge.window=merge.window, min.cpgs=min.cpgs, min.width=min.width)
   universe.ranges <- subset(universe.ranges, `ncpg`<=max.cpgs)
   if (methods::is(exclude.ranges,"GRanges"))
     universe.ranges <- subset(universe.ranges, universe.ranges %outside% exclude.ranges)
   if (is.null(sample.names))
     sample.names <- paste0("sample", seq_len(nsamples))
-  
+
   if (nsamples > length(universe.ranges)) {
     nsamples <- length(universe.ranges)
     message("'nsamples' has been set to the maximum possible value of ", nsamples)
@@ -127,10 +127,10 @@ simulateAMR <- function (template.ranges,
     samples.per.region <- nsamples
     message("'samples.per.region' has been set to the maximum possible value of ", nsamples)
   }
-  
+
   amr.ranges        <- rep(sample(universe.ranges, nsamples * regions.per.sample), samples.per.region)
   amr.ranges$sample <- repRotate(rep(sample(sample.names, nsamples), regions.per.sample), times=samples.per.region, shift=1)
   amr.ranges$dbeta  <- as.numeric(dbeta)
-  
+
   return(amr.ranges)
 }

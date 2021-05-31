@@ -2,17 +2,17 @@
 #'
 #' @description
 #' `getUniverse` returns a `GRanges` object with all the genomic regions in a
-#' dataset, that can be used for AMR enrichment analysis
+#' data set, that can be used for AMR enrichment analysis
 #'
 #' @details
-#' In the provided dataset `getUniverse` merges and outputs all the genomic
+#' In the provided data set `getUniverse` merges and outputs all the genomic
 #' regions that satisfy filtering criteria, thus creating a `GRanges` object to
 #' be used as a reference set of genomic regions for AMR enrichment analysis.
 #'
 #' @param data.ranges A `GRanges` object with genomic locations and
 #' corresponding beta values included as metadata.
-#' @param merge.window A single integer >= 1. All `data.ranges` genomic locations
-#' within this distance will be merged (the default: 300).
+#' @param merge.window A single integer >= 1. All `data.ranges` genomic
+#' locations within this distance will be merged (the default: 300).
 #' @param min.cpgs A single integer >= 1. All genomic regions containing less
 #' than `min.cpgs` genomic locations are filtered out (the default: 7).
 #' @param min.width A single integer >= 1 (the default). Only regions with the
@@ -21,7 +21,7 @@
 #' in `data.ranges` object (in other words, all potential AMRs).
 #' @seealso \code{\link{getAMR}} for identification of AMRs,
 #' \code{\link{plotAMR}} for plotting AMRs, \code{\link{simulateAMR}} and
-#' \code{\link{simulateData}} for the generation of simulated test datasets,
+#' \code{\link{simulateData}} for the generation of simulated test data sets,
 #' and `ramr` vignettes for the description of usage and sample data.
 #' @examples
 #'   data(ramr)

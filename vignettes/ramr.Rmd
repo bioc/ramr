@@ -24,10 +24,10 @@ options(width=100)
 
 # Introduction
 
-*`ramr`* is an R package for detection of low-frequency aberrant methylation events in large datasets
+*`ramr`* is an R package for detection of low-frequency aberrant methylation events in large data sets
 obtained by methylation profiling using array or high-throughput bisulfite sequencing. In addition, package provides
 functions to visualize found aberrantly methylated regions (AMRs), to generate sets of all possible regions to be used
-as reference sets for enrichment analysis, and to generate biologically relevant test datasets for
+as reference sets for enrichment analysis, and to generate biologically relevant test data sets for
 performance evaluation of AMR/DMR search algorithms.
 
 ## Current Features
@@ -35,7 +35,7 @@ performance evaluation of AMR/DMR search algorithms.
  * Identification of aberrantly methylated regions (AMRs)
  * AMR visualization
  * Generation of reference sets for third-party analyses (e.g. enrichment)
- * Generation of test datasets for performance evaluation of algorithms for search of differentially (DMR) or aberrantly (AMR) methylated regions
+ * Generation of test data sets for performance evaluation of algorithms for search of differentially (DMR) or aberrantly (AMR) methylated regions
 
 # Reading data
 
@@ -59,7 +59,7 @@ GRanges object with 383788 ranges and 845 metadata columns:
 
 ```
 
-*`ramr`* package is supplied with a sample data, which was simulated using GSE51032 dataset as described in the *`ramr`* reference paper. Sample dataset *`ramr.data`* contains beta values for 10000 CpGs and 100 samples (*`ramr.samples`*), and carries 6 unique (*`ramr.tp.unique`*) and 15 non-unique (*`ramr.tp.nonunique`*) true positive AMRs containing at least 10 CpGs with their beta values increased/decreased by 0.5
+*`ramr`* package is supplied with a sample data, which was simulated using GSE51032 data set as described in the *`ramr`* reference paper. Sample data set *`ramr.data`* contains beta values for 10000 CpGs and 100 samples (*`ramr.samples`*), and carries 6 unique (*`ramr.tp.unique`*) and 15 non-unique (*`ramr.tp.nonunique`*) true positive AMRs containing at least 10 CpGs with their beta values increased/decreased by 0.5
 
 ```{r, fig.width=10, fig.height=4, out.width="100%", out.height="100%"}
 library(ramr)
@@ -147,7 +147,7 @@ mcols(data.ranges) <- data.betas
 
 # Simulating data
 
-*`ramr`* provides methods to create sets of random AMRs and to generate biologically relevant methylation beta values using real datasets as templates. The following code provides an example, however it is recommended to use a real experimental data (e.g. GSE51032) to create a test dataset for assessing the performance of *`ramr`* or other AMR/DMR search engines. The results of parallel data generation are fully reproducible when the same seed has been set (thanks to doRNG::%dorng%).
+*`ramr`* provides methods to create sets of random AMRs and to generate biologically relevant methylation beta values using real data sets as templates. The following code provides an example, however it is recommended to use a real experimental data (e.g. GSE51032) to create a test data set for assessing the performance of *`ramr`* or other AMR/DMR search engines. The results of parallel data generation are fully reproducible when the same seed has been set (thanks to doRNG::%dorng%).
 
 ```{r, fig.width=10, fig.height=6, out.width="100%", out.height="100%"}
 # set the seed if reproducible results required
@@ -244,7 +244,7 @@ summarize_annotations(annotated_regions=amrs.annots, quiet=FALSE)
 ```
 
 ```
-# generate the set of all possible genomic regions using sample dataset and
+# generate the set of all possible genomic regions using sample data set and
 # the same parameters as for AMR search
 universe <- getUniverse(ramr.data, min.cpgs=5, merge.window=1000)
 

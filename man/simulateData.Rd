@@ -2,7 +2,7 @@
 % Please edit documentation in R/simulateData.R
 \name{simulateData}
 \alias{simulateData}
-\title{Template-based simulation of methylation datasets}
+\title{Template-based simulation of methylation data sets}
 \usage{
 simulateData(
   template.ranges,
@@ -25,7 +25,7 @@ generate.}
 
 \item{amr.ranges}{A `GRanges` object with genomic locations of (rare)
 methylation aberrations. If `NULL` (the default), no aberrations is
-introduced, and function will return "smoothed" dataset. If supplied,
+introduced, and function will return "smoothed" data set. If supplied,
 `GRanges` object must contain the following metadata columns:
 \itemize{
   \item `revmap` -- integer list of `template.ranges` genomic locations that
@@ -45,11 +45,11 @@ default), sample names will be computed as
 `sample.names` vector must be equal to the value of `nsamples`.}
 
 \item{min.beta}{A single numeric within the range c(0,1). All beta values
-in the generated dataset below this value will be assigned this value.
+in the generated data set below this value will be assigned this value.
 The default: 0.001.}
 
 \item{max.beta}{A single numeric within the range c(0,1). All beta values
-in the generated dataset above this value will be assigned this value.
+in the generated data set above this value will be assigned this value.
 The default: 0.999.}
 
 \item{cores}{A single integer >= 1. Number of processes for parallel
@@ -67,28 +67,28 @@ modified accordingly.
 }
 \description{
 `simulateData` generates aberration-free methylation data using an
-experimental dataset as a template, and further introduces methylation
+experimental data set as a template, and further introduces methylation
 aberrations if `GRanges` object containing a set of aberrantly methylated
 regions was provided. The output can be used to evaluate performance
 of algorithms for search of differentially (DMR) or aberrantly (AMR)
 methylated regions.
 }
 \details{
-For every genomic location in the template dataset (`GRanges` object with
+For every genomic location in the template data set (`GRanges` object with
 genomic locations and corresponding beta values included as metadata)
 `simulateData` estimates the parameters of beta distribution by means of
 `EnvStats::ebeta` function, and then uses estimated parameters to generate
 `nsamples` random beta values by means of `stats::rbeta` function. This
-results in "smoothed" dataset that has biologically relevant distribution
+results in "smoothed" data set that has biologically relevant distribution
 of beta values at every genomic location, but does not contain methylation
 aberrations. If the `amr.ranges` parameter points to a `GRanges` object with
-aberrations, every AMR is then introduced into the "smoothed" dataset as
+aberrations, every AMR is then introduced into the "smoothed" data set as
 following: if mean methylation beta value for AMR region across all samples
-in the "smoothed" dataset is above (below) 0.5 then all beta values for the
+in the "smoothed" data set is above (below) 0.5 then all beta values for the
 sample defined by the `sample` metadata column are decreased (increased) by
 the absolute value specified in the `dbeta` metadata column. Resulting
-datasets with (or without) AMR together with the `amr.ranges` set of true
-positive aberrations can be used as test dataset to evaluate performance
+data sets with (or without) AMR together with the `amr.ranges` set of true
+positive aberrations can be used as test data set to evaluate performance
 of algorithms for search of differentially (DMR) or aberrantly (AMR)
 methylated regions.
 }

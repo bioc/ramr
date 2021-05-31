@@ -31,7 +31,7 @@ Changes in version 1.1.0 (2021-05-21)
 
 Changes in version 1.1.2 (2021-05-28)
 + reviewers' suggestions were implemented, docs updated, typos fixed
-+ new methods for simulation of AMR and test datasets
++ new methods for simulation of AMR and test data sets
 + NULL as a default for data.samples (to use all)
 + doRNG is used to ensure reproducibility during parallel computing
 + a couple of new defaults for previously required parameters for easy usage
