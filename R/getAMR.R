@@ -37,7 +37,7 @@
 #' from the median value by more than `iqr.cutoff` interquartile ranges are
 #' considered to be significant (the default: 5).
 #' @param pval.cutoff A numeric scalar (the default: 5e-2). Bonferroni
-#' correction of `pval.cutoff` by the length of the `data.ranges` object is
+#' correction of `pval.cutoff` by the length of the `data.samples` object is
 #' used to calculate `qval.cutoff` if the latter is `NULL`.
 #' @param qval.cutoff A numeric scalar. Used as a threshold for filtering based
 #' on fitting non-weighted or weighted beta distributions: all p-values lower
@@ -160,7 +160,7 @@ getAMR <- function (data.ranges,
 
   betas <- as.matrix(mcols(data.ranges)[universe.cpgs,data.samples,drop=FALSE])
   if (is.null(qval.cutoff))
-    qval.cutoff <- pval.cutoff/nrow(betas)
+    qval.cutoff <- pval.cutoff/ncol(betas)
 
   chunks  <- split(seq_len(nrow(betas)), if (cores>1) cut(seq_len(nrow(betas)),cores) else 1)
   medians <- foreach (chunk=chunks, .combine=c) %dorng% matrixStats::rowMedians(betas[chunk,], na.rm=TRUE)

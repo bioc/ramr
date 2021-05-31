@@ -43,7 +43,7 @@ from the median value by more than `iqr.cutoff` interquartile ranges are
 considered to be significant (the default: 5).}
 
 \item{pval.cutoff}{A numeric scalar (the default: 5e-2). Bonferroni
-correction of `pval.cutoff` by the length of the `data.ranges` object is
+correction of `pval.cutoff` by the length of the `data.samples` object is
 used to calculate `qval.cutoff` if the latter is `NULL`.}
 
 \item{qval.cutoff}{A numeric scalar. Used as a threshold for filtering based
