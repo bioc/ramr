@@ -152,11 +152,11 @@ simulateData <- function (template.ranges,
     if (verbose) message("Introducing epimutations", appendLF=FALSE)
     tm <- proc.time()
 
-    amr.mcols <- GenomicRanges::mcols(amr.ranges)
+    amr.mcols <- data.frame(GenomicRanges::mcols(amr.ranges))
     for (i in seq_len(nrow(amr.mcols))) {
-      revmap <- unlist(amr.mcols$revmap[i])
-      dbeta  <- sign(0.5 - mean(random.betas[revmap,], na.omit=TRUE)) * amr.mcols$dbeta[i]
-      sample <- amr.mcols$sample[i]
+      revmap <- unlist(amr.mcols[i,"revmap"])
+      dbeta  <- sign(0.5 - mean(random.betas[revmap,], na.omit=TRUE)) * amr.mcols[i,"dbeta"]
+      sample <- amr.mcols[i,"sample"]
       random.betas[revmap, sample] <- random.betas[revmap, sample] + dbeta
     }
 
