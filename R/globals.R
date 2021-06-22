@@ -1,1 +1,1 @@
-utils::globalVariables(c("chunk", "column", "ncpg"))
+utils::globalVariables(c("chunk", "column", "ncpg", "width"))

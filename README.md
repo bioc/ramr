@@ -3,35 +3,34 @@ ramr
 
 [![](https://github.com/BBCG/ramr/workflows/R-CMD-check-bioc/badge.svg)](https://github.com/BBCG/ramr/actions)
 [![](https://codecov.io/gh/BBCG/ramr/branch/master/graph/badge.svg)](https://codecov.io/gh/BBCG/ramr)
-[![](https://bioconductor.org/shields/years-in-bioc/ramr.svg)](https://bioconductor.org/packages/devel/bioc/html/ramr.html)
+[![](https://bioconductor.org/shields/years-in-bioc/ramr.svg)](https://bioconductor.org/packages/release/bioc/html/ramr.html)
 
 # Introduction
 
-*`ramr`* is an R package for detection of low-frequency aberrant methylation events in large datasets
+*`ramr`* is an R package for detection of low-frequency aberrant methylation events in large data sets
 obtained by methylation profiling using array or high-throughput bisulfite sequencing. In addition, package provides
-functions to visualize found aberrantly methylated regions (AMRs), and to generate sets of all possible regions to be used
-as reference sets for enrichment analysis.
+functions to visualize found aberrantly methylated regions (AMRs), to generate sets of all possible regions to be used
+as reference sets for enrichment analysis, and to generate biologically relevant test data sets for
+performance evaluation of AMR/DMR search algorithms.
 
-This readme contains condensed info on *`ramr`* usage. For more, please check function-specific help pages and vignettes.
+This readme contains condensed info on *`ramr`* usage. For more, please check function-specific help pages and vignettes within the R environment or at [GitHub pages](https://bbcg.github.io/ramr/articles/ramr.html).
 
 ## Current Features
 
  * Identification of aberrantly methylated regions (AMRs)
  * AMR visualization
  * Generation of reference sets for third-party analyses (e.g. enrichment)
+ * Generation of test data sets for performance evaluation of algorithms for search of differentially (DMR) or aberrantly (AMR) methylated regions
 
 
 -------
 
 ## Installation
 
-### install via Bioconductor (devel only)
+### install via Bioconductor
 ```r
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
-
-# The following initializes usage of Bioc devel
-BiocManager::install(version='devel')
 
 BiocManager::install("ramr")
 ```
@@ -54,7 +53,8 @@ install_github("BBCG/ramr", build_vignettes=FALSE,
 [Replication Data for: "ramr: an R package for detection of rare aberrantly methylated regions"](https://doi.org/10.18710/ED8HSD)
 
 ### *`ramr`* at Bioconductor
-[Bioconductor - ramr (development version)](https://bioconductor.org/packages/devel/bioc/html/ramr.html)
+[release](https://bioconductor.org/packages/release/bioc/html/ramr.html), 
+[development version](https://bioconductor.org/packages/devel/bioc/html/ramr.html)
 
 -------
 
@@ -100,7 +100,7 @@ amrs <- getAMR(ramr.data, ramr.samples, ramr.method="beta", min.cpgs=5,
 amrs
 plotAMR(ramr.data, ramr.samples, amrs[1])
 
-# generate the set of all possible genomic regions using sample dataset and
+# generate the set of all possible genomic regions using sample data set and
 # the same parameters as for AMR search
 universe <- getUniverse(ramr.data, min.cpgs=5, merge.window=1000)
 
@@ -110,13 +110,28 @@ hg19.coredb <- loadRegionDB(system.file("LOLACore", "hg19", package="LOLA"))
 core.hits   <- runLOLA(amrs, universe, hg19.coredb, cores=1, redefineUserSets=TRUE)
 ```
 
+The following code generates random AMRs and methylation beta values using provided data set as a template:
+
+```r
+# unique random AMRs
+amrs.unique <- simulateAMR(ramr.data, nsamples=10, regions.per.sample=2,
+                           min.cpgs=5, merge.window=1000, dbeta=0.2)
+
+# methylation data with AMRs
+data.with.amrs <- simulateData(ramr.data, nsamples=10,
+                               amr.ranges=amrs.unique, cores=2)
+  
+# that's how regions look like
+library(gridExtra)
+do.call("grid.arrange", c(plotAMR(data.with.amrs, amr.ranges=amrs.unique[1:2]), ncol=2))
+```
 
 
-The input object may be obtained using data from various sources. Here we provide two examples:
+The input (or template) object may be obtained using data from various sources. Here we provide two examples:
 
 ### Using data from NCBI GEO
 
-The following code pulls (NB: very large) raw files from NCBI GEO database, performes normalization and creates *`GRanges`* object for further analysis using *`ramr`* (system requirements: 22GB of disk space, 64GB of RAM)
+The following code pulls (NB: very large) raw files from NCBI GEO database, performs normalization and creates *`GRanges`* object for further analysis using *`ramr`* (system requirements: 22GB of disk space, 64GB of RAM)
 ```r
 library(minfi)
 library(GEOquery)

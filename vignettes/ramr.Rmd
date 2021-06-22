@@ -4,7 +4,7 @@ author: "Oleksii Nikolaienko"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 abstract: |
   A comprehensive guide to using the ramr package for detection
-  of rare aberrantly methylated regions
+  of rare aberrantly methylated regions.
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{ramr}
@@ -24,16 +24,18 @@ options(width=100)
 
 # Introduction
 
-*`ramr`* is an R package for detection of low-frequency aberrant methylation events in large datasets
+*`ramr`* is an R package for detection of low-frequency aberrant methylation events in large data sets
 obtained by methylation profiling using array or high-throughput bisulfite sequencing. In addition, package provides
-functions to visualize found aberrantly methylated regions (AMRs), and to generate sets of all possible regions to be used
-as reference sets for enrichment analysis.
+functions to visualize found aberrantly methylated regions (AMRs), to generate sets of all possible regions to be used
+as reference sets for enrichment analysis, and to generate biologically relevant test data sets for
+performance evaluation of AMR/DMR search algorithms.
 
 ## Current Features
 
  * Identification of aberrantly methylated regions (AMRs)
  * AMR visualization
  * Generation of reference sets for third-party analyses (e.g. enrichment)
+ * Generation of test data sets for performance evaluation of algorithms for search of differentially (DMR) or aberrantly (AMR) methylated regions
 
 # Reading data
 
@@ -57,7 +59,7 @@ GRanges object with 383788 ranges and 845 metadata columns:
 
 ```
 
-*`ramr`* package is supplied with a sample data, which was simulated using GSE51032 dataset as described in the *`ramr`* reference paper. Sample dataset *`ramr.data`* contains beta values for 10000 CpGs and 100 samples (*`ramr.samples`*), and carries 6 unique (*`ramr.tp.unique`*) and 15 non-unique (*`ramr.tp.nonunique`*) true positive AMRs containing at least 10 CpGs with their beta values increased/decreased by 0.5
+*`ramr`* package is supplied with a sample data, which was simulated using GSE51032 data set as described in the *`ramr`* reference paper. Sample data set *`ramr.data`* contains beta values for 10000 CpGs and 100 samples (*`ramr.samples`*), and carries 6 unique (*`ramr.tp.unique`*) and 15 non-unique (*`ramr.tp.nonunique`*) true positive AMRs containing at least 10 CpGs with their beta values increased/decreased by 0.5
 
 ```{r, fig.width=10, fig.height=4, out.width="100%", out.height="100%"}
 library(ramr)
@@ -70,7 +72,7 @@ plotAMR(ramr.data, ramr.samples, ramr.tp.nonunique[c(1,6,11)])
 ```
 
 
-The input object may be obtained using data from various sources. Here we provide two examples:
+The input (or template) object may be obtained using data from various sources. Here we provide two examples:
 
 ### Using data from NCBI GEO
 
@@ -143,6 +145,71 @@ mcols(data.ranges) <- data.betas
 # data.ranges and sample.ids objects are now ready for AMR search using ramr
 ```
 
+# Simulating data
+
+*`ramr`* provides methods to create sets of random AMRs and to generate biologically relevant methylation beta values using real data sets as templates. The following code provides an example, however it is recommended to use a real experimental data (e.g. GSE51032) to create a test data set for assessing the performance of *`ramr`* or other AMR/DMR search engines. The results of parallel data generation are fully reproducible when the same seed has been set (thanks to doRNG::%dorng%).
+
+```{r, fig.width=10, fig.height=6, out.width="100%", out.height="100%"}
+# set the seed if reproducible results required
+  set.seed(999)
+
+# unique random AMRs
+  amrs.unique <-
+    simulateAMR(ramr.data, nsamples=25, regions.per.sample=2,
+                min.cpgs=5, merge.window=1000, dbeta=0.2)
+
+# non-unique AMRs outside of regions with unique AMRs
+  amrs.nonunique <-
+    simulateAMR(ramr.data, nsamples=4, exclude.ranges=amrs.unique,
+                samples.per.region=2, min.cpgs=5, merge.window=1000)
+  
+# random noise outside of AMR regions
+  noise <-
+    simulateAMR(ramr.data, nsamples=25, regions.per.sample=20,
+                exclude.ranges=c(amrs.unique, amrs.nonunique),
+                min.cpgs=1, max.cpgs=1, merge.window=1, dbeta=0.5)
+
+# "smooth" methylation data without AMRs (negative control)
+  smooth.data <-
+    simulateData(ramr.data, nsamples=25, cores=2)
+  
+# methylation data with AMRs and noise
+  noisy.data <-
+    simulateData(ramr.data, nsamples=25,
+                 amr.ranges=c(amrs.unique, amrs.nonunique, noise), cores=2)
+  
+# that's how regions look like
+  library(gridExtra)
+
+  do.call("grid.arrange", c(plotAMR(noisy.data, amr.ranges=amrs.unique[1:4]), ncol=2))
+  do.call("grid.arrange", c(plotAMR(noisy.data, amr.ranges=sort(amrs.nonunique)[1:8]), ncol=2))
+  do.call("grid.arrange", c(plotAMR(noisy.data, amr.ranges=noise[1:4]), ncol=2))
+  
+# can we find them?
+  system.time(found <- getAMR(noisy.data, ramr.method="beta", min.cpgs=5,
+                              merge.window=1000, qval.cutoff=1e-2, cores=2))
+  
+# all possible regions
+  all.ranges <- getUniverse(noisy.data, min.cpgs=5, merge.window=1000)
+  
+# true positives
+  tp <- sum(found %over% c(amrs.unique, amrs.nonunique))
+  
+# false positives
+  fp <- sum(found %outside% c(amrs.unique, amrs.nonunique))
+
+# true negatives
+  tn <- length(all.ranges %outside% c(amrs.unique, amrs.nonunique))
+  
+# false negatives
+  fn <- sum(c(amrs.unique, amrs.nonunique) %outside% found)
+  
+# accuracy, MCC
+  acc <- (tp+tn) / (tp+tn+fp+fn)
+  mcc <- (tp*tn - fp*fn) / (sqrt(tp+fp)*sqrt(tp+fn)*sqrt(tn+fp)*sqrt(tn+fn))
+  setNames(c(tp, fp, tn, fn), c("TP", "FP", "TN", "FN"))
+  setNames(c(acc, mcc), c("accuracy", "MCC"))
+```
 
 # AMR identification
 
@@ -156,10 +223,10 @@ amrs <- getAMR(ramr.data, ramr.samples, ramr.method="beta", min.cpgs=5,
 # inspect
 sort(amrs)
 
-library(gridExtra)
 do.call("grid.arrange", c(plotAMR(ramr.data, ramr.samples, amrs[1:10]), ncol=2))
 ```
 
+Again, the results of parallel processing are fully reproducible if the same seed has been set.
 
 # AMR annotation and enrichment analysis
 
@@ -177,7 +244,7 @@ summarize_annotations(annotated_regions=amrs.annots, quiet=FALSE)
 ```
 
 ```
-# generate the set of all possible genomic regions using sample dataset and
+# generate the set of all possible genomic regions using sample data set and
 # the same parameters as for AMR search
 universe <- getUniverse(ramr.data, min.cpgs=5, merge.window=1000)
 

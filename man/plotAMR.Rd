@@ -6,8 +6,8 @@
 \usage{
 plotAMR(
   data.ranges,
-  data.samples,
-  ramr.ranges,
+  data.samples = NULL,
+  amr.ranges,
   highlight = NULL,
   title = NULL,
   window = 300
@@ -18,20 +18,21 @@ plotAMR(
 corresponding beta values included as metadata.}
 
 \item{data.samples}{A character vector with sample names (a subset of
-metadata column names) to be included in the plot.}
+metadata column names) to be included in the plot. If `NULL` (the default),
+then all samples (metadata columns) are included.}
 
-\item{ramr.ranges}{An output of `getAMR` - a `GRanges` object that contain
+\item{amr.ranges}{An output of `getAMR` - a `GRanges` object that contain
 aberrantly methylated regions (AMRs).}
 
-\item{highlight}{An optional list of samples to highlight. If NULL (default),
-will contain sample IDs from the `sample` metadata column of `ramr.ranges`
- object.}
+\item{highlight}{An optional list of samples to highlight. If NULL (the
+default), will contain sample IDs from the `sample` metadata column of
+`amr.ranges` object.}
 
-\item{title}{An optional title for the plot. If NULL (default), plot title is
-set to a genomic location of particular AMR.}
+\item{title}{An optional title for the plot. If NULL (the default), plot
+title is set to a genomic location of particular AMR.}
 
 \item{window}{An optional integer constant to expand genomic ranges of the
-`ramr.ranges` object.}
+`amr.ranges` object (the default: 300).}
 }
 \value{
 The output is a list of `ggplot` objects.
@@ -41,11 +42,11 @@ The output is a list of `ggplot` objects.
 at particular genomic locations.
 }
 \details{
-For every non-overapping genomic location from `ramr.ranges` object,
+For every non-overlapping genomic location from `amr.ranges` object,
 `plotAMR` plots and outputs a line graph of methylation beta values taken
 from `data.ranges` for all samples from `data.samples`. Samples bearing
 significantly different methylation profiles ('sample' column of
-`ramr.ranges` object) are highlighted.
+`amr.ranges` object) are highlighted.
 }
 \examples{
   data(ramr)
@@ -56,5 +57,8 @@ significantly different methylation profiles ('sample' column of
 }
 \seealso{
 \code{\link{getAMR}} for identification of AMRs,
-\code{\link{getUniverse}} or README for info on enrichment analysis
+\code{\link{getUniverse}} for info on enrichment analysis,
+\code{\link{simulateAMR}} and \code{\link{simulateData}} for the generation
+of simulated test data sets, and `ramr` vignettes for the description of
+usage and sample data.
 }

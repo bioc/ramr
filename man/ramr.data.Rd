@@ -6,7 +6,7 @@
 \alias{ramr.samples}
 \alias{ramr.tp.unique}
 \alias{ramr.tp.nonunique}
-\title{Simulated Illumina HumanMethylation 450k dataset with 3000 CpGs and 100
+\title{Simulated Illumina HumanMethylation 450k data set with 3000 CpGs and 100
 samples}
 \format{
 Objects of class \code{"GRanges"} (\code{"ramr.data, ramr.tp.unique,
@@ -16,12 +16,12 @@ ramr.tp.nonunique"}) and \code{"character"} (\code{"ramr.samples"}).
 data(ramr)
 }
 \description{
-Data was simulated using GSE51032 dataset as described in the reference.
-Current dataset (\code{"ramr.data"}) contains beta values for 10000 CpGs
+Data was simulated using GSE51032 data set as described in the reference.
+Current data set (\code{"ramr.data"}) contains beta values for 10000 CpGs
 and 100 samples (\code{"ramr.samples"}), and carries 6 unique
 (\code{"ramr.tp.unique"}) and 15 non-unique (\code{"ramr.tp.nonunique"})
 true positive AMRs containing at least 10 CpGs with their beta values
-increased/decreased by 0.5
+increased/decreased by 0.5.
 }
 \examples{
   data(ramr)
@@ -36,4 +36,5 @@ increased/decreased by 0.5
 Nikolaienko et al., 2020
 (\href{https://doi.org/10.1101/2020.12.01.403501}{bioRxiv})
 }
-\keyword{datasets}
+\keyword{data}
+\keyword{sets}
