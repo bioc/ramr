@@ -47,10 +47,10 @@ install_github("BBCG/ramr", build_vignettes=FALSE,
 -------
 
 ### Citing the *`ramr`* package
-[Nikolaienko et al., 2020 bioRxiv](https://doi.org/10.1101/2020.12.01.403501)
+Oleksii Nikolaienko, Per Eystein Lønning, Stian Knappskog, *ramr*: an R/Bioconductor package for detection of rare aberrantly methylated regions, Bioinformatics, 2021;, btab586, [https://doi.org/10.1093/bioinformatics/btab586](https://doi.org/10.1093/bioinformatics/btab586)
 
 ### The data underlying *`ramr`* manuscript
-[Replication Data for: "ramr: an R package for detection of rare aberrantly methylated regions"](https://doi.org/10.18710/ED8HSD)
+Replication Data for: "ramr: an R package for detection of rare aberrantly methylated regions, ["https://doi.org/10.18710/ED8HSD"](https://doi.org/10.18710/ED8HSD)
 
 ### *`ramr`* at Bioconductor
 [release](https://bioconductor.org/packages/release/bioc/html/ramr.html), 
