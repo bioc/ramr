@@ -1,6 +1,6 @@
 Package: ramr
 Title: Detection of Rare Aberrantly Methylated Regions in Array and NGS Data
-Version: 1.1.3
+Version: 1.1.4
 Authors@R: 
     person(given = "Oleksii",
            family = "Nikolaienko",
@@ -47,5 +47,5 @@ BugReports: https://github.com/BBCG/ramr/issues
 Encoding: UTF-8
 biocViews: DNAMethylation, DifferentialMethylation, Epigenetics,
     MethylationArray, MethylSeq
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 VignetteBuilder: knitr

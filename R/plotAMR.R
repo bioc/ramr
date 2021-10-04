@@ -64,6 +64,7 @@ plotAMR <- function (data.ranges,
     data.hits   <- unique(S4Vectors::queryHits(GenomicRanges::findOverlaps(data.ranges, plot.ranges, maxgap=window, ignore.strand=TRUE)))
     if (length(data.hits)>0) {
       plot.data <- data.frame(data.ranges[data.hits, data.samples], check.names=FALSE, stringsAsFactors=FALSE)
+      colnames(plot.data) <- c("seqnames", "start", "end", "width", "strand", data.samples)
       plot.data$median <- matrixStats::rowMedians(as.matrix(plot.data[,data.samples]), na.rm=TRUE)
 
       colorify       <- c("median", if (is.null(highlight)) unique(plot.ranges$sample), highlight)
@@ -79,7 +80,7 @@ plotAMR <- function (data.ranges,
         geom_line(size=0.5) +
         geom_point(size=1) +
         scale_x_continuous(name="position") +
-        scale_y_continuous(name="beta value", limits=c(-0, 1), breaks=c(0, 0.25, 0.5, 0.75, 1)) +
+        scale_y_continuous(name="beta value", limits=c(0, 1), breaks=c(0, 0.25, 0.5, 0.75, 1)) +
         scale_color_discrete(name="samples", limits=colorify) +
         scale_alpha_continuous(guide="none") +
         theme(legend.text=element_text(size=8),
