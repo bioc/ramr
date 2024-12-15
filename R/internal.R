@@ -1,5 +1,6 @@
 ## #' @importFrom data.table data.table
-## #' @useDynLib ramr, .registration=TRUE
+#' @importFrom Rcpp sourceCpp
+#' @useDynLib ramr, .registration=TRUE
 
 
 # internal globals, constants and helper functions 
@@ -13,7 +14,7 @@ utils::globalVariables(
   c("chunk", "column", "ncpg", "width")
 )
 
-## .onUnload <- function (libpath) {library.dynam.unload("ramr", libpath)}
+.onUnload <- function (libpath) {library.dynam.unload("ramr", libpath)}
 
 ################################################################################
 # Constants
