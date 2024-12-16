@@ -7,7 +7,7 @@
 getAMR(
   data.ranges,
   data.samples = NULL,
-  ramr.method = "IQR",
+  ramr.method = c("IQR", "beta", "wbeta", "beinf"),
   iqr.cutoff = 5,
   pval.cutoff = 0.05,
   qval.cutoff = NULL,

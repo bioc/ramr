@@ -92,10 +92,12 @@
 #' @importFrom doRNG %dorng%
 #' @importFrom methods as is
 #' @importFrom stats median pbeta
+#' @importFrom gamlss gamlss gamlss.control
+#' @importFrom gamlss.dist pBEINF
 #' @export
 getAMR <- function (data.ranges,
                     data.samples=NULL,
-                    ramr.method="IQR",
+                    ramr.method=c("IQR", "beta", "wbeta", "beinf"),
                     iqr.cutoff=5,
                     pval.cutoff=5e-2,
                     qval.cutoff=NULL,
@@ -115,6 +117,7 @@ getAMR <- function (data.ranges,
     stop("'data.ranges' metadata must include 'data.samples'")
   if (length(data.samples)<3)
     stop("at least three 'data.samples' must be provided")
+  ramr.method <- match.arg(ramr.method)
 
   #####################################################################################
 
@@ -134,7 +137,7 @@ getAMR <- function (data.ranges,
       x.median    <- stats::median(x, na.rm=TRUE)
       x[is.na(x)] <- x.median
       # weight directly correlates with bin contents (number of values per bin)
-      # and inversly - with the distance from the median value, thus narrowing
+      # and inversely - with the distance from the median value, thus narrowing
       # the estimated distribution and emphasizing outliers
       c           <- cut(x, c(0:100)/100)
       b           <- table(c)
@@ -146,6 +149,30 @@ getAMR <- function (data.ranges,
     })
     return(t(chunk.filt))
   }
+  inv.logit <- function (x) exp(x)/(1+exp(x))
+  getPValues.beinf <- function (data.chunk, ...) {
+    chunk.filt <- apply(data.chunk, 1, function (x) {
+      x.median    <- stats::median(x, na.rm=TRUE)
+      x[is.na(x)] <- x.median
+      beinf.fit <- gamlss::gamlss(
+        as.numeric(x)~1, sigma.formula=~1, nu.formula=~1, tau.formula=~1,
+        family=gamlss.dist::BEINF(mu.link="logit", sigma.link="logit",
+                                  nu.link="log", tau.link="log"),
+        control=gamlss::gamlss.control(trace=FALSE), ...
+      )
+      pvals <- gamlss.dist::pBEINF(
+        q=x, mu=inv.logit(beinf.fit$mu.coefficients),
+        sigma=inv.logit(beinf.fit$sigma.coefficients),
+        nu=exp(beinf.fit$nu.coefficients),
+        tau=exp(beinf.fit$tau.coefficients),
+        lower.tail=TRUE, log.p=FALSE
+      )
+      pvals[x>x.median] <- 1 - pvals[x>x.median]
+      return(pvals)
+    })
+    return(t(chunk.filt))
+  }
+  
 
   #####################################################################################
 
@@ -178,6 +205,10 @@ getAMR <- function (data.ranges,
     betas.filtered <- foreach (chunk=chunks) %dorng% getPValues.wbeta(betas[chunk,], ...)
     betas.filtered <- do.call(rbind, betas.filtered)
     betas.filtered[betas.filtered>=qval.cutoff] <- NA
+  } else if (ramr.method=="beinf") {
+    betas.filtered <- foreach (chunk=chunks) %dorng% getPValues.beinf(betas[chunk,], ...)
+    betas.filtered <- do.call(rbind, betas.filtered)
+    betas.filtered[betas.filtered>=qval.cutoff] <- NA
   } else {
     stop("unknown 'ramr.method'")
   }
@@ -201,9 +232,7 @@ getAMR <- function (data.ranges,
         ranges$xiqr   <- vapply(ranges$revmap, function (revmap) {
           mean(betas.filtered[not.na[revmap],column,drop=FALSE], na.rm=TRUE)
         }, numeric(1))
-      }
-
-      if (ramr.method=="beta" | ramr.method=="wbeta") {
+      } else {
         ranges$pval <- vapply(ranges$revmap, function (revmap) {
           return( 10**mean(log10(betas.filtered[not.na[revmap],column] + .Machine$double.xmin), na.rm=TRUE) )
         }, numeric(1))
