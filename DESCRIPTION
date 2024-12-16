@@ -15,7 +15,7 @@ Description: ramr is an R package for detection of epimutations (i.e.,
   to generate sets of all possible regions to be used as reference sets for
   enrichment analysis, and to generate biologically relevant test data sets
   for performance evaluation of AMR/DMR search algorithms.
-SystemRequirements: C++17, GNU make
+SystemRequirements: C++20, GNU make
 NeedsCompilation: yes
 Depends:
   R (>= 4.1),

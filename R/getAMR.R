@@ -134,7 +134,7 @@ getAMR <- function (data.ranges,
       x.median    <- stats::median(x, na.rm=TRUE)
       x[is.na(x)] <- x.median
       # weight directly correlates with bin contents (number of values per bin)
-      # and inversly - with the distance from the median value, thus narrowing
+      # and inversely - with the distance from the median value, thus narrowing
       # the estimated distribution and emphasizing outliers
       c           <- cut(x, c(0:100)/100)
       b           <- table(c)
