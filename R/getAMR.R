@@ -7,12 +7,16 @@
 #' @details
 #' In the provided data set, `getAMR` compares methylation beta values of each
 #' sample with other samples to identify rare long-range methylation
-#' aberrations. For `ramr.method=="IQR"`: for every genomic location (CpG) in
+#' aberrations (epimutations).
+#' For `ramr.method=="IQR"`: for every genomic location (CpG) in
 #' `data.ranges` the IQR-normalized deviation from the median value is
 #' calculated, and all CpGs with such normalized deviation not smaller than the
-#' `iqr.cutoff` are retained. For `ramr.method=="*beta"`: parameters of beta
-#' distribution are estimated by means of `EnvStats::ebeta` or `ExtDist::eBeta`
-#' functions, and then used to calculate the probability values, followed by the
+#' `iqr.cutoff` are retained. For
+#' `ramr.method %in% c("beta", "wbeta", "beinf")`: parameters of beta
+#' distribution are estimated by means of `EnvStats::ebeta` (beta distribution),
+#' `ExtDist::eBeta` (weighted beta destribution), or `gamlss.dist::BEINF` (zero
+#' and one inflated beta distribution) functions, respectively. These
+#' parameters are then used to calculate the probability values, followed by the
 #' filtering when all CpGs with p-values not greater than `qval.cutoff` are
 #' retained. Another filtering is then performed to exclude all CpGs within
 #' `exclude.range`. Next, the retained (significant) CpGs are merged within
@@ -26,8 +30,9 @@
 #' columns) are included in the analysis.
 #' @param ramr.method A character scalar: when ramr.method is "IQR" (the
 #' default), the filtering based on interquantile range is used (`iqr.cutoff`
-#' value is then used as a threshold). When "beta" or "wbeta" - filtering based
-#' on fitting non-weighted (`EnvStats::ebeta`) or weighted (`ExtDist::eBeta`)
+#' value is then used as a threshold). When "beta", "wbeta" or "beinf" -
+#' filtering based on fitting non-weighted (`EnvStats::ebeta`), weighted
+#' (`ExtDist::eBeta`) or zero-and-one inflated (`gamlss.dist::BEINF`)
 #' beta distributions, respectively, is used, and `pval.cutoff` or `qval.cutoff`
 #' (if not `NULL`) is used as a threshold. For "wbeta", weights directly
 #' correlate with bin contents (number of values per bin) and inversly - with
@@ -185,28 +190,28 @@ getAMR <- function (data.ranges,
   universe      <- getUniverse(data.ranges, merge.window=merge.window, min.cpgs=min.cpgs, min.width=min.width)
   universe.cpgs <- unlist(universe$revmap)
 
-  betas <- as.matrix(mcols(data.ranges)[universe.cpgs,data.samples,drop=FALSE])
+  betas <- as.matrix(mcols(data.ranges)[universe.cpgs, data.samples, drop=FALSE])
   if (is.null(qval.cutoff))
     qval.cutoff <- pval.cutoff/ncol(betas)
 
-  chunks  <- split(seq_len(nrow(betas)), if (cores>1) cut(seq_len(nrow(betas)),cores) else 1)
-  medians <- foreach (chunk=chunks, .combine=c) %dorng% matrixStats::rowMedians(betas[chunk,], na.rm=TRUE)
+  chunks  <- split(seq_len(nrow(betas)), if (cores>1) cut(seq_len(nrow(betas)), cores) else 1)
+  medians <- foreach (chunk=chunks, .combine=c) %dorng% matrixStats::rowMedians(betas[chunk, ], na.rm=TRUE)
 
   if (ramr.method=="IQR") {
-    iqrs <- foreach (chunk=chunks, .combine=c) %dorng% matrixStats::rowIQRs(betas[chunk,], na.rm=TRUE)
+    iqrs <- foreach (chunk=chunks, .combine=c) %dorng% matrixStats::rowIQRs(betas[chunk, ], na.rm=TRUE)
     betas.filtered <- (betas-medians)/iqrs
     betas.filtered[abs(betas.filtered)<iqr.cutoff]  <- NA
   } else if (ramr.method=="beta") {
     # multi-threaded EnvStats::ebeta (speed: mme=mmue>mle>>>fitdistrplus::fitdist)
-    betas.filtered <- foreach (chunk=chunks) %dorng% getPValues.beta(betas[chunk,], ...)
+    betas.filtered <- foreach (chunk=chunks) %dorng% getPValues.beta(betas[chunk, ], ...)
     betas.filtered <- do.call(rbind, betas.filtered)
     betas.filtered[betas.filtered>=qval.cutoff] <- NA
   } else if (ramr.method=="wbeta") {
-    betas.filtered <- foreach (chunk=chunks) %dorng% getPValues.wbeta(betas[chunk,], ...)
+    betas.filtered <- foreach (chunk=chunks) %dorng% getPValues.wbeta(betas[chunk, ], ...)
     betas.filtered <- do.call(rbind, betas.filtered)
     betas.filtered[betas.filtered>=qval.cutoff] <- NA
   } else if (ramr.method=="beinf") {
-    betas.filtered <- foreach (chunk=chunks) %dorng% getPValues.beinf(betas[chunk,], ...)
+    betas.filtered <- foreach (chunk=chunks) %dorng% getPValues.beinf(betas[chunk, ], ...)
     betas.filtered <- do.call(rbind, betas.filtered)
     betas.filtered[betas.filtered>=qval.cutoff] <- NA
   } else {
