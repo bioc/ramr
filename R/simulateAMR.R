@@ -76,7 +76,7 @@
 #'                 samples.per.region=2, min.cpgs=5, merge.window=1000)
 #' @importFrom methods is
 #' @importFrom utils head tail
-#' @importFrom IRanges `%outside%`
+#' @importFrom IRanges subsetByOverlaps
 #' @export
 simulateAMR <- function (template.ranges,
                          nsamples,
@@ -111,7 +111,7 @@ simulateAMR <- function (template.ranges,
   universe.ranges <- getUniverse(template.ranges, merge.window=merge.window, min.cpgs=min.cpgs, min.width=min.width)
   universe.ranges <- subset(universe.ranges, `ncpg`<=max.cpgs)
   if (methods::is(exclude.ranges,"GRanges"))
-    universe.ranges <- subset(universe.ranges, universe.ranges %outside% exclude.ranges)
+    universe.ranges <- IRanges::subsetByOverlaps(universe.ranges, exclude.ranges, invert=TRUE)
   if (is.null(sample.names))
     sample.names <- paste0("sample", seq_len(nsamples))
 
