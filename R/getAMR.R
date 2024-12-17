@@ -7,12 +7,16 @@
 #' @details
 #' In the provided data set, `getAMR` compares methylation beta values of each
 #' sample with other samples to identify rare long-range methylation
-#' aberrations. For `ramr.method=="IQR"`: for every genomic location (CpG) in
+#' aberrations (epimutations).
+#' For `ramr.method=="IQR"`: for every genomic location (CpG) in
 #' `data.ranges` the IQR-normalized deviation from the median value is
 #' calculated, and all CpGs with such normalized deviation not smaller than the
-#' `iqr.cutoff` are retained. For `ramr.method=="*beta"`: parameters of beta
-#' distribution are estimated by means of `EnvStats::ebeta` or `ExtDist::eBeta`
-#' functions, and then used to calculate the probability values, followed by the
+#' `iqr.cutoff` are retained. For
+#' `ramr.method %in% c("beta", "wbeta", "beinf")`: parameters of beta
+#' distribution are estimated by means of `EnvStats::ebeta` (beta distribution),
+#' `ExtDist::eBeta` (weighted beta destribution), or `gamlss.dist::BEINF` (zero
+#' and one inflated beta distribution) functions, respectively. These
+#' parameters are then used to calculate the probability values, followed by the
 #' filtering when all CpGs with p-values not greater than `qval.cutoff` are
 #' retained. Another filtering is then performed to exclude all CpGs within
 #' `exclude.range`. Next, the retained (significant) CpGs are merged within
@@ -26,8 +30,9 @@
 #' columns) are included in the analysis.
 #' @param ramr.method A character scalar: when ramr.method is "IQR" (the
 #' default), the filtering based on interquantile range is used (`iqr.cutoff`
-#' value is then used as a threshold). When "beta" or "wbeta" - filtering based
-#' on fitting non-weighted (`EnvStats::ebeta`) or weighted (`ExtDist::eBeta`)
+#' value is then used as a threshold). When "beta", "wbeta" or "beinf" -
+#' filtering based on fitting non-weighted (`EnvStats::ebeta`), weighted
+#' (`ExtDist::eBeta`) or zero-and-one inflated (`gamlss.dist::BEINF`)
 #' beta distributions, respectively, is used, and `pval.cutoff` or `qval.cutoff`
 #' (if not `NULL`) is used as a threshold. For "wbeta", weights directly
 #' correlate with bin contents (number of values per bin) and inversly - with
@@ -82,20 +87,10 @@
 #'   data(ramr)
 #'   getAMR(ramr.data, ramr.samples, ramr.method="beta",
 #'          min.cpgs=5, merge.window=1000, qval.cutoff=1e-3, cores=2)
-#' @importFrom parallel detectCores makeCluster stopCluster
-#' @importFrom doParallel registerDoParallel
-#' @importFrom GenomicRanges mcols reduce
-#' @importFrom EnvStats ebeta
-#' @importFrom ExtDist eBeta pBeta
-#' @importFrom matrixStats rowMedians rowIQRs
-#' @importFrom foreach foreach
-#' @importFrom doRNG %dorng%
-#' @importFrom methods as is
-#' @importFrom stats median pbeta
 #' @export
 getAMR <- function (data.ranges,
                     data.samples=NULL,
-                    ramr.method="IQR",
+                    ramr.method=c("IQR", "beta", "wbeta", "beinf"),
                     iqr.cutoff=5,
                     pval.cutoff=5e-2,
                     qval.cutoff=NULL,
@@ -115,6 +110,7 @@ getAMR <- function (data.ranges,
     stop("'data.ranges' metadata must include 'data.samples'")
   if (length(data.samples)<3)
     stop("at least three 'data.samples' must be provided")
+  ramr.method <- match.arg(ramr.method)
 
   #####################################################################################
 
@@ -134,7 +130,7 @@ getAMR <- function (data.ranges,
       x.median    <- stats::median(x, na.rm=TRUE)
       x[is.na(x)] <- x.median
       # weight directly correlates with bin contents (number of values per bin)
-      # and inversly - with the distance from the median value, thus narrowing
+      # and inversely - with the distance from the median value, thus narrowing
       # the estimated distribution and emphasizing outliers
       c           <- cut(x, c(0:100)/100)
       b           <- table(c)
@@ -146,6 +142,30 @@ getAMR <- function (data.ranges,
     })
     return(t(chunk.filt))
   }
+  inv.logit <- function (x) exp(x)/(1+exp(x))
+  getPValues.beinf <- function (data.chunk, ...) {
+    chunk.filt <- apply(data.chunk, 1, function (x) {
+      x.median    <- stats::median(x, na.rm=TRUE)
+      x[is.na(x)] <- x.median
+      beinf.fit <- gamlss::gamlss(
+        as.numeric(x)~1, sigma.formula=~1, nu.formula=~1, tau.formula=~1,
+        family=gamlss.dist::BEINF(mu.link="logit", sigma.link="logit",
+                                  nu.link="log", tau.link="log"),
+        control=gamlss::gamlss.control(trace=FALSE), ...
+      )
+      pvals <- gamlss.dist::pBEINF(
+        q=x, mu=inv.logit(beinf.fit$mu.coefficients),
+        sigma=inv.logit(beinf.fit$sigma.coefficients),
+        nu=exp(beinf.fit$nu.coefficients),
+        tau=exp(beinf.fit$tau.coefficients),
+        lower.tail=TRUE, log.p=FALSE
+      )
+      pvals[x>x.median] <- 1 - pvals[x>x.median]
+      return(pvals)
+    })
+    return(t(chunk.filt))
+  }
+  
 
   #####################################################################################
 
@@ -158,28 +178,30 @@ getAMR <- function (data.ranges,
   universe      <- getUniverse(data.ranges, merge.window=merge.window, min.cpgs=min.cpgs, min.width=min.width)
   universe.cpgs <- unlist(universe$revmap)
 
-  betas <- as.matrix(mcols(data.ranges)[universe.cpgs,data.samples,drop=FALSE])
+  betas <- as.matrix(mcols(data.ranges)[universe.cpgs, data.samples, drop=FALSE])
   if (is.null(qval.cutoff))
     qval.cutoff <- pval.cutoff/ncol(betas)
 
-  chunks  <- split(seq_len(nrow(betas)), if (cores>1) cut(seq_len(nrow(betas)),cores) else 1)
-  medians <- foreach (chunk=chunks, .combine=c) %dorng% matrixStats::rowMedians(betas[chunk,], na.rm=TRUE)
+  chunks  <- split(seq_len(nrow(betas)), if (cores>1) cut(seq_len(nrow(betas)), cores) else 1)
+  medians <- foreach (chunk=chunks, .combine=c) %dorng% matrixStats::rowMedians(betas[chunk, ], na.rm=TRUE)
 
   if (ramr.method=="IQR") {
-    iqrs <- foreach (chunk=chunks, .combine=c) %dorng% matrixStats::rowIQRs(betas[chunk,], na.rm=TRUE)
+    iqrs <- foreach (chunk=chunks, .combine=c) %dorng% matrixStats::rowIQRs(betas[chunk, ], na.rm=TRUE)
     betas.filtered <- (betas-medians)/iqrs
     betas.filtered[abs(betas.filtered)<iqr.cutoff]  <- NA
   } else if (ramr.method=="beta") {
     # multi-threaded EnvStats::ebeta (speed: mme=mmue>mle>>>fitdistrplus::fitdist)
-    betas.filtered <- foreach (chunk=chunks) %dorng% getPValues.beta(betas[chunk,], ...)
+    betas.filtered <- foreach (chunk=chunks) %dorng% getPValues.beta(betas[chunk, ], ...)
     betas.filtered <- do.call(rbind, betas.filtered)
     betas.filtered[betas.filtered>=qval.cutoff] <- NA
   } else if (ramr.method=="wbeta") {
-    betas.filtered <- foreach (chunk=chunks) %dorng% getPValues.wbeta(betas[chunk,], ...)
+    betas.filtered <- foreach (chunk=chunks) %dorng% getPValues.wbeta(betas[chunk, ], ...)
     betas.filtered <- do.call(rbind, betas.filtered)
     betas.filtered[betas.filtered>=qval.cutoff] <- NA
-  } else {
-    stop("unknown 'ramr.method'")
+  } else if (ramr.method=="beinf") {
+    betas.filtered <- foreach (chunk=chunks) %dorng% getPValues.beinf(betas[chunk, ], ...)
+    betas.filtered <- do.call(rbind, betas.filtered)
+    betas.filtered[betas.filtered>=qval.cutoff] <- NA
   }
 
   if (!is.null(exclude.range))
@@ -201,9 +223,7 @@ getAMR <- function (data.ranges,
         ranges$xiqr   <- vapply(ranges$revmap, function (revmap) {
           mean(betas.filtered[not.na[revmap],column,drop=FALSE], na.rm=TRUE)
         }, numeric(1))
-      }
-
-      if (ramr.method=="beta" | ramr.method=="wbeta") {
+      } else {
         ranges$pval <- vapply(ranges$revmap, function (revmap) {
           return( 10**mean(log10(betas.filtered[not.na[revmap],column] + .Machine$double.xmin), na.rm=TRUE) )
         }, numeric(1))

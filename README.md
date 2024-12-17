@@ -18,10 +18,11 @@ This readme contains condensed info on *`ramr`* usage. For more, please check fu
 ## Current Features
 
  * Identification of aberrantly methylated regions (AMRs)
+   - filtering by interquartile range (IQR)
+   - filtering by fitting non-weighted, weighted, or one-and-zero inflated beta distributions
  * AMR visualization
  * Generation of reference sets for third-party analyses (e.g. enrichment)
  * Generation of test data sets for performance evaluation of algorithms for search of differentially (DMR) or aberrantly (AMR) methylated regions
-
 
 -------
 

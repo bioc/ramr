@@ -40,8 +40,6 @@
 #'     runLOLA(amrs, universe, hg19.extdb, cores=1, redefineUserSets=TRUE)
 #'   }
 #' }
-#' @importFrom GenomicRanges reduce
-#' @importFrom methods is
 #' @export
 getUniverse <- function (data.ranges,
                          merge.window=300,
