@@ -30,8 +30,9 @@ columns) are included in the analysis.}
 
 \item{ramr.method}{A character scalar: when ramr.method is "IQR" (the
 default), the filtering based on interquantile range is used (`iqr.cutoff`
-value is then used as a threshold). When "beta" or "wbeta" - filtering based
-on fitting non-weighted (`EnvStats::ebeta`) or weighted (`ExtDist::eBeta`)
+value is then used as a threshold). When "beta", "wbeta" or "beinf" -
+filtering based on fitting non-weighted (`EnvStats::ebeta`), weighted
+(`ExtDist::eBeta`) or zero-and-one inflated (`gamlss.dist::BEINF`)
 beta distributions, respectively, is used, and `pval.cutoff` or `qval.cutoff`
 (if not `NULL`) is used as a threshold. For "wbeta", weights directly
 correlate with bin contents (number of values per bin) and inversly - with
@@ -98,12 +99,16 @@ regions (AMRs) for all samples in a data set.
 \details{
 In the provided data set, `getAMR` compares methylation beta values of each
 sample with other samples to identify rare long-range methylation
-aberrations. For `ramr.method=="IQR"`: for every genomic location (CpG) in
+aberrations (epimutations).
+For `ramr.method=="IQR"`: for every genomic location (CpG) in
 `data.ranges` the IQR-normalized deviation from the median value is
 calculated, and all CpGs with such normalized deviation not smaller than the
-`iqr.cutoff` are retained. For `ramr.method=="*beta"`: parameters of beta
-distribution are estimated by means of `EnvStats::ebeta` or `ExtDist::eBeta`
-functions, and then used to calculate the probability values, followed by the
+`iqr.cutoff` are retained. For
+`ramr.method %in% c("beta", "wbeta", "beinf")`: parameters of beta
+distribution are estimated by means of `EnvStats::ebeta` (beta distribution),
+`ExtDist::eBeta` (weighted beta destribution), or `gamlss.dist::BEINF` (zero
+and one inflated beta distribution) functions, respectively. These
+parameters are then used to calculate the probability values, followed by the
 filtering when all CpGs with p-values not greater than `qval.cutoff` are
 retained. Another filtering is then performed to exclude all CpGs within
 `exclude.range`. Next, the retained (significant) CpGs are merged within
