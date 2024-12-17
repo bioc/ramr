@@ -8,6 +8,6 @@ test_getUniverse <- function () {
     length(ramr.data)
   )
   RUnit::checkTrue(
-    all( width( getUniverse(ramr.data, min.cpgs=10, merge.window=1000) ) > 1000 )
+    all( GenomicRanges::width( getUniverse(ramr.data, min.cpgs=10, merge.window=1000) ) > 1000 )
   )
 }
