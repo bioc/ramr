@@ -74,9 +74,6 @@
 #'   amrs.nonunique <-
 #'     simulateAMR(ramr.data, nsamples=3, exclude.ranges=amrs.unique,
 #'                 samples.per.region=2, min.cpgs=5, merge.window=1000)
-#' @importFrom methods is
-#' @importFrom utils head tail
-#' @importFrom IRanges subsetByOverlaps
 #' @export
 simulateAMR <- function (template.ranges,
                          nsamples,

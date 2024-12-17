@@ -87,18 +87,6 @@
 #'   data(ramr)
 #'   getAMR(ramr.data, ramr.samples, ramr.method="beta",
 #'          min.cpgs=5, merge.window=1000, qval.cutoff=1e-3, cores=2)
-#' @importFrom parallel detectCores makeCluster stopCluster
-#' @importFrom doParallel registerDoParallel
-#' @importFrom GenomicRanges mcols reduce
-#' @importFrom EnvStats ebeta
-#' @importFrom ExtDist eBeta pBeta
-#' @importFrom matrixStats rowMedians rowIQRs
-#' @importFrom foreach foreach
-#' @importFrom doRNG %dorng%
-#' @importFrom methods as is
-#' @importFrom stats median pbeta
-#' @importFrom gamlss gamlss gamlss.control
-#' @importFrom gamlss.dist pBEINF
 #' @export
 getAMR <- function (data.ranges,
                     data.samples=NULL,

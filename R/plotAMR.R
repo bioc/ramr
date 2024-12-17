@@ -39,10 +39,6 @@
 #'   library(gridExtra)
 #'   do.call("grid.arrange",
 #'           c(plotAMR(ramr.data, ramr.samples, ramr.tp.nonunique), ncol=2))
-#' @importFrom BiocGenerics relist
-#' @importFrom GenomicRanges reduce findOverlaps mcols
-#' @importFrom data.table as.data.table melt.data.table
-#' @importFrom S4Vectors queryHits
 #' @export
 plotAMR <- function (data.ranges,
                      data.samples=NULL,
