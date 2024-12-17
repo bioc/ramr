@@ -17,21 +17,20 @@ Description: ramr is an R package for detection of epimutations (i.e.,
   enrichment analysis, and to generate biologically relevant test data sets
   for performance evaluation of AMR/DMR search algorithms.
 Depends:
-  R (>= 4.1),
-  GenomicRanges,
+  R (>= 4.1)
+Imports:
   parallel,
   doParallel,
   foreach,
   doRNG,
-  methods
-Imports:
+  methods,
+  data.table,
+  matrixStats,
+  GenomicRanges,
   IRanges,
   BiocGenerics,
-  ggplot2,
-  reshape2,
   EnvStats,
   ExtDist,
-  matrixStats,
   S4Vectors,
   gamlss,
   gamlss.dist
@@ -39,6 +38,7 @@ Suggests:
   RUnit,
   knitr,
   rmarkdown,
+  ggplot2,
   gridExtra,
   annotatr,
   LOLA,
