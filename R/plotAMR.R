@@ -43,7 +43,6 @@
 #' @importFrom GenomicRanges reduce findOverlaps mcols
 #' @importFrom data.table as.data.table melt.data.table
 #' @importFrom S4Vectors queryHits
-#' @importFrom methods as is
 #' @export
 plotAMR <- function (data.ranges,
                      data.samples=NULL,

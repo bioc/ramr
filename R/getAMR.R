@@ -214,8 +214,6 @@ getAMR <- function (data.ranges,
     betas.filtered <- foreach (chunk=chunks) %dorng% getPValues.beinf(betas[chunk, ], ...)
     betas.filtered <- do.call(rbind, betas.filtered)
     betas.filtered[betas.filtered>=qval.cutoff] <- NA
-  } else {
-    stop("unknown 'ramr.method'")
   }
 
   if (!is.null(exclude.range))
