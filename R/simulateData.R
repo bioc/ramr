@@ -82,14 +82,6 @@
 #'   noisy.data <-
 #'     simulateData(ramr.data, nsamples=10, amr.ranges=c(amrs,noise), cores=2)
 #'   plotAMR(noisy.data, amr.ranges=amrs[1])
-#' @importFrom parallel detectCores makeCluster stopCluster
-#' @importFrom doParallel registerDoParallel
-#' @importFrom GenomicRanges mcols `mcols<-` granges
-#' @importFrom EnvStats ebeta
-#' @importFrom foreach foreach
-#' @importFrom doRNG %dorng%
-#' @importFrom methods is
-#' @importFrom stats median na.omit rbeta
 #' @export
 simulateData <- function (template.ranges,
                           nsamples,

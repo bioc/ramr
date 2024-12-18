@@ -18,31 +18,31 @@ Description: ramr is an R package for detection of epimutations (i.e.,
 SystemRequirements: C++20, GNU make
 NeedsCompilation: yes
 Depends:
-  R (>= 4.1),
-  GenomicRanges,
+  R (>= 4.1)
+Imports:
   parallel,
   doParallel,
   foreach,
-  doRNG
-Imports:
+  doRNG,
   methods,
+  data.table,
+  matrixStats,
+  GenomicRanges,
   IRanges,
   BiocGenerics,
-  ggplot2,
-  reshape2,
   EnvStats,
   ExtDist,
-  matrixStats,
   S4Vectors,
-  Rcpp
+  gamlss,
+  gamlss.dist
 LinkingTo:
   Rcpp,
-  BH,
-  Rhtslib
+  BH
 Suggests:
   RUnit,
   knitr,
   rmarkdown,
+  ggplot2,
   gridExtra,
   annotatr,
   LOLA,

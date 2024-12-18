@@ -18,10 +18,12 @@ test_simulateAMR <- function () {
   unique    <- simulateAMR(ramr.data, nsamples=29, regions.per.sample=2, samples.per.region=1)
   nonunique <- simulateAMR(ramr.data, nsamples=20, exclude.ranges=unique, merge.window=1000, regions.per.sample=5, samples.per.region=3)
   noise     <- simulateAMR(ramr.data, nsamples=100, exclude.ranges=c(unique,nonunique), merge.window=1, min.cpgs=1, max.cpgs=1, regions.per.sample=1000, samples.per.region=1)
-  RUnit::checkTrue(
-    all(unique %outside% nonunique)
+  RUnit::checkEquals(
+    sum(GenomicRanges::countOverlaps(unique, nonunique)),
+    0
   )
-  RUnit::checkTrue(
-    all(noise %outside% c(unique,nonunique))
+  RUnit::checkEquals(
+    sum(GenomicRanges::countOverlaps(noise, c(unique,nonunique))),
+    0
   )
 }

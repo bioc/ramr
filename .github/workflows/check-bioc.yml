@@ -256,7 +256,7 @@ jobs:
       - name: Test coverage
         if: github.ref == 'refs/heads/devel' && env.run_covr == 'true' && runner.os == 'Linux'
         run: |
-          covr::codecov(coverage = covr::package_coverage(type = "all"))
+          covr::codecov(coverage = covr::package_coverage(type = "all"), token="cf2f8381-b9fa-4b72-9fc2-cf4fbd1d2f0b")
         shell: Rscript {0}
 
       - name: Install package

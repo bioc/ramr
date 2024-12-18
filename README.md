@@ -2,7 +2,7 @@ ramr
 ========
 
 [![](https://github.com/BBCG/ramr/workflows/R-CMD-check-bioc/badge.svg)](https://github.com/BBCG/ramr/actions)
-[![](https://codecov.io/gh/BBCG/ramr/branch/master/graph/badge.svg)](https://codecov.io/gh/BBCG/ramr)
+[![](https://codecov.io/gh/BBCG/ramr/branch/devel/graph/badge.svg)](https://app.codecov.io/gh/BBCG/ramr/tree/devel)
 [![](https://bioconductor.org/shields/years-in-bioc/ramr.svg)](https://bioconductor.org/packages/release/bioc/html/ramr.html)
 
 # Introduction
@@ -18,10 +18,11 @@ This readme contains condensed info on *`ramr`* usage. For more, please check fu
 ## Current Features
 
  * Identification of aberrantly methylated regions (AMRs)
+   - filtering by interquartile range (IQR)
+   - filtering by fitting non-weighted, weighted, or one-and-zero inflated beta distributions
  * AMR visualization
  * Generation of reference sets for third-party analyses (e.g. enrichment)
  * Generation of test data sets for performance evaluation of algorithms for search of differentially (DMR) or aberrantly (AMR) methylated regions
-
 
 -------
 

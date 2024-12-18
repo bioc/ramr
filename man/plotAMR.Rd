@@ -10,6 +10,7 @@ plotAMR(
   amr.ranges,
   highlight = NULL,
   title = NULL,
+  labs = c("genomic position", "beta value"),
   window = 300
 )
 }
@@ -30,6 +31,9 @@ default), will contain sample IDs from the `sample` metadata column of
 
 \item{title}{An optional title for the plot. If NULL (the default), plot
 title is set to a genomic location of particular AMR.}
+
+\item{labs}{Optional axis labels for the plot. Default: c("genomic position",
+"beta value").}
 
 \item{window}{An optional integer constant to expand genomic ranges of the
 `amr.ranges` object (the default: 300).}
