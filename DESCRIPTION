@@ -34,7 +34,8 @@ Imports:
   ExtDist,
   S4Vectors,
   gamlss,
-  gamlss.dist
+  gamlss.dist,
+  Rcpp
 LinkingTo:
   Rcpp,
   BH
