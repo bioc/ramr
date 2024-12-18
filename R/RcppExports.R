@@ -5,7 +5,7 @@ rcpp_test <- function() {
     .Call(`_ramr_rcpp_test`)
 }
 
-rcpp_prepare_data <- function(fn, nthreads) {
-    .Call(`_ramr_rcpp_prepare_data`, fn, nthreads)
+rcpp_prepare_data <- function(seqnames, seqrunlens, start, strand, mcols) {
+    .Call(`_ramr_rcpp_prepare_data`, seqnames, seqrunlens, start, strand, mcols)
 }
 
