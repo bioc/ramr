@@ -27,7 +27,7 @@ double rcpp_test ()
   }
   
   struct {
-    bool operator()(double a, double b) const {return std::isnan(b) | (a<b);}   // NaN last
+    bool operator()(double a, double b) const {return std::isnan(b) || (a<b);}  // NaN last
   } customLess;
   
   Rcpp::Rcout << "unsorted:\n";
@@ -106,15 +106,14 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
       if (std::isnan(v)) len_data[r]--;
     }
   }
-  // for (size_t c=0; c<ncol; c++) {
-  //   for (size_t r=0; r<nrow; r++) {
-  //     const double v = raw->at(nrow*c+r);
-  //     out->at(ncol*r+c) = v;
-  //     if (std::isnan(v)) len->at(r)--;
-  //   }
-  // }
   
-  // 
+  // sort 'out' putting NaNs on the right
+  struct {
+    bool operator()(double a, double b) const {return std::isnan(b) || (a<b);}  // NaN last
+  } nanLess;
+  for (size_t r=0; r<nrow; r++) {
+    std::sort(out_data+r*ncol, out_data+(r+1)*ncol, nanLess);
+  }
   
   // 
   
