@@ -68,7 +68,7 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
                               Rcpp::IntegerVector &seqrunlens,                  // IntegerVector output of as.integer(S4Vectors::runLength(GenomeInfoDb::seqnames(<input.ranges>)))
                               Rcpp::IntegerVector &start,                       // IntegerVector output of as.integer(BiocGenerics::start(<input.ranges>))
                               Rcpp::IntegerVector &strand,                      // IntegerVector output of as.integer(BiocGenerics::strand(<input.ranges>))
-                              Rcpp::DataFrame &mcols)                           // DataFrame output of GenomicRanges::mcols(<input.ranges>)
+                              Rcpp::DataFrame &mcols)                           // DataFrame output of as.data.frame(GenomicRanges::mcols(<input.ranges>))
 {
 #define T_coef std::array<double,4>                                             // array to store median, IQR, parameters of fitted distribution, etc
   
@@ -91,32 +91,48 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
   raw->shrink_to_fit();
   
   // initialize 'len', 'coef', and 'out'
-  len->resize(nrow, ncol);                                                      // all values = number of columns (samples)
-  coef->resize(nrow);                                                           // have a feeling that values are not initialized to 0
+  len->resize(nrow);                                                            // init with 0 - a waste, but no choice
+  coef->resize(nrow);                                                           // have a feeling that values are not initialized to 0, but that's ok
   out->resize(ncol*nrow);                                                       // init with 0 - a waste, but no choice
   
-  // transpose 'raw' to 'out', counting NaNs, subtracting them from 'len' vector
+  // fast accessors
   const auto raw_data = raw->data();
   const auto out_data = out->data();
   const auto len_data = len->data();
-  for (size_t c=0; c<ncol; c++) {
-    for (size_t r=0; r<nrow; r++) {
-      const double v = raw_data[nrow*c+r];
-      out_data[ncol*r+c] = v;
-      if (std::isnan(v)) len_data[r]--;
-    }
-  }
+  const auto coef_data = coef->data();
   
-  // sort 'out' putting NaNs on the right
-  struct {
-    bool operator()(double a, double b) const {return std::isnan(b) || (a<b);}  // NaN last
-  } nanLess;
-  for (size_t r=0; r<nrow; r++) {
-    std::sort(out_data+r*ncol, out_data+(r+1)*ncol, nanLess);
-  }
-  
+  // // transpose 'raw' to 'out', counting NaNs, subtracting them from 'len' vector
+  // for (size_t c=0; c<ncol; c++) {
+  //   for (size_t r=0; r<nrow; r++) {
+  //     const double v = raw_data[nrow*c+r];
+  //     out_data[ncol*r+c] = v;
+  //     if (std::isnan(v)) len_data[r]--;                                         // maybe it's better to count NaNs after sorting. Or don't copy them...
+  //   }
+  // }
   // 
+  // // sort 'out' putting NaNs on the right
+  // struct {
+  //   bool operator()(double a, double b) const {return std::isnan(b) || (a<b);}  // NaN last
+  // } nanLess;
+  // for (size_t r=0; r<nrow; r++) {
+  //   std::sort(out_data+r*ncol, out_data+(r+1)*ncol, nanLess);
+  // }
   
+  // transpose 'raw' to 'out', skipping NaNs; sort 'out'; adjust 'len'
+  // should be more computationally efficient and parallelizable
+  // have to rewrite this to become cache-friendly, 845 samples seriously suck on Mac
+  double *buf  = (double*) malloc(ncol * sizeof(double));                       // buffer to gather values from each column (mcols[r,])
+  for (size_t r=0; r<nrow; r++) {
+    size_t l = 0;                                                               // number of elements actually copied
+    for (size_t c=0; c<ncol; c++)                                               // column by column
+      if (!std::isnan(raw_data[r+nrow*c]))                                      // if value is not a NaN
+        buf[l++] = raw_data[r+nrow*c];                                          // gather it in the buffer; increase its length
+    len_data[r] = l;                                                            // adjust observed length
+    // std::sort(buf, buf+l);                                                      // sort 'buf' - eventually might go for several calls of nth_element()
+    std::nth_element(buf, buf+l/2, buf+l);
+    std::copy(buf, buf+l, out_data+ncol*r);                                     // copy 'buf' to 'out'
+  }
+  free(buf);
   
   // wrap and return the results
   Rcpp::List res = Rcpp::List::create(                                          // final List
@@ -153,7 +169,13 @@ setwd("~/work/packages/ramr/")
 devtools::document()
 devtools::load_all()
 
+devtools::clean_dll()
+pkgbuild::compile_dll(debug=FALSE)
+devtools::load_all()
+
 devtools::check()
+cvg <- covr::package_coverage(type="all")
+cvg; covr::zero_coverage(cvg)
 
 # library(data.table)
 library(GenomicRanges)
@@ -171,16 +193,30 @@ S4Vectors::runValue(seqnames(multi.ranges))
 
 rcpp_test()
 
-seqnames_ <- as.integer(S4Vectors::runValue(GenomeInfoDb::seqnames(multi.ranges)))
-seqrunlens_ <- as.integer(S4Vectors::runLength(GenomeInfoDb::seqnames(multi.ranges)))
-start_ <- as.integer(BiocGenerics::start(multi.ranges))
-strand_ <- as.integer(BiocGenerics::strand(multi.ranges))
-mcols_ <- GenomicRanges::mcols(multi.ranges)
+load("~/work/data/ramr/data/GSE51032/GSE51032.data.Rdata")
+test.ranges <- geo.ranges
+
+load("~/work/data/ramr/data/REVISION-SIMULATED/REVISION-SIMULATED-5-1000-0.250.data.Rdata")
+test.ranges <- simulated.ranges
+
+test.ranges <- multi.ranges
+seqnames_ <- as.integer(S4Vectors::runValue(GenomeInfoDb::seqnames(test.ranges)))
+seqrunlens_ <- as.integer(S4Vectors::runLength(GenomeInfoDb::seqnames(test.ranges)))
+start_ <- as.integer(BiocGenerics::start(test.ranges))
+strand_ <- as.integer(BiocGenerics::strand(test.ranges))
+mcols_ <- as.data.frame(GenomicRanges::mcols(test.ranges))
 
 microbenchmark::microbenchmark(
   z <- rcpp_prepare_data(seqnames_, seqrunlens_, start_, strand_, mcols_),
-times=100)
+  y <- t(mcols_),
+  {suppressWarnings(rm(y,z)); gc(); gc()},
+times=10)
 
+microbenchmark::microbenchmark(
+  y <- as.data.frame(GenomicRanges::mcols(test.ranges)),
+  z <- as.numeric(as(GenomicRanges::mcols(test.ranges, use.names=FALSE), "Vector")),
+  {suppressWarnings(rm(y,z)); gc(); gc()},
+  times=10)
 
 */
 // #############################################################################
