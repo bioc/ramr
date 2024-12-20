@@ -1,67 +1,18 @@
 #include <algorithm>
-// #include <ranges>
 #include <vector>
 #include <array>
 #include <Rcpp.h>
 
 // [[Rcpp::plugins(cpp20)]]
-// [[Rcpp::depends(BH)]]
 
-// 
-
-
-// [[Rcpp::export]]
-double rcpp_test ()
-{
-  std::vector<double> v = {5, 6, 4, 3, 2, 6, 7, 9, 3, 1, 2, 4, NA_REAL, R_NaN, R_PosInf, R_NegInf, 4};
-  
-  int n = v.size();
-  for (int i = 0; i < n; ++i) {
-    if (std::isnan(v[i]))
-      Rprintf("v[%i] is std::isnan.\n", i);
-    if (Rcpp::NumericVector::is_na(v[i]))
-      Rprintf("v[%i] is NA.\n", i);
-    if (Rcpp::traits::is_nan<REALSXP>(v[i]))
-      Rprintf("v[%i] is NaN.\n", i);
-    if (Rcpp::traits::is_infinite<REALSXP>(v[i]))
-      Rprintf("v[%i] is Inf or -Inf.\n", i);
-  }
-  
-  struct {
-    bool operator()(double a, double b) const {return std::isnan(b) || (a<b);}  // NaN last
-  } customLess;
-  
-  Rcpp::Rcout << "unsorted:\n";
-  for (int i=0; i<n; ++i)
-    Rcpp::Rcout << v[i] << " ";
-  Rcpp::Rcout << "\n";
-  
-  Rcpp::Rcout << "default nth element:\n";
-  std::nth_element(v.begin(), v.begin() + v.size()/2, v.end());
-  for (int i=0; i<n; ++i)
-    Rcpp::Rcout << v[i] << " ";
-  Rcpp::Rcout << "\n";
-  
-  Rcpp::Rcout << "na-aware nth element:\n";
-  std::nth_element(v.begin(), v.begin() + v.size()/2, v.end(), customLess);
-  for (int i=0; i<n; ++i)
-    Rcpp::Rcout << v[i] << " ";
-  Rcpp::Rcout << "\n";
-  
-  Rcpp::Rcout << "default sort:\n";
-  std::sort(v.begin(), v.end());
-  for (int i=0; i<n; ++i)
-    Rcpp::Rcout << v[i] << " ";
-  Rcpp::Rcout << "\n";
-  
-  Rcpp::Rcout << "na-aware sort:\n";
-  std::sort(v.begin(), v.end(), customLess);
-  for (int i=0; i<n; ++i)
-    Rcpp::Rcout << v[i] << " ";
-  Rcpp::Rcout << "\n";
-  
-  return(0);
-}
+// This function prepares input data for further processing:
+//   1) makes a copy of raw methylation values ('raw')
+//   2) transposes raw values dropping NaNs ('out') and counting them ('len')
+//   3) arranges other vectors used in computations later.
+//
+// TODO:
+//   1) more efficient access to S4Vectors with raw values
+//   2) ...
 
 // <input.ranges> for rcpp_prepare_data must be sorted
 // [[Rcpp::export]]
@@ -94,32 +45,14 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
   // initialize 'len', 'coef', and 'out'
   len->resize(nrow);                                                            // init with 0 - a waste, but no choice
   coef->resize(nrow);                                                           // have a feeling that values are not initialized to 0, but that's ok
-  out->resize(ncol*nrow);                                                       // init with 0 - a waste, but no choice
+  out->resize(ncol*nrow, NA_REAL);                                              // init with NA_REAL - see if it breaks anything further. NB: default might be marginally faster
   
-  // fast accessors
+  // fast direct accessors
   const auto raw_data = raw->data();
   const auto out_data = out->data();
   const auto len_data = len->data();
-  const auto coef_data = coef->data();
   
-  // // transpose 'raw' to 'out', counting NaNs, subtracting them from 'len' vector
-  // for (size_t c=0; c<ncol; c++) {
-  //   for (size_t r=0; r<nrow; r++) {
-  //     const double v = raw_data[nrow*c+r];
-  //     out_data[ncol*r+c] = v;
-  //     if (std::isnan(v)) len_data[r]--;                                         // maybe it's better to count NaNs after sorting. Or don't copy them...
-  //   }
-  // }
-  // 
-  // // sort 'out' putting NaNs on the right
-  // struct {
-  //   bool operator()(double a, double b) const {return std::isnan(b) || (a<b);}  // NaN last
-  // } nanLess;
-  // for (size_t r=0; r<nrow; r++) {
-  //   std::sort(out_data+r*ncol, out_data+(r+1)*ncol, nanLess);
-  // }
-  
-  // transpose 'raw' to 'out', skipping NaNs; sort 'out'; adjust 'len'
+  // transpose 'raw' to 'out', skipping NaNs; adjust 'len'
   // should be more computationally efficient and parallelizable
   // have to rewrite this to become cache-friendly, 845 samples seriously suck on Mac
   double *buf  = (double*) malloc(ncol * sizeof(double));                       // buffer to gather values from each column (mcols[r,])
@@ -129,8 +62,6 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
       if (!std::isnan(raw_data[r+nrow*c]))                                      // if value is not a NaN
         buf[l++] = raw_data[r+nrow*c];                                          // gather it in the buffer; increase its length
     len_data[r] = l;                                                            // adjust observed length
-    // std::sort(buf, buf+l);                                                      // sort 'buf' - eventually might go for several calls of nth_element()
-    // std::nth_element(buf, buf+l/2, buf+l);
     std::copy(buf, buf+l, out_data+ncol*r);                                     // copy 'buf' to 'out'
   }
   free(buf);
@@ -192,7 +123,7 @@ multi.ranges <- unlist(as(lapply(levels(sn), function (chr) {
 S4Vectors::runLength(seqnames(multi.ranges))
 S4Vectors::runValue(seqnames(multi.ranges))
 
-rcpp_test()
+rcpp_test_nan()
 
 load("~/work/data/ramr/data/GSE51032/GSE51032.data.Rdata")
 test.ranges <- geo.ranges
@@ -205,13 +136,13 @@ seqnames_ <- as.integer(S4Vectors::runValue(GenomeInfoDb::seqnames(test.ranges))
 seqrunlens_ <- as.integer(S4Vectors::runLength(GenomeInfoDb::seqnames(test.ranges)))
 start_ <- as.integer(BiocGenerics::start(test.ranges))
 strand_ <- as.integer(BiocGenerics::strand(test.ranges))
-mcols_ <- as.data.frame(GenomicRanges::mcols(test.ranges))
+mcols_ <- as.data.frame(GenomicRanges::mcols(test.ranges, use.names=FALSE))
 
 microbenchmark::microbenchmark(
   z <- rcpp_prepare_data(seqnames_, seqrunlens_, start_, strand_, mcols_),
   y <- t(mcols_),
   {suppressWarnings(rm(y,z)); gc(); gc()},
-times=10)
+times=25)
 
 microbenchmark::microbenchmark(
   y <- as.data.frame(GenomicRanges::mcols(test.ranges)),

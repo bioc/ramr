@@ -38,7 +38,8 @@ Imports:
   Rcpp
 LinkingTo:
   Rcpp,
-  BH
+  BH,
+  S4Vectors
 Suggests:
   RUnit,
   knitr,

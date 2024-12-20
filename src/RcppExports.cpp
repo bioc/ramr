@@ -10,16 +10,6 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// rcpp_test
-double rcpp_test();
-RcppExport SEXP _ramr_rcpp_test() {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(rcpp_test());
-    return rcpp_result_gen;
-END_RCPP
-}
 // rcpp_prepare_data
 Rcpp::List rcpp_prepare_data(Rcpp::IntegerVector& seqnames, Rcpp::IntegerVector& seqrunlens, Rcpp::IntegerVector& start, Rcpp::IntegerVector& strand, Rcpp::DataFrame& mcols);
 RcppExport SEXP _ramr_rcpp_prepare_data(SEXP seqnamesSEXP, SEXP seqrunlensSEXP, SEXP startSEXP, SEXP strandSEXP, SEXP mcolsSEXP) {
@@ -35,10 +25,32 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// rcpp_test_nan
+double rcpp_test_nan();
+RcppExport SEXP _ramr_rcpp_test_nan() {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    rcpp_result_gen = Rcpp::wrap(rcpp_test_nan());
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpp_test_s4v
+double rcpp_test_s4v(SEXP x);
+RcppExport SEXP _ramr_rcpp_test_s4v(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_test_s4v(x));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_ramr_rcpp_test", (DL_FUNC) &_ramr_rcpp_test, 0},
     {"_ramr_rcpp_prepare_data", (DL_FUNC) &_ramr_rcpp_prepare_data, 5},
+    {"_ramr_rcpp_test_nan", (DL_FUNC) &_ramr_rcpp_test_nan, 0},
+    {"_ramr_rcpp_test_s4v", (DL_FUNC) &_ramr_rcpp_test_s4v, 1},
     {NULL, NULL, 0}
 };
 
