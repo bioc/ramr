@@ -1,6 +1,7 @@
 #include <algorithm>
-#include <ranges>
+// #include <ranges>
 #include <vector>
+#include <array>
 #include <Rcpp.h>
 
 // [[Rcpp::plugins(cpp20)]]
@@ -36,25 +37,25 @@ double rcpp_test ()
   Rcpp::Rcout << "\n";
   
   Rcpp::Rcout << "default nth element:\n";
-  std::ranges::nth_element(v, v.begin() + v.size()/2);
+  std::nth_element(v.begin(), v.begin() + v.size()/2, v.end());
   for (int i=0; i<n; ++i)
     Rcpp::Rcout << v[i] << " ";
   Rcpp::Rcout << "\n";
   
   Rcpp::Rcout << "na-aware nth element:\n";
-  std::ranges::nth_element(v, v.begin() + v.size()/2, customLess);
+  std::nth_element(v.begin(), v.begin() + v.size()/2, v.end(), customLess);
   for (int i=0; i<n; ++i)
     Rcpp::Rcout << v[i] << " ";
   Rcpp::Rcout << "\n";
   
   Rcpp::Rcout << "default sort:\n";
-  std::ranges::sort(v);
+  std::sort(v.begin(), v.end());
   for (int i=0; i<n; ++i)
     Rcpp::Rcout << v[i] << " ";
   Rcpp::Rcout << "\n";
   
   Rcpp::Rcout << "na-aware sort:\n";
-  std::ranges::sort(v, customLess);
+  std::sort(v.begin(), v.end(), customLess);
   for (int i=0; i<n; ++i)
     Rcpp::Rcout << v[i] << " ";
   Rcpp::Rcout << "\n";
@@ -129,7 +130,7 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
         buf[l++] = raw_data[r+nrow*c];                                          // gather it in the buffer; increase its length
     len_data[r] = l;                                                            // adjust observed length
     // std::sort(buf, buf+l);                                                      // sort 'buf' - eventually might go for several calls of nth_element()
-    std::nth_element(buf, buf+l/2, buf+l);
+    // std::nth_element(buf, buf+l/2, buf+l);
     std::copy(buf, buf+l, out_data+ncol*r);                                     // copy 'buf' to 'out'
   }
   free(buf);
