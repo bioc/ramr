@@ -10,6 +10,17 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// rcpp_compute_iqr
+int rcpp_compute_iqr(Rcpp::List& data);
+RcppExport SEXP _ramr_rcpp_compute_iqr(SEXP dataSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_compute_iqr(data));
+    return rcpp_result_gen;
+END_RCPP
+}
 // rcpp_prepare_data
 Rcpp::List rcpp_prepare_data(Rcpp::IntegerVector& seqnames, Rcpp::IntegerVector& seqrunlens, Rcpp::IntegerVector& start, Rcpp::IntegerVector& strand, Rcpp::DataFrame& mcols);
 RcppExport SEXP _ramr_rcpp_prepare_data(SEXP seqnamesSEXP, SEXP seqrunlensSEXP, SEXP startSEXP, SEXP strandSEXP, SEXP mcolsSEXP) {
@@ -35,6 +46,50 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// rcpp_test_med_boost
+double rcpp_test_med_boost(std::vector<double> v);
+RcppExport SEXP _ramr_rcpp_test_med_boost(SEXP vSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::vector<double> >::type v(vSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_test_med_boost(v));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpp_test_iqr_boost
+double rcpp_test_iqr_boost(std::vector<double> v);
+RcppExport SEXP _ramr_rcpp_test_iqr_boost(SEXP vSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::vector<double> >::type v(vSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_test_iqr_boost(v));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpp_test_med
+double rcpp_test_med(std::vector<double> v);
+RcppExport SEXP _ramr_rcpp_test_med(SEXP vSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::vector<double> >::type v(vSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_test_med(v));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpp_test_iqr
+// double rcpp_test_iqr(std::vector<double> v);
+RcppExport SEXP _ramr_rcpp_test_iqr(SEXP vSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::vector<double> >::type v(vSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_test_iqr(v));
+    return rcpp_result_gen;
+END_RCPP
+}
 // rcpp_test_s4v
 double rcpp_test_s4v(SEXP x);
 RcppExport SEXP _ramr_rcpp_test_s4v(SEXP xSEXP) {
@@ -48,8 +103,13 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_ramr_rcpp_compute_iqr", (DL_FUNC) &_ramr_rcpp_compute_iqr, 1},
     {"_ramr_rcpp_prepare_data", (DL_FUNC) &_ramr_rcpp_prepare_data, 5},
     {"_ramr_rcpp_test_nan", (DL_FUNC) &_ramr_rcpp_test_nan, 0},
+    {"_ramr_rcpp_test_med_boost", (DL_FUNC) &_ramr_rcpp_test_med_boost, 1},
+    {"_ramr_rcpp_test_iqr_boost", (DL_FUNC) &_ramr_rcpp_test_iqr_boost, 1},
+    {"_ramr_rcpp_test_med", (DL_FUNC) &_ramr_rcpp_test_med, 1},
+    {"_ramr_rcpp_test_iqr", (DL_FUNC) &_ramr_rcpp_test_iqr, 1},
     {"_ramr_rcpp_test_s4v", (DL_FUNC) &_ramr_rcpp_test_s4v, 1},
     {NULL, NULL, 0}
 };

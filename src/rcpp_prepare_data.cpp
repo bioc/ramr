@@ -1,4 +1,4 @@
-#include <algorithm>
+// #include <algorithm>
 #include <vector>
 #include <array>
 #include <Rcpp.h>
@@ -11,8 +11,9 @@
 //   3) arranges other vectors used in computations later.
 //
 // TODO:
-//   1) more efficient access to S4Vectors with raw values
-//   2) ...
+//   [ ] more efficient access to S4Vectors with raw values
+//   [ ] OpenMP
+//   [ ] ...
 
 // <input.ranges> for rcpp_prepare_data must be sorted
 // [[Rcpp::export]]
@@ -32,7 +33,7 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
   std::vector<uint32_t>* pos = new std::vector<uint32_t>(start.begin(), start.end());    // genomic positions
   std::vector<uint32_t>* str = new std::vector<uint32_t>(strand.begin(), strand.end());  // genomic strands
   std::vector<double>* raw = new std::vector<double>;                           // flat vector with raw values from &mcols
-  std::vector<double>* out = new std::vector<double>;                           // vector to hold intermediate output values (e.g., transposed, sorted)
+  std::vector<double>* out = new std::vector<double>;                           // vector to hold intermediate output values (e.g., transposed)
   std::vector<uint32_t>* len = new std::vector<uint32_t>;                       // lengths of &mcols rows minus number of NaNs
   std::vector<T_coef>* coef = new std::vector<T_coef>;                          // vector to hold per-row results (e.g., median, Q1, Q3, parameters of fitted distribution)
 

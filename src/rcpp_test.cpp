@@ -12,7 +12,8 @@
 // [[Rcpp::export]]
 double rcpp_test_nan ()
 {
-  std::vector<double> v = {5, 6, 4, 3, 2, 6, 7, 9, 3, 1, 2, 4, NA_REAL, R_NaN, R_PosInf, R_NegInf, 4};
+  // set.seed(1); paste(sample(23), collapse=", ")
+  std::vector<double> v = {4, 7, 1, 2, 11, 14, 21, 5, 16, 10, 6, 18, 22, 9, 15, 12, 17, 19, NA_REAL, R_NaN, R_PosInf, R_NegInf, 8, 13, 20, 3, 23};
   
   int n = v.size();
   for (int i = 0; i < n; ++i) {
@@ -61,6 +62,112 @@ double rcpp_test_nan ()
   
   return(0);
 }
+
+#include <boost/math/statistics/univariate_statistics.hpp>
+// [[Rcpp::export]]
+double rcpp_test_med_boost (std::vector<double> v)
+{
+  const auto first = v.data();
+  const size_t l = v.size();
+  double m = boost::math::statistics::median(first, first+l);
+  return(m);
+}
+// [[Rcpp::export]]
+double rcpp_test_iqr_boost (std::vector<double> v)
+{
+  const auto first = v.data();
+  const size_t l = v.size();
+  double i = boost::math::statistics::interquartile_range(first, first+l);
+  return(i);
+}
+// [[Rcpp::export]]
+double rcpp_test_med (std::vector<double> v)
+{
+  const auto first = v.data();
+  const size_t l = v.size();
+  const size_t n = l/2;
+  std::nth_element(first, first+n, first+l);
+  double m = first[n];
+  if (l&1==0) {
+    std::nth_element(first, first+n-1, first+l);
+    m += first[n-1];
+    m /= 2;
+  }
+  return(m);
+}
+// [[Rcpp::export]]
+double rcpp_test_iqr_type7 (std::vector<double> v, size_t q)
+{
+  const auto first = v.data();
+  const size_t l = v.size();
+  
+  // for Type 7 quantile function (R's default):
+  //   m = 1 - p
+  //   j = floor(np + m)
+  //   gamma = g = np + m - j
+  //   Q(p) = (1 - g)Xj + gX(j+1)
+  // where p=0.25 for Q1 and p=0.75 for Q3,
+  // and Xj and X(j+1) are j-th and j+1-th statistics (elements)
+  
+  std::array<double,3> p = {0.25, 0.5, 0.75};
+  std::array<double,3> g;
+  std::array<size_t,3> j;
+  
+  for (size_t i) {
+    g[i] = (double)l * p[i] + 1 - p[i];
+    j[i] = (size_t)g[i];
+    g[i] -= j[i];
+  }
+  
+  // corner case is when (l-1)&3==0 (i.e., 21, 25, 27, ..., 4n+1),
+  // then gamma = 0 and only one nth_element() call per Q is therefore required
+  // can test it by checking if g<0.1
+  
+  
+  
+  
+  
+  if ((l-1)&3==0) {
+    g3 = (double)l*3/4 + 0.25;
+    j3 = (size_t)g3;
+    g3 -= j3;
+  }
+  
+  
+  std::nth_element(first, first+n, first+l);
+  double m = first[n];
+  if (l&1==0) {
+    std::nth_element(first, first+n-1, first+l);
+    m += first[n-1];
+    m /= 2;
+  }
+  return(m);
+}
+/*
+set.seed(1)
+vs <- lapply(20:100, sample)
+vs <- lapply(20:100, rnorm)
+all.equal(
+  sapply(vs, median), sapply(vs, rcpp_test_med_boost),
+  tolerance=1e-15
+)
+all.equal(
+  sapply(vs, IQR), sapply(vs, rcpp_test_iqr_boost),
+  tolerance=1e-15
+)
+all.equal(
+  sapply(vs, IQR), sapply(vs, quantile, prob=0.75, names=F)-sapply(vs, quantile, prob=0.25, names=F),
+  tolerance=1e-15
+)
+all.equal(
+  sapply(vs, median), sapply(vs, rcpp_test_med),
+  tolerance=1e-15
+)
+
+
+*/  
+  
+
 
 // [[Rcpp::depends(S4Vectors)]]
 #include <S4Vectors_interface.h>
