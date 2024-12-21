@@ -123,7 +123,19 @@ double rcpp_test_iqr_type7 (std::vector<double> v, size_t q)
   // then gamma = 0 and only one nth_element() call per Q is therefore required
   // can test it by checking if g<0.1
   
-  
+  //      q1		    q2		    q3		
+  // n	  i	 g	    i	  g	    i	  g	
+  // 20	  5	 0,75	  10  0,5	  15	0,25	
+  // 21	  6	 0	    11	0	    16	0	
+  // 22	  6	 0,25	  11	0,5	  16	0,75	
+  // 23	  6	 0,5	  12	0	    17	0,5	
+  // 24	  6	 0,75	  12	0,5	  18	0,25	
+  // 25	  7	 0	    13	0	    19	0	
+  // 26	  7	 0,25	  13	0,5	  19	0,75	
+  // 27	  7	 0,5	  14	0	    20	0,5	
+  // 28	  7	 0,75	  14	0,5	  21	0,25	
+  // 29	  8	 0	    15	0	    22	0	
+  // 30	  8	 0,25	  15	0,5	  22	0,75	
   
   
   
