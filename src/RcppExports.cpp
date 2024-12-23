@@ -10,14 +10,49 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// rcpp_compute_iqr
-int rcpp_compute_iqr(Rcpp::List& data);
-RcppExport SEXP _ramr_rcpp_compute_iqr(SEXP dataSEXP) {
+// rcpp_compute_xiqr
+int rcpp_compute_xiqr(Rcpp::List& data);
+RcppExport SEXP _ramr_rcpp_compute_xiqr(SEXP dataSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_compute_iqr(data));
+    rcpp_result_gen = Rcpp::wrap(rcpp_compute_xiqr(data));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpp_filter_threshold_xiqr
+int rcpp_filter_threshold_xiqr(Rcpp::List& data, double thr);
+RcppExport SEXP _ramr_rcpp_filter_threshold_xiqr(SEXP dataSEXP, SEXP thrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< double >::type thr(thrSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_filter_threshold_xiqr(data, thr));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpp_filter_threshold_pval
+int rcpp_filter_threshold_pval(Rcpp::List& data, double thr);
+RcppExport SEXP _ramr_rcpp_filter_threshold_pval(SEXP dataSEXP, SEXP thrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< double >::type thr(thrSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_filter_threshold_pval(data, thr));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpp_get_iqr
+int rcpp_get_iqr(Rcpp::List& data);
+RcppExport SEXP _ramr_rcpp_get_iqr(SEXP dataSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_get_iqr(data));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -33,6 +68,17 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::IntegerVector& >::type strand(strandSEXP);
     Rcpp::traits::input_parameter< Rcpp::DataFrame& >::type mcols(mcolsSEXP);
     rcpp_result_gen = Rcpp::wrap(rcpp_prepare_data(seqnames, seqrunlens, start, strand, mcols));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpp_extract_out
+std::vector<double> rcpp_extract_out(Rcpp::List& data);
+RcppExport SEXP _ramr_rcpp_extract_out(SEXP dataSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_extract_out(data));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -79,14 +125,14 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// rcpp_test_iqr
-// double rcpp_test_iqr(std::vector<double> v);
-RcppExport SEXP _ramr_rcpp_test_iqr(SEXP vSEXP) {
+// rcpp_test_iqr_type7
+std::vector<double> rcpp_test_iqr_type7(std::vector<double> v);
+RcppExport SEXP _ramr_rcpp_test_iqr_type7(SEXP vSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::vector<double> >::type v(vSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_test_iqr(v));
+    rcpp_result_gen = Rcpp::wrap(rcpp_test_iqr_type7(v));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -103,13 +149,17 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_ramr_rcpp_compute_iqr", (DL_FUNC) &_ramr_rcpp_compute_iqr, 1},
+    {"_ramr_rcpp_compute_xiqr", (DL_FUNC) &_ramr_rcpp_compute_xiqr, 1},
+    {"_ramr_rcpp_filter_threshold_xiqr", (DL_FUNC) &_ramr_rcpp_filter_threshold_xiqr, 2},
+    {"_ramr_rcpp_filter_threshold_pval", (DL_FUNC) &_ramr_rcpp_filter_threshold_pval, 2},
+    {"_ramr_rcpp_get_iqr", (DL_FUNC) &_ramr_rcpp_get_iqr, 1},
     {"_ramr_rcpp_prepare_data", (DL_FUNC) &_ramr_rcpp_prepare_data, 5},
+    {"_ramr_rcpp_extract_out", (DL_FUNC) &_ramr_rcpp_extract_out, 1},
     {"_ramr_rcpp_test_nan", (DL_FUNC) &_ramr_rcpp_test_nan, 0},
     {"_ramr_rcpp_test_med_boost", (DL_FUNC) &_ramr_rcpp_test_med_boost, 1},
     {"_ramr_rcpp_test_iqr_boost", (DL_FUNC) &_ramr_rcpp_test_iqr_boost, 1},
     {"_ramr_rcpp_test_med", (DL_FUNC) &_ramr_rcpp_test_med, 1},
-    {"_ramr_rcpp_test_iqr", (DL_FUNC) &_ramr_rcpp_test_iqr, 1},
+    {"_ramr_rcpp_test_iqr_type7", (DL_FUNC) &_ramr_rcpp_test_iqr_type7, 1},
     {"_ramr_rcpp_test_s4v", (DL_FUNC) &_ramr_rcpp_test_s4v, 1},
     {NULL, NULL, 0}
 };
