@@ -1,4 +1,4 @@
-// Flow:
+// FLOW:
 //   1) rcpp_prepare_data <- transposes 'raw' values into 'out'
 //   2) rcpp_(get|fit)_(iqr|beta|beinf) <- gets median/IQR or fits a
 //      distribution; 'coef' stores these values
@@ -9,27 +9,17 @@
 //   5) rcpp_create_granges <- makes GRanges object with AMRs
 //
 
-// DEFINITIONS //
+// CONSTS //
+const size_t ncoef = 4;                                                         // number of coefficient values to compute per genomic position
 
-// vector of genomic position
-#define T_pos std::vector<uint32_t>
 
-// vector of genomic strands
-#define T_str std::vector<uint32_t>
-
-// vector of raw values
-#define T_raw std::vector<double>
-
-// vector of genomic strands
-#define T_out std::vector<double>
-
-// vector of number of columns in data
-#define T_len std::vector<uint32_t>
-
-// number of coefficient values to compute per genomic position
-#define ncoef 4
-
-// vector to store coefficients: median, IQR, parameters of fitted distribution
-#define T_coef std::vector<double>
+// TYPEDEFS //
+typedef std::vector<uint32_t> T_chr;                                            // vector of chromosomes
+typedef std::vector<uint32_t> T_pos;                                            // vector of genomic positions
+typedef std::vector<uint32_t> T_str;                                            // vector of genomic strands
+typedef std::vector<double> T_raw;                                              // vector of raw values
+typedef std::vector<double> T_out;                                              // vector of computed values
+typedef std::vector<uint32_t> T_len;                                            // vector of number of columns by row in data
+typedef std::vector<double> T_coef;                                             // vector to store coefficients: median, IQR, parameters of fitted distribution
 
 

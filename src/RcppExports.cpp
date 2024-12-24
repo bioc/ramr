@@ -21,6 +21,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// rcpp_create_granges
+Rcpp::List rcpp_create_granges(Rcpp::List& data, size_t window, bool ignore_strand, size_t min_ncpg, size_t min_width);
+RcppExport SEXP _ramr_rcpp_create_granges(SEXP dataSEXP, SEXP windowSEXP, SEXP ignore_strandSEXP, SEXP min_ncpgSEXP, SEXP min_widthSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< size_t >::type window(windowSEXP);
+    Rcpp::traits::input_parameter< bool >::type ignore_strand(ignore_strandSEXP);
+    Rcpp::traits::input_parameter< size_t >::type min_ncpg(min_ncpgSEXP);
+    Rcpp::traits::input_parameter< size_t >::type min_width(min_widthSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_create_granges(data, window, ignore_strand, min_ncpg, min_width));
+    return rcpp_result_gen;
+END_RCPP
+}
 // rcpp_filter_threshold_xiqr
 int rcpp_filter_threshold_xiqr(Rcpp::List& data, double thr);
 RcppExport SEXP _ramr_rcpp_filter_threshold_xiqr(SEXP dataSEXP, SEXP thrSEXP) {
@@ -150,6 +165,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_ramr_rcpp_compute_xiqr", (DL_FUNC) &_ramr_rcpp_compute_xiqr, 1},
+    {"_ramr_rcpp_create_granges", (DL_FUNC) &_ramr_rcpp_create_granges, 5},
     {"_ramr_rcpp_filter_threshold_xiqr", (DL_FUNC) &_ramr_rcpp_filter_threshold_xiqr, 2},
     {"_ramr_rcpp_filter_threshold_pval", (DL_FUNC) &_ramr_rcpp_filter_threshold_pval, 2},
     {"_ramr_rcpp_get_iqr", (DL_FUNC) &_ramr_rcpp_get_iqr, 1},

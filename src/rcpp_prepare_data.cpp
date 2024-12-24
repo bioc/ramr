@@ -29,6 +29,7 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
   const size_t nrow = mcols.nrow();                                             // number of rows (genomic loci)
   
   // containers
+  T_chr* chr = new T_chr;                                                       // chromosomes
   T_pos* pos = new T_pos(start.begin(), start.end());                           // genomic positions
   T_str* str = new T_str(strand.begin(), strand.end());                         // genomic strands
   T_raw* raw = new T_raw;                                                       // flat vector with raw values from &mcols
@@ -36,6 +37,12 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
   T_len* len = new T_len;                                                       // lengths of &mcols rows minus number of NaNs
   T_coef* coef = new T_coef;                                                    // vector to hold per-row results (e.g., median, Q1, Q3, parameters of fitted distribution)
 
+  // fill 'chr' vector with seqname ids
+  chr->reserve(nrow);                                                           // reserve space as required
+  for (size_t i=0; i<seqnames.size(); i++)
+    chr->resize(chr->size()+seqrunlens[i], seqnames[i]);
+  chr->shrink_to_fit();
+  
   // fill 'raw' with values from &mcols
   raw->reserve(ncol*nrow);                                                      // reserve space as required
   for (size_t c=0; c<ncol; c++)
@@ -75,12 +82,14 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
   );
   
   // pointers to containers
+  Rcpp::XPtr<T_chr> chr_xptr(chr, true);
   Rcpp::XPtr<T_pos> pos_xptr(pos, true);
   Rcpp::XPtr<T_str> str_xptr(str, true);
   Rcpp::XPtr<T_raw> raw_xptr(raw, true);
   Rcpp::XPtr<T_out> out_xptr(out, true);
   Rcpp::XPtr<T_len> len_xptr(len, true);
   Rcpp::XPtr<T_coef> coef_xptr(coef, true);
+  res.attr("chr_xptr") = chr_xptr;
   res.attr("pos_xptr") = pos_xptr;
   res.attr("str_xptr") = str_xptr;
   res.attr("raw_xptr") = raw_xptr;

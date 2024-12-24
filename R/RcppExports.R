@@ -5,6 +5,10 @@ rcpp_compute_xiqr <- function(data) {
     .Call(`_ramr_rcpp_compute_xiqr`, data)
 }
 
+rcpp_create_granges <- function(data, window, ignore_strand, min_ncpg, min_width) {
+    .Call(`_ramr_rcpp_create_granges`, data, window, ignore_strand, min_ncpg, min_width)
+}
+
 rcpp_filter_threshold_xiqr <- function(data, thr) {
     .Call(`_ramr_rcpp_filter_threshold_xiqr`, data, thr)
 }
