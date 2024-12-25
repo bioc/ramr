@@ -33,15 +33,15 @@ int rcpp_get_iqr (Rcpp::List &data)                                             
   const auto coef_data = coef->data();
   
   // arrays for quantile calculations
-  const double p[4] = {0.00, 0.25, 0.50, 0.75};                                 // probabilities (1st element is disregarded)
-  double g[4];                                                                  // gamma = g
-  size_t j[4];                                                                  // index j
+  const double p[2] = {0.75, 0.25};                                             // probabilities
+  double g[2];                                                                  // gamma = g
+  size_t j[2];                                                                  // index j
   
   for (size_t r=0; r<nrow; r++) {
     const auto first = out_data + r*ncol;                                       // first element
     const size_t l = len_data[r];                                               // length = ncol - nNaNs
     if (l==0) continue;                                                         // skip row if no values to process
-    const auto q = coef_data + r*ncoef;                                         // pointer to coef 4-element array
+    const auto q = coef_data + r*NCOEF + 1;                                     // pointer to the second element of 'coef' NCOEF-element array
     
     // for Type 7 quantile function (R's default):
     //   m = 1 - p
@@ -75,7 +75,7 @@ int rcpp_get_iqr (Rcpp::List &data)                                             
     // 30	|  8	| 0,25	| 15	| 0,5	 | 22	 | 0,75	
     
     // compute indexes and coefficients for quantiles
-    for (size_t i=1; i<4; i++) {
+    for (size_t i=0; i<2; i++) {
       g[i] = (double)l * p[i] + 1 - p[i];                                       // gamma = g = np + m = np + 1 - p
       j[i] = (size_t)g[i];                                                      // j = floor(g)
       g[i] -= j[i];                                                             // g = g - j
@@ -83,40 +83,29 @@ int rcpp_get_iqr (Rcpp::List &data)                                             
     }
     
     // Q3:
-    if (g[3]>0.1) {                                                             // ((l-1)&3)!=0, i.e., not the case of g=0
-      std::nth_element(first, first+j[3]+1, first+l);                           // get (j+1)-th element
-      q[3] = first[j[3]+1] * g[3];                                              // (j+1)-th times gamma
-      std::nth_element(first, first+j[3], first+j[3]+1);                        // get j-th element
-      q[3] += first[j[3]] * (1-g[3]);                                           // plus j-th times 1-gamma
+    if (g[0]>0.1) {                                                             // ((l-1)&3)!=0, i.e., not the case of g=0
+      std::nth_element(first, first+j[0]+1, first+l);                           // get (j+1)-th element
+      q[0] = first[j[0]+1] * g[0];                                              // (j+1)-th times gamma
+      std::nth_element(first, first+j[0], first+j[0]+1);                        // get j-th element
+      q[0] += first[j[0]] * (1-g[0]);                                           // plus j-th times 1-gamma
     } else {
-      std::nth_element(first, first+j[3], first+l);                             // get j-th element
-      q[3] = first[j[3]];                                                       // which is a Q3
-    }
-    
-    // Q2==median:
-    if (g[2]>0.1) {                                                             // (l&1)!=0, i.e., not the case of g=0
-      std::nth_element(first, first+j[2]+1, first+j[3]);
-      q[2] = first[j[2]+1] * g[2];
-      std::nth_element(first, first+j[2], first+j[2]+1);
-      q[2] += first[j[2]] * (1-g[2]);
-    } else {
-      std::nth_element(first, first+j[2], first+j[3]);
-      q[2] = first[j[2]];
+      std::nth_element(first, first+j[0], first+l);                             // get j-th element
+      q[0] = first[j[0]];                                                       // which is a Q3
     }
     
     // Q1:
     if (g[1]>0.1) {                                                             // ((l-1)&3)!=0, i.e., not the case of g=0
-      std::nth_element(first, first+j[1]+1, first+j[2]);
+      std::nth_element(first, first+j[1]+1, first+j[0]);
       q[1] = first[j[1]+1] * g[1];
       std::nth_element(first, first+j[1], first+j[1]+1);
       q[1] += first[j[1]] * (1-g[1]);
     } else {
-      std::nth_element(first, first+j[1], first+j[2]);
+      std::nth_element(first, first+j[1], first+j[0]);
       q[1] = first[j[1]];
     }
     
     // IQR:
-    q[0] = q[3] - q[1];
+    q[2] = q[0] - q[1];
   }
   
   return 0;

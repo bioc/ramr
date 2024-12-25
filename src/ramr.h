@@ -10,8 +10,9 @@
 //
 
 // CONSTS //
-const size_t ncoef = 4;                                                         // number of coefficient values to compute per genomic position
-
+const size_t NCOEF = 5;                                                         // number of coefficient values to compute per genomic position
+// median is always 0th
+// for IQR: Q3 is 1st, Q1 is 2nd, IQR is 3rd
 
 // TYPEDEFS //
 typedef std::vector<unsigned int> T_chr;                                        // vector of chromosomes

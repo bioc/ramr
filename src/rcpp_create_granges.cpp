@@ -32,6 +32,7 @@ Rcpp::List rcpp_create_granges (Rcpp::List &data,                               
   Rcpp::XPtr<T_str> str((SEXP)data.attr("str_xptr"));                           // genomic strands (1=="+", 2=="-", 3=="*")
   Rcpp::XPtr<T_raw> raw((SEXP)data.attr("raw_xptr"));                           // flat vector with raw values
   Rcpp::XPtr<T_out> out((SEXP)data.attr("out_xptr"));                           // vector to hold intermediate output values (here: xIQR or p-values or NaN for the ones to skip)
+  Rcpp::XPtr<T_coef> coef((SEXP)data.attr("coef_xptr"));                        // vector with per-row coefficients (need median here)
   
   // fast direct accessors
   const auto chr_data = chr->data();
@@ -39,6 +40,7 @@ Rcpp::List rcpp_create_granges (Rcpp::List &data,                               
   const auto str_data = str->data();
   const auto raw_data = raw->data();
   const auto out_data = out->data();
+  const auto coef_data = coef->data();
   
   // output containers for AMRs
   // have to be careful with them when writing from multiple threads
@@ -59,7 +61,7 @@ Rcpp::List rcpp_create_granges (Rcpp::List &data,                               
     res_chr.push_back(amr[s].chr);                            /* chromosome */ \
     res_start.push_back(amr[s].start);                             /* start */ \
     res_end.push_back(amr[s].end);                                   /* end */ \
-    res_strand.push_back(s+1);                                    /* strand */ \
+    res_strand.push_back(s+1);                            /* 1-based strand */ \
     res_revmap.push_back(amr[s].revmap);                          /* revmap */ \
     res_ncpg.push_back(amr[s].revmap.size());                       /* ncpg */ \
     amr[s].dbeta /= amr[s].revmap.size();                  /* average dbeta */ \
@@ -96,8 +98,8 @@ Rcpp::List rcpp_create_granges (Rcpp::List &data,                               
         const size_t d = pos_data[r] - amr[s].end;                              //   distance from previous base
         if ((d<=window) && (amr[s].chr==chr_data[r])) {                         //   if within the window and the same chromosome
           amr[s].end = pos_data[r];                                             //     new end
-          amr[s].revmap.push_back(r);                                           //     add element to revmap
-          amr[s].dbeta += raw_first[r];                                         //     add 'raw'
+          amr[s].revmap.push_back(r+1);                                         //     add element to revmap, make it 1-based
+          amr[s].dbeta += raw_first[r] - coef_data[r*NCOEF];                    //     add 'raw' minus median (0th element of 'coef' array)
           amr[s].aggr += out_first[r];                                          //     add 'out'
         } else {                                                                //   if outside the window or another chromosome
           spit_amr;                                                             //     save existing
@@ -108,8 +110,8 @@ Rcpp::List rcpp_create_granges (Rcpp::List &data,                               
         amr[s].chr = chr_data[r];                                               //   record chromosome
         amr[s].start = pos_data[r];                                             //   start
         amr[s].end = pos_data[r];                                               //   end = start
-        amr[s].revmap.push_back(r);                                             //   add element to revmap
-        amr[s].dbeta = raw_first[r];                                            //   first 'raw'
+        amr[s].revmap.push_back(r+1);                                           //   add element to revmap, make it 1-based
+        amr[s].dbeta = raw_first[r] - coef_data[r*NCOEF];                       //   first 'raw' minus median (0th element of 'coef' array)
         amr[s].aggr = out_first[r];                                             //   first 'out'
       }
     }
@@ -119,24 +121,23 @@ Rcpp::List rcpp_create_granges (Rcpp::List &data,                               
       if (amr[s].open) spit_amr;
     
     // add (the same) sample id for all sample AMRs
-    res_sample.resize(res_chr.size(), c);
+    res_sample.resize(res_chr.size(), c+1);                                     // make it 1-based
   }
   
-  
-  
   // wrap and return the results
-  Rcpp::IntegerVector col_chr = Rcpp::wrap(res_chr);                            // making seqnames a factor
-  col_chr.attr("class") = "factor";
+  Rcpp::IntegerVector col_chr = Rcpp::wrap(res_chr);                            // int chr
+  Rcpp::IntegerVector col_start = Rcpp::wrap(res_start);                        // int start
+  Rcpp::IntegerVector col_end = Rcpp::wrap(res_end);                            // int end
+  Rcpp::IntegerVector col_strand = Rcpp::wrap(res_strand);                      // int strand
+  Rcpp::IntegerVector col_ncpg = Rcpp::wrap(res_ncpg);                          // int ncpg
+  Rcpp::IntegerVector col_sample = Rcpp::wrap(res_sample);                      // int sample
+  
+  col_chr.attr("class") = "factor";                                             // making seqnames a factor
   col_chr.attr("levels") = ((Rcpp::IntegerVector)(data["seqnames"])).attr("levels");
-  
-  Rcpp::IntegerVector col_strand = Rcpp::wrap(res_strand);                      // making strand a factor
-  col_strand.attr("class") = "factor";
+  col_strand.attr("class") = "factor";                                          // making strand a factor
   col_strand.attr("levels") = data.attr("strandlevels");
-  
-  Rcpp::IntegerVector col_start = Rcpp::wrap(res_start);                        // int start
-  Rcpp::IntegerVector col_end = Rcpp::wrap(res_end);                            // int start
-  Rcpp::IntegerVector col_start = Rcpp::wrap(res_start);                        // int start
-  Rcpp::IntegerVector col_ncpg = Rcpp::wrap(res_ncpg);                          // int start
+  col_sample.attr("class") = "factor";                                          // making sample a factor
+  col_sample.attr("levels") = (Rcpp::CharacterVector)(data["samples"]);
   
   Rcpp::List res = Rcpp::List::create(                                          // final List
     Rcpp::Named("seqnames") = col_chr,                                          // chromosomes
@@ -145,9 +146,9 @@ Rcpp::List rcpp_create_granges (Rcpp::List &data,                               
     Rcpp::Named("strand") = col_strand,                                         // genomic strand
     Rcpp::Named("revmap") = res_revmap,                                         // revmap
     Rcpp::Named("ncpg") = col_ncpg,                                             // number of CpGs
-    Rcpp::Named("sample") = res_sample,                                         // integer sample id
+    Rcpp::Named("sample") = col_sample,                                         // integer sample id
     Rcpp::Named("dbeta") = res_dbeta,                                           // average 'raw' minus 'median' (beta)
-    Rcpp::Named("xIQR") = res_aggr                                              // average 'out' (mean for xIQR, geometric mean for p-values), or comb-p combined p
+    Rcpp::Named("xiqr") = res_aggr                                              // average 'out' (mean for xIQR, geometric mean for p-values), or comb-p combined p
   );
   
   return(res);

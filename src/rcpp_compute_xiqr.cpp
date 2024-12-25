@@ -24,7 +24,7 @@ int rcpp_compute_xiqr (Rcpp::List &data)                                        
   // containers
   Rcpp::XPtr<T_raw> raw((SEXP)data.attr("raw_xptr"));                           // flat vector with raw values
   Rcpp::XPtr<T_out> out((SEXP)data.attr("out_xptr"));                           // vector to hold intermediate output values (here: xIQR)
-  Rcpp::XPtr<T_coef> coef((SEXP)data.attr("coef_xptr"));                        // vector with per-row results of rcpp_get_iqr ([0]IQR, [1]Q1, [2]median, [3]Q3)
+  Rcpp::XPtr<T_coef> coef((SEXP)data.attr("coef_xptr"));                        // vector with per-row results of rcpp_get_iqr ([0]median, [1]Q3, [2]Q1, [3]IQR)
   
   // fast direct accessors
   const auto raw_data = raw->data();
@@ -35,8 +35,8 @@ int rcpp_compute_xiqr (Rcpp::List &data)                                        
     const auto raw_first = raw_data + c*nrow;                                   // first element of c-th column in 'raw'
     const auto out_first = out_data + c*nrow;                                   // first element of c-th column in 'out'
     for (size_t r=0; r<nrow; r++) {
-      const auto coef_first = coef_data + r*ncoef;                              // first element of 'coef' array
-      out_first[r] = (raw_first[r] - coef_first[2]) / coef_first[0];            // (value-median)/IQR
+      const auto coef_first = coef_data + r*NCOEF;                              // first element of 'coef' array
+      out_first[r] = (raw_first[r] - coef_first[0]) / coef_first[3];            // (value-median)/IQR
     }
   }
   

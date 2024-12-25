@@ -51,13 +51,14 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
   
   // initialize 'len', 'coef', and 'out'
   len->resize(nrow);                                                            // init with 0 - a waste, but no choice
-  coef->resize(nrow*ncoef);                                                     // nrow times ncoef to store them all continuously
+  coef->resize(nrow*NCOEF);                                                     // nrow times NCOEF to store them all continuously
   out->resize(ncol*nrow, NA_REAL);                                              // init with NA_REAL - see if it breaks anything further. NB: default might be marginally faster
   
   // fast direct accessors
   const auto raw_data = raw->data();
   const auto out_data = out->data();
   const auto len_data = len->data();
+  const auto coef_data = coef->data();
   
   // transpose 'raw' to 'out', skipping NaNs; adjust 'len'
   // should be more computationally efficient and parallelizable
@@ -69,6 +70,16 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
       if (!std::isnan(raw_data[r+nrow*c]))                                      // if value is not a NaN
         buf[l++] = raw_data[r+nrow*c];                                          // gather it in the buffer; increase its length
     len_data[r] = l;                                                            // adjust observed length
+    
+    // median
+    const auto q = coef_data + r*NCOEF;                                         // pointer to coef NCOEF-element array
+    const size_t hl = l/2;                                                      // half length
+    std::nth_element(buf, buf+hl, buf+l);                                       // order up to l/2-th
+    q[0] = buf[hl];                                                             // median for odd l
+    if ((l&1)==0) {                                                             // if l is even
+      std::nth_element(buf, buf+hl-1, buf+hl);                                  // order up to l/2-1-th
+      q[0] = (q[0] + buf[hl-1])/2;                                              // median for even l
+    }
     std::copy(buf, buf+l, out_data+ncol*r);                                     // copy 'buf' to 'out'
   }
   free(buf);
@@ -78,7 +89,8 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
     Rcpp::Named("ncol") = ncol,                                                 // number of columns (samples)
     Rcpp::Named("nrow") = nrow,                                                 // number of rows (genomic loci)
     Rcpp::Named("seqnames") = seqnames,                                         // integer IDs of seqnames
-    Rcpp::Named("seqrunlens") = seqrunlens                                      // running lengths of seqnames
+    Rcpp::Named("seqrunlens") = seqrunlens,                                     // running lengths of seqnames
+    Rcpp::Named("samples") = mcols.names()                                      // sample names
   );
   res.attr("strandlevels") = strand.attr("levels");                             // strand levels
   
