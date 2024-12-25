@@ -14,12 +14,12 @@ const size_t ncoef = 4;                                                         
 
 
 // TYPEDEFS //
-typedef std::vector<uint32_t> T_chr;                                            // vector of chromosomes
-typedef std::vector<uint32_t> T_pos;                                            // vector of genomic positions
-typedef std::vector<uint32_t> T_str;                                            // vector of genomic strands
+typedef std::vector<unsigned int> T_chr;                                        // vector of chromosomes
+typedef std::vector<unsigned int> T_pos;                                        // vector of genomic positions
+typedef std::vector<unsigned int> T_str;                                        // vector of genomic strands
 typedef std::vector<double> T_raw;                                              // vector of raw values
 typedef std::vector<double> T_out;                                              // vector of computed values
-typedef std::vector<uint32_t> T_len;                                            // vector of number of columns by row in data
+typedef std::vector<unsigned int> T_len;                                        // vector of number of columns by row in data
 typedef std::vector<double> T_coef;                                             // vector to store coefficients: median, IQR, parameters of fitted distribution
 
 

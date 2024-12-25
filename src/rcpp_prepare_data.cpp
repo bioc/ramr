@@ -18,10 +18,10 @@
 
 // <input.ranges> for rcpp_prepare_data must be sorted
 // [[Rcpp::export]]
-Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    // IntegerVector output of as.integer(S4Vectors::runValue(GenomeInfoDb::seqnames(<input.ranges>)))
-                              Rcpp::IntegerVector &seqrunlens,                  // IntegerVector output of as.integer(S4Vectors::runLength(GenomeInfoDb::seqnames(<input.ranges>)))
-                              Rcpp::IntegerVector &start,                       // IntegerVector output of as.integer(BiocGenerics::start(<input.ranges>))
-                              Rcpp::IntegerVector &strand,                      // IntegerVector output of as.integer(BiocGenerics::strand(<input.ranges>))
+Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    // IntegerVector (factor) output of S4Vectors::runValue(GenomeInfoDb::seqnames(<input.ranges>))
+                              Rcpp::IntegerVector &seqrunlens,                  // IntegerVector output of S4Vectors::runLength(GenomeInfoDb::seqnames(<input.ranges>))
+                              Rcpp::IntegerVector &start,                       // IntegerVector output of BiocGenerics::start(<input.ranges>)
+                              Rcpp::IntegerVector &strand,                      // IntegerVector (factor) output of as.factor(BiocGenerics::strand(<input.ranges>))
                               Rcpp::DataFrame &mcols)                           // DataFrame output of as.data.frame(GenomicRanges::mcols(<input.ranges>))
 {
   // consts
@@ -80,6 +80,7 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
     Rcpp::Named("seqnames") = seqnames,                                         // integer IDs of seqnames
     Rcpp::Named("seqrunlens") = seqrunlens                                      // running lengths of seqnames
   );
+  res.attr("strandlevels") = strand.attr("levels");                             // strand levels
   
   // pointers to containers
   Rcpp::XPtr<T_chr> chr_xptr(chr, true);

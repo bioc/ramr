@@ -93,7 +93,7 @@ Rcpp::List rcpp_create_granges (Rcpp::List &data,                               
       if (std::isnan(out_first[r])) continue;                                   // next if NaN
       s = str_data[r] - 1;                                                      // strand of current position, 0-based
       if (amr[s].open) {                                                        // if there's an open AMR on this strand
-        const size_t d = amr[s].end - pos_data[r];                              //   distance from previous base
+        const size_t d = pos_data[r] - amr[s].end;                              //   distance from previous base
         if ((d<=window) && (amr[s].chr==chr_data[r])) {                         //   if within the window and the same chromosome
           amr[s].end = pos_data[r];                                             //     new end
           amr[s].revmap.push_back(r);                                           //     add element to revmap
@@ -125,13 +125,26 @@ Rcpp::List rcpp_create_granges (Rcpp::List &data,                               
   
   
   // wrap and return the results
+  Rcpp::IntegerVector col_chr = Rcpp::wrap(res_chr);                            // making seqnames a factor
+  col_chr.attr("class") = "factor";
+  col_chr.attr("levels") = ((Rcpp::IntegerVector)(data["seqnames"])).attr("levels");
+  
+  Rcpp::IntegerVector col_strand = Rcpp::wrap(res_strand);                      // making strand a factor
+  col_strand.attr("class") = "factor";
+  col_strand.attr("levels") = data.attr("strandlevels");
+  
+  Rcpp::IntegerVector col_start = Rcpp::wrap(res_start);                        // int start
+  Rcpp::IntegerVector col_end = Rcpp::wrap(res_end);                            // int start
+  Rcpp::IntegerVector col_start = Rcpp::wrap(res_start);                        // int start
+  Rcpp::IntegerVector col_ncpg = Rcpp::wrap(res_ncpg);                          // int start
+  
   Rcpp::List res = Rcpp::List::create(                                          // final List
-    Rcpp::Named("seqnames") = res_chr,                                          // chromosomes
-    Rcpp::Named("start") = res_start,                                           // genomic start
-    Rcpp::Named("end") = res_end,                                               // genomic end
-    Rcpp::Named("strand") = res_strand,                                         // genomic strand
+    Rcpp::Named("seqnames") = col_chr,                                          // chromosomes
+    Rcpp::Named("start") = col_start,                                           // genomic start
+    Rcpp::Named("end") = col_end,                                               // genomic end
+    Rcpp::Named("strand") = col_strand,                                         // genomic strand
     Rcpp::Named("revmap") = res_revmap,                                         // revmap
-    Rcpp::Named("ncpg") = res_ncpg,                                             // number of CpGs
+    Rcpp::Named("ncpg") = col_ncpg,                                             // number of CpGs
     Rcpp::Named("sample") = res_sample,                                         // integer sample id
     Rcpp::Named("dbeta") = res_dbeta,                                           // average 'raw' minus 'median' (beta)
     Rcpp::Named("xIQR") = res_aggr                                              // average 'out' (mean for xIQR, geometric mean for p-values), or comb-p combined p
