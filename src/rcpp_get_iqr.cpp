@@ -8,7 +8,6 @@
 // Function computes xIQR values using R's default quantile function (type 7):
 //   1) computes Q1, median and Q3
 //   2) stores its output in the vector of coefficients as {IQR, Q1, median, Q3}
-//   2) subtracts median from each 'raw' value, abs it, divides by IQR
 //
 // TODO:
 //   [ ] OpenMP
@@ -22,10 +21,9 @@ int rcpp_get_iqr (Rcpp::List &data)                                             
   const size_t nrow = data["nrow"];                                             // number of rows (genomic loci)
   
   // containers
-  Rcpp::XPtr<T_raw> raw((SEXP)data.attr("raw_xptr"));                           // flat vector with raw values
-  Rcpp::XPtr<T_out> out((SEXP)data.attr("out_xptr"));                           // vector to hold intermediate output values (here: transposed)
+  Rcpp::XPtr<T_out> out((SEXP)data.attr("out_xptr"));                           // vector with intermediate output values (here: transposed 'raw')
   Rcpp::XPtr<T_len> len((SEXP)data.attr("len_xptr"));                           // lengths of input data rows minus number of NaNs
-  Rcpp::XPtr<T_coef> coef((SEXP)data.attr("coef_xptr"));                        // vector to hold per-row results (here: [0]IQR, [1]Q1, [2]median, [3]Q3)
+  Rcpp::XPtr<T_coef> coef((SEXP)data.attr("coef_xptr"));                        // vector to hold per-row results (here: [0]median, [1]Q3, [2]Q1, [3]IQR)
   
   // fast direct accessors
   const auto out_data = out->data();
@@ -40,8 +38,11 @@ int rcpp_get_iqr (Rcpp::List &data)                                             
   for (size_t r=0; r<nrow; r++) {
     const auto first = out_data + r*ncol;                                       // first element
     const size_t l = len_data[r];                                               // length = ncol - nNaNs
-    if (l==0) continue;                                                         // skip row if no values to process
     const auto q = coef_data + r*NCOEF + 1;                                     // pointer to the second element of 'coef' NCOEF-element array
+    if (l==0) {                                                                 // if no values to process (all are NaNs or excluded by median)
+      std::fill_n(q, 3, NA_REAL);                                               // Q3, Q1, IQR are NaN
+      continue;                                                                 // skip this row
+    }
     
     // for Type 7 quantile function (R's default):
     //   m = 1 - p

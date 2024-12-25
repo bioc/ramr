@@ -22,7 +22,9 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
                               Rcpp::IntegerVector &seqrunlens,                  // IntegerVector output of S4Vectors::runLength(GenomeInfoDb::seqnames(<input.ranges>))
                               Rcpp::IntegerVector &start,                       // IntegerVector output of BiocGenerics::start(<input.ranges>)
                               Rcpp::IntegerVector &strand,                      // IntegerVector (factor) output of as.factor(BiocGenerics::strand(<input.ranges>))
-                              Rcpp::DataFrame &mcols)                           // DataFrame output of as.data.frame(GenomicRanges::mcols(<input.ranges>))
+                              Rcpp::DataFrame &mcols,                           // DataFrame output of as.data.frame(GenomicRanges::mcols(<input.ranges>))
+                              double exclude_lower,                             // lower bound of range to exclude
+                              double exclude_upper)                             // upper bound of range to exclude
 {
   // consts
   const size_t ncol = mcols.ncol();                                             // number of columns (samples)
@@ -69,7 +71,6 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
     for (size_t c=0; c<ncol; c++)                                               // column by column
       if (!std::isnan(raw_data[r+nrow*c]))                                      // if value is not a NaN
         buf[l++] = raw_data[r+nrow*c];                                          // gather it in the buffer; increase its length
-    len_data[r] = l;                                                            // adjust observed length
     
     // median
     const auto q = coef_data + r*NCOEF;                                         // pointer to coef NCOEF-element array
@@ -80,7 +81,12 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
       std::nth_element(buf, buf+hl-1, buf+hl);                                  // order up to l/2-1-th
       q[0] = (q[0] + buf[hl-1])/2;                                              // median for even l
     }
-    std::copy(buf, buf+l, out_data+ncol*r);                                     // copy 'buf' to 'out'
+    if (q[0]<exclude_lower || q[0]>exclude_upper){                              // if median is less that exclude_lower or greater than exclude_upper
+      std::copy(buf, buf+l, out_data+ncol*r);                                   // copy 'buf' to 'out'
+      len_data[r] = l;                                                          // adjust observed length
+    } else {
+      len_data[r] = 0;                                                          // don't use this row in further analyses
+    }
   }
   free(buf);
   

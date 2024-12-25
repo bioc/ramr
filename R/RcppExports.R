@@ -21,8 +21,8 @@ rcpp_get_iqr <- function(data) {
     .Call(`_ramr_rcpp_get_iqr`, data)
 }
 
-rcpp_prepare_data <- function(seqnames, seqrunlens, start, strand, mcols) {
-    .Call(`_ramr_rcpp_prepare_data`, seqnames, seqrunlens, start, strand, mcols)
+rcpp_prepare_data <- function(seqnames, seqrunlens, start, strand, mcols, exclude_lower, exclude_upper) {
+    .Call(`_ramr_rcpp_prepare_data`, seqnames, seqrunlens, start, strand, mcols, exclude_lower, exclude_upper)
 }
 
 rcpp_extract_out <- function(data) {
