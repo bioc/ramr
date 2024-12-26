@@ -5,6 +5,7 @@
 #include "ramr.h"
 
 // [[Rcpp::plugins(cpp20)]]
+// [[Rcpp::plugins(openmp)]]
 
 // This function prepares input data for further processing:
 //   1) makes a copy of raw methylation values ('raw')

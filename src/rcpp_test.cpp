@@ -2,11 +2,25 @@
 #include <vector>
 #include <array>
 #include <Rcpp.h>
+#include <unistd.h>
+#include "ramr.h"
+// #include <omp.h>
 
 // [[Rcpp::plugins(cpp20)]]
 // [[Rcpp::depends(BH)]]
+// [[Rcpp::plugins(openmp)]]
 
-// 
+// [[Rcpp::export]]
+bool wait_a_second_omp(int sec, int ncores)
+{
+#if defined(_OPENMP)
+  Rcpp::Rcout << "OpenMP is available\n";
+  #pragma omp parallel num_threads(ncores)
+  #pragma omp for
+#endif
+  for(int ii = 0; ii < sec; ii++) sleep(1);
+  return 1;
+}
 
 // [[Rcpp::export]]
 std::vector<double> rcpp_extract_out (Rcpp::List &data)

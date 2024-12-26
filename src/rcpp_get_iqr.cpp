@@ -6,8 +6,8 @@
 // [[Rcpp::plugins(cpp20)]]
 
 // Function computes xIQR values using R's default quantile function (type 7):
-//   1) computes Q1, median and Q3
-//   2) stores its output in the vector of coefficients as {IQR, Q1, median, Q3}
+//   1) computes Q3 and Q1
+//   2) stores them in the vector of coefficients as {[1]Q3, [2]Q1, [3]IQR}
 //
 // TODO:
 //   [ ] OpenMP
@@ -38,7 +38,7 @@ int rcpp_get_iqr (Rcpp::List &data)                                             
   for (size_t r=0; r<nrow; r++) {
     const auto first = out_data + r*ncol;                                       // first element
     const size_t l = len_data[r];                                               // length = ncol - nNaNs
-    const auto q = coef_data + r*NCOEF + 1;                                     // pointer to the second element of 'coef' NCOEF-element array
+    const auto q = coef_data + r*NCOEF + 1;                                     // pointer to the second element of 'coef' NCOEF-element array (first is median)
     if (l==0) {                                                                 // if no values to process (all are NaNs or excluded by median)
       std::fill_n(q, 3, NA_REAL);                                               // Q3, Q1, IQR are NaN
       continue;                                                                 // skip this row

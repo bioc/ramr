@@ -60,6 +60,39 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// rcpp_fit_beta_mom
+int rcpp_fit_beta_mom(Rcpp::List& data);
+RcppExport SEXP _ramr_rcpp_fit_beta_mom(SEXP dataSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_fit_beta_mom(data));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpp_fit_beta_amle
+int rcpp_fit_beta_amle(Rcpp::List& data);
+RcppExport SEXP _ramr_rcpp_fit_beta_amle(SEXP dataSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_fit_beta_amle(data));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpp_fit_beta_nmle
+int rcpp_fit_beta_nmle(Rcpp::List& data);
+RcppExport SEXP _ramr_rcpp_fit_beta_nmle(SEXP dataSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_fit_beta_nmle(data));
+    return rcpp_result_gen;
+END_RCPP
+}
 // rcpp_get_iqr
 int rcpp_get_iqr(Rcpp::List& data);
 RcppExport SEXP _ramr_rcpp_get_iqr(SEXP dataSEXP) {
@@ -85,6 +118,18 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type exclude_lower(exclude_lowerSEXP);
     Rcpp::traits::input_parameter< double >::type exclude_upper(exclude_upperSEXP);
     rcpp_result_gen = Rcpp::wrap(rcpp_prepare_data(seqnames, seqrunlens, start, strand, mcols, exclude_lower, exclude_upper));
+    return rcpp_result_gen;
+END_RCPP
+}
+// wait_a_second_omp
+bool wait_a_second_omp(int sec, int ncores);
+RcppExport SEXP _ramr_wait_a_second_omp(SEXP secSEXP, SEXP ncoresSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type sec(secSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    rcpp_result_gen = Rcpp::wrap(wait_a_second_omp(sec, ncores));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -170,8 +215,12 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ramr_rcpp_create_granges", (DL_FUNC) &_ramr_rcpp_create_granges, 5},
     {"_ramr_rcpp_filter_threshold_xiqr", (DL_FUNC) &_ramr_rcpp_filter_threshold_xiqr, 2},
     {"_ramr_rcpp_filter_threshold_pval", (DL_FUNC) &_ramr_rcpp_filter_threshold_pval, 2},
+    {"_ramr_rcpp_fit_beta_mom", (DL_FUNC) &_ramr_rcpp_fit_beta_mom, 1},
+    {"_ramr_rcpp_fit_beta_amle", (DL_FUNC) &_ramr_rcpp_fit_beta_amle, 1},
+    {"_ramr_rcpp_fit_beta_nmle", (DL_FUNC) &_ramr_rcpp_fit_beta_nmle, 1},
     {"_ramr_rcpp_get_iqr", (DL_FUNC) &_ramr_rcpp_get_iqr, 1},
     {"_ramr_rcpp_prepare_data", (DL_FUNC) &_ramr_rcpp_prepare_data, 7},
+    {"_ramr_wait_a_second_omp", (DL_FUNC) &_ramr_wait_a_second_omp, 2},
     {"_ramr_rcpp_extract_out", (DL_FUNC) &_ramr_rcpp_extract_out, 1},
     {"_ramr_rcpp_test_nan", (DL_FUNC) &_ramr_rcpp_test_nan, 0},
     {"_ramr_rcpp_test_med_boost", (DL_FUNC) &_ramr_rcpp_test_med_boost, 1},

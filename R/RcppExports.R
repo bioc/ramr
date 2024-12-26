@@ -17,12 +17,28 @@ rcpp_filter_threshold_pval <- function(data, thr) {
     .Call(`_ramr_rcpp_filter_threshold_pval`, data, thr)
 }
 
+rcpp_fit_beta_mom <- function(data) {
+    .Call(`_ramr_rcpp_fit_beta_mom`, data)
+}
+
+rcpp_fit_beta_amle <- function(data) {
+    .Call(`_ramr_rcpp_fit_beta_amle`, data)
+}
+
+rcpp_fit_beta_nmle <- function(data) {
+    .Call(`_ramr_rcpp_fit_beta_nmle`, data)
+}
+
 rcpp_get_iqr <- function(data) {
     .Call(`_ramr_rcpp_get_iqr`, data)
 }
 
 rcpp_prepare_data <- function(seqnames, seqrunlens, start, strand, mcols, exclude_lower, exclude_upper) {
     .Call(`_ramr_rcpp_prepare_data`, seqnames, seqrunlens, start, strand, mcols, exclude_lower, exclude_upper)
+}
+
+wait_a_second_omp <- function(sec, ncores) {
+    .Call(`_ramr_wait_a_second_omp`, sec, ncores)
 }
 
 rcpp_extract_out <- function(data) {

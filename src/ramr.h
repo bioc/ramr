@@ -23,4 +23,9 @@ typedef std::vector<double> T_out;                                              
 typedef std::vector<unsigned int> T_len;                                        // vector of number of columns by row in data
 typedef std::vector<double> T_coef;                                             // vector to store coefficients: median, IQR, parameters of fitted distribution
 
+// OpenMP //
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 
