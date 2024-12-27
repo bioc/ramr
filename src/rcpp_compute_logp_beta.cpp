@@ -97,7 +97,7 @@ static inline double incbeta (double a,                              /* alpha */
 //
 // TODO:
 //   [ ] OpenMP
-//   [?] maybe skip rows where len[r]==0
+//   [x] skip rows where len[r]==0
 
 // [[Rcpp::export]]
 int rcpp_compute_logp_beta (Rcpp::List &data)                                   // List output of rcpp_prepare_data
@@ -109,19 +109,26 @@ int rcpp_compute_logp_beta (Rcpp::List &data)                                   
   // containers
   Rcpp::XPtr<T_raw> raw((SEXP)data.attr("raw_xptr"));                           // flat vector with raw values
   Rcpp::XPtr<T_out> out((SEXP)data.attr("out_xptr"));                           // vector to hold output values
+  Rcpp::XPtr<T_len> len((SEXP)data.attr("len_xptr"));                           // lengths of input data rows minus number of NaNs
   Rcpp::XPtr<T_coef> coef((SEXP)data.attr("coef_xptr"));                        // vector with per-row results of rcpp_fit_beta
   
   // fast direct accessors
   const auto raw_data = raw->data();
   const auto out_data = out->data();
+  const auto len_data = len->data();
   const auto coef_data = coef->data();
   
   for (size_t c=0; c<ncol; c++) {
     const auto raw_first = raw_data + c*nrow;                                   // first element of c-th column in 'raw'
     const auto out_first = out_data + c*nrow;                                   // first element of c-th column in 'out'
     for (size_t r=0; r<nrow; r++) {
-      const auto coef_first = coef_data + r*NCOEF;                              // first element of 'coef' array
-      out_first[r] = incbeta(coef_first[3], coef_first[4], coef_first[5], raw_first[r]); // Regularized Incomplete Beta Function
+      if (len_data[r] && !std::isnan(raw_first[r])) {                           // if row is not excluded and x is not NaN
+        const auto coef_first = coef_data + r*NCOEF;                            // first element of 'coef' array
+        out_first[r] = incbeta(coef_first[3], coef_first[4],                    // Regularized Incomplete Beta Function
+                               coef_first[5], raw_first[r]);
+      } else {
+        out_first[r] = NA_REAL;
+      }
     }
   }
   
