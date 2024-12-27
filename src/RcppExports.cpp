@@ -10,6 +10,17 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// rcpp_compute_logp_beta
+int rcpp_compute_logp_beta(Rcpp::List& data);
+RcppExport SEXP _ramr_rcpp_compute_logp_beta(SEXP dataSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_compute_logp_beta(data));
+    return rcpp_result_gen;
+END_RCPP
+}
 // rcpp_compute_xiqr
 int rcpp_compute_xiqr(Rcpp::List& data);
 RcppExport SEXP _ramr_rcpp_compute_xiqr(SEXP dataSEXP) {
@@ -21,18 +32,59 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// rcpp_create_granges
-Rcpp::List rcpp_create_granges(Rcpp::List& data, size_t window, bool ignore_strand, size_t min_ncpg, size_t min_width);
-RcppExport SEXP _ramr_rcpp_create_granges(SEXP dataSEXP, SEXP windowSEXP, SEXP ignore_strandSEXP, SEXP min_ncpgSEXP, SEXP min_widthSEXP) {
+// rcpp_create_granges_stranded_xiqr
+Rcpp::List rcpp_create_granges_stranded_xiqr(Rcpp::List& data, size_t window, size_t min_ncpg, size_t min_width);
+RcppExport SEXP _ramr_rcpp_create_granges_stranded_xiqr(SEXP dataSEXP, SEXP windowSEXP, SEXP min_ncpgSEXP, SEXP min_widthSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
     Rcpp::traits::input_parameter< size_t >::type window(windowSEXP);
-    Rcpp::traits::input_parameter< bool >::type ignore_strand(ignore_strandSEXP);
     Rcpp::traits::input_parameter< size_t >::type min_ncpg(min_ncpgSEXP);
     Rcpp::traits::input_parameter< size_t >::type min_width(min_widthSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_create_granges(data, window, ignore_strand, min_ncpg, min_width));
+    rcpp_result_gen = Rcpp::wrap(rcpp_create_granges_stranded_xiqr(data, window, min_ncpg, min_width));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpp_create_granges_stranded_logp
+Rcpp::List rcpp_create_granges_stranded_logp(Rcpp::List& data, size_t window, size_t min_ncpg, size_t min_width);
+RcppExport SEXP _ramr_rcpp_create_granges_stranded_logp(SEXP dataSEXP, SEXP windowSEXP, SEXP min_ncpgSEXP, SEXP min_widthSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< size_t >::type window(windowSEXP);
+    Rcpp::traits::input_parameter< size_t >::type min_ncpg(min_ncpgSEXP);
+    Rcpp::traits::input_parameter< size_t >::type min_width(min_widthSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_create_granges_stranded_logp(data, window, min_ncpg, min_width));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpp_create_granges_unstranded_xiqr
+Rcpp::List rcpp_create_granges_unstranded_xiqr(Rcpp::List& data, size_t window, size_t min_ncpg, size_t min_width);
+RcppExport SEXP _ramr_rcpp_create_granges_unstranded_xiqr(SEXP dataSEXP, SEXP windowSEXP, SEXP min_ncpgSEXP, SEXP min_widthSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< size_t >::type window(windowSEXP);
+    Rcpp::traits::input_parameter< size_t >::type min_ncpg(min_ncpgSEXP);
+    Rcpp::traits::input_parameter< size_t >::type min_width(min_widthSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_create_granges_unstranded_xiqr(data, window, min_ncpg, min_width));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpp_create_granges_unstranded_logp
+Rcpp::List rcpp_create_granges_unstranded_logp(Rcpp::List& data, size_t window, size_t min_ncpg, size_t min_width);
+RcppExport SEXP _ramr_rcpp_create_granges_unstranded_logp(SEXP dataSEXP, SEXP windowSEXP, SEXP min_ncpgSEXP, SEXP min_widthSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< size_t >::type window(windowSEXP);
+    Rcpp::traits::input_parameter< size_t >::type min_ncpg(min_ncpgSEXP);
+    Rcpp::traits::input_parameter< size_t >::type min_width(min_widthSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_create_granges_unstranded_logp(data, window, min_ncpg, min_width));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -48,15 +100,15 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// rcpp_filter_threshold_pval
-int rcpp_filter_threshold_pval(Rcpp::List& data, double thr);
-RcppExport SEXP _ramr_rcpp_filter_threshold_pval(SEXP dataSEXP, SEXP thrSEXP) {
+// rcpp_filter_threshold_logp
+int rcpp_filter_threshold_logp(Rcpp::List& data, double thr);
+RcppExport SEXP _ramr_rcpp_filter_threshold_logp(SEXP dataSEXP, SEXP thrSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
     Rcpp::traits::input_parameter< double >::type thr(thrSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_filter_threshold_pval(data, thr));
+    rcpp_result_gen = Rcpp::wrap(rcpp_filter_threshold_logp(data, thr));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -144,6 +196,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// rcpp_extract_coef
+std::vector<double> rcpp_extract_coef(Rcpp::List& data);
+RcppExport SEXP _ramr_rcpp_extract_coef(SEXP dataSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_extract_coef(data));
+    return rcpp_result_gen;
+END_RCPP
+}
 // rcpp_test_nan
 double rcpp_test_nan();
 RcppExport SEXP _ramr_rcpp_test_nan() {
@@ -211,10 +274,14 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_ramr_rcpp_compute_logp_beta", (DL_FUNC) &_ramr_rcpp_compute_logp_beta, 1},
     {"_ramr_rcpp_compute_xiqr", (DL_FUNC) &_ramr_rcpp_compute_xiqr, 1},
-    {"_ramr_rcpp_create_granges", (DL_FUNC) &_ramr_rcpp_create_granges, 5},
+    {"_ramr_rcpp_create_granges_stranded_xiqr", (DL_FUNC) &_ramr_rcpp_create_granges_stranded_xiqr, 4},
+    {"_ramr_rcpp_create_granges_stranded_logp", (DL_FUNC) &_ramr_rcpp_create_granges_stranded_logp, 4},
+    {"_ramr_rcpp_create_granges_unstranded_xiqr", (DL_FUNC) &_ramr_rcpp_create_granges_unstranded_xiqr, 4},
+    {"_ramr_rcpp_create_granges_unstranded_logp", (DL_FUNC) &_ramr_rcpp_create_granges_unstranded_logp, 4},
     {"_ramr_rcpp_filter_threshold_xiqr", (DL_FUNC) &_ramr_rcpp_filter_threshold_xiqr, 2},
-    {"_ramr_rcpp_filter_threshold_pval", (DL_FUNC) &_ramr_rcpp_filter_threshold_pval, 2},
+    {"_ramr_rcpp_filter_threshold_logp", (DL_FUNC) &_ramr_rcpp_filter_threshold_logp, 2},
     {"_ramr_rcpp_fit_beta_mom", (DL_FUNC) &_ramr_rcpp_fit_beta_mom, 1},
     {"_ramr_rcpp_fit_beta_amle", (DL_FUNC) &_ramr_rcpp_fit_beta_amle, 1},
     {"_ramr_rcpp_fit_beta_nmle", (DL_FUNC) &_ramr_rcpp_fit_beta_nmle, 1},
@@ -222,6 +289,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ramr_rcpp_prepare_data", (DL_FUNC) &_ramr_rcpp_prepare_data, 7},
     {"_ramr_wait_a_second_omp", (DL_FUNC) &_ramr_wait_a_second_omp, 2},
     {"_ramr_rcpp_extract_out", (DL_FUNC) &_ramr_rcpp_extract_out, 1},
+    {"_ramr_rcpp_extract_coef", (DL_FUNC) &_ramr_rcpp_extract_coef, 1},
     {"_ramr_rcpp_test_nan", (DL_FUNC) &_ramr_rcpp_test_nan, 0},
     {"_ramr_rcpp_test_med_boost", (DL_FUNC) &_ramr_rcpp_test_med_boost, 1},
     {"_ramr_rcpp_test_iqr_boost", (DL_FUNC) &_ramr_rcpp_test_iqr_boost, 1},

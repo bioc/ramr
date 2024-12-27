@@ -25,11 +25,19 @@ bool wait_a_second_omp(int sec, int ncores)
 // [[Rcpp::export]]
 std::vector<double> rcpp_extract_out (Rcpp::List &data)
 {
-  Rcpp::XPtr<std::vector<double>> out((SEXP)data.attr("out_xptr"));
-  std::vector<double> res(out->begin(), out->end());
+  Rcpp::XPtr<T_out> out((SEXP)data.attr("out_xptr"));
+  T_out res(out->begin(), out->end());
   return res;
 }
-  
+
+// [[Rcpp::export]]
+std::vector<double> rcpp_extract_coef (Rcpp::List &data)
+{
+  Rcpp::XPtr<T_coef> out((SEXP)data.attr("coef_xptr"));
+  T_coef res(out->begin(), out->end());
+  return res;
+}
+
 // [[Rcpp::export]]
 double rcpp_test_nan ()
 {

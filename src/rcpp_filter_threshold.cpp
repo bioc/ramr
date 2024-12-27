@@ -48,7 +48,7 @@ int rcpp_filter_threshold_xiqr (Rcpp::List &data, double thr)
 }
 
 // [[Rcpp::export]]
-int rcpp_filter_threshold_pval (Rcpp::List &data, double thr)
+int rcpp_filter_threshold_logp (Rcpp::List &data, double thr)
 {
   return rcpp_filter_threshold<false>(data, thr);
 }

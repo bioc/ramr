@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <vector>
 #include <Rcpp.h>
 #include "ramr.h"
@@ -7,7 +6,7 @@
 // [[Rcpp::depends(BH)]]
 
 // Function estimates parameters of beta distribution and stores them
-// in the vector of coefficients as {[3] alpha (p), [4] beta (q)}
+// in the vector of coefficients as {[3] alpha (p), [4] beta (q), [5] log(std::beta)}
 //
 // TODO:
 //   [ ] OpenMP
@@ -23,7 +22,7 @@ int rcpp_fit_beta (Rcpp::List &data)                                            
   // containers
   Rcpp::XPtr<T_out> out((SEXP)data.attr("out_xptr"));                           // vector with intermediate output values (here: transposed 'raw')
   Rcpp::XPtr<T_len> len((SEXP)data.attr("len_xptr"));                           // lengths of input data rows minus number of NaNs
-  Rcpp::XPtr<T_coef> coef((SEXP)data.attr("coef_xptr"));                        // vector to hold per-row results (here: [0]median, [1]mean, [2]variance, [3]alpha, [4]beta)
+  Rcpp::XPtr<T_coef> coef((SEXP)data.attr("coef_xptr"));                        // vector to hold per-row results
   
   // fast direct accessors
   const auto out_data = out->data();
@@ -35,7 +34,7 @@ int rcpp_fit_beta (Rcpp::List &data)                                            
     const size_t l = len_data[r];                                               // length = ncol - nNaNs
     const auto q = coef_data + r*NCOEF + 1;                                     // pointer to the second element of 'coef' NCOEF-element array (first is median)
     if (l==0) {                                                                 // if no values to process (all are NaNs or excluded by median)
-      std::fill_n(q, 4, NA_REAL);                                               // estimates are NaN
+      std::fill_n(q, NCOEF-1, NA_REAL);                                         // estimates are NaN
       continue;                                                                 // skip this row
     }
     
@@ -78,28 +77,34 @@ int rcpp_fit_beta (Rcpp::List &data)                                            
       // beta (shape parameter q) in q[3]
       q[3] = 0.5 + q[1] / ( 2 * (1 - q[0] - q[1]) );
         
-    } else if (method==2) {                                                     // numerical MLE
+    } else if (method==2) {                                                     // TODO: numerical MLE
       Rcpp::stop("not implemented");
+      // check how stats::optim works, maybe look for a C++ solution
     }
+    
+    // logarithm of complete beta function in q[4]
+    q[4] = std::lgamma(q[2]) + std::lgamma(q[3]) - std::lgamma(q[2] + q[3]);
+    // there's absolutely no error handling here...
+    // but all numbers are defined and finite, so should be fine?..
   }
   
   return 0;
 }
 
 // [[Rcpp::export]]
-int rcpp_fit_beta_mom (Rcpp::List &data)
+int rcpp_fit_beta_mom (Rcpp::List &data)                                        // method of moments
 {
   return rcpp_fit_beta<0>(data);
 }
 
 // [[Rcpp::export]]
-int rcpp_fit_beta_amle (Rcpp::List &data)
+int rcpp_fit_beta_amle (Rcpp::List &data)                                       // approximate MLE
 {
   return rcpp_fit_beta<1>(data);
 }
 
 // [[Rcpp::export]]
-int rcpp_fit_beta_nmle (Rcpp::List &data)
+int rcpp_fit_beta_nmle (Rcpp::List &data)                                       // numerical MLE
 {
   return rcpp_fit_beta<2>(data);
 }

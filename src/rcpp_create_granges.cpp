@@ -15,12 +15,11 @@
 //   [ ] ...
 //
 
-// [[Rcpp::export]]
+template<bool ignore_strand, bool is_xiqr>                                      // if strand info should be ignored; if xIQR values are aggregated here
 Rcpp::List rcpp_create_granges (Rcpp::List &data,                               // List output of rcpp_prepare_data
-                                size_t window,                                  // 
-                                bool ignore_strand,                             // 
-                                size_t min_ncpg,                                // 
-                                size_t min_width)                               // 
+                                size_t window,                                  // maximum distance between genomic positions
+                                size_t min_ncpg,                                // minimum number of genomic positions in the region
+                                size_t min_width)                               // minimum width of the region
 {
   // consts
   const size_t ncol = data["ncol"];                                             // number of columns (samples)
@@ -67,7 +66,7 @@ Rcpp::List rcpp_create_granges (Rcpp::List &data,                               
     amr[s].dbeta /= amr[s].revmap.size();                  /* average dbeta */ \
     res_dbeta.push_back(amr[s].dbeta);                     /* average dbeta */ \
     amr[s].aggr /= amr[s].revmap.size();         /* aggregated 'out' values */ \
-    res_aggr.push_back(amr[s].aggr);             /* aggregated 'out' values */ \
+    res_aggr.push_back(is_xiqr ? amr[s].aggr : std::exp(amr[s].aggr)); /* ? */ \
   }                                                                            \
   amr[s].revmap.clear();                                    /* clear revmap */ \
   amr[s].open = false;                                         /* close AMR */ \
@@ -93,7 +92,7 @@ Rcpp::List rcpp_create_granges (Rcpp::List &data,                               
     
     for (size_t r=0; r<nrow; r++) {
       if (std::isnan(out_first[r])) continue;                                   // next if NaN
-      s = str_data[r] - 1;                                                      // strand of current position, 0-based
+      s = ignore_strand ? 2 : str_data[r] - 1;                                  // strand of current position, 0-based (or * if ignore_strand)
       if (amr[s].open) {                                                        // if there's an open AMR on this strand
         const size_t d = pos_data[r] - amr[s].end;                              //   distance from previous base
         if ((d<=window) && (amr[s].chr==chr_data[r])) {                         //   if within the window and the same chromosome
@@ -148,10 +147,34 @@ Rcpp::List rcpp_create_granges (Rcpp::List &data,                               
     Rcpp::Named("ncpg") = col_ncpg,                                             // number of CpGs
     Rcpp::Named("sample") = col_sample,                                         // integer sample id
     Rcpp::Named("dbeta") = res_dbeta,                                           // average 'raw' minus 'median' (beta)
-    Rcpp::Named("xiqr") = res_aggr                                              // average 'out' (mean for xIQR, geometric mean for p-values), or comb-p combined p
+    Rcpp::Named(is_xiqr ? "xiqr" : "pval") = res_aggr                           // average 'out' (mean for xIQR, geometric mean for p-values), or comb-p combined p
   );
   
   return(res);
+}
+
+// [[Rcpp::export]]
+Rcpp::List rcpp_create_granges_stranded_xiqr (Rcpp::List &data, size_t window, size_t min_ncpg, size_t min_width)
+{
+  return rcpp_create_granges<false, true>(data, window, min_ncpg, min_width);
+}
+
+// [[Rcpp::export]]
+Rcpp::List rcpp_create_granges_stranded_logp (Rcpp::List &data, size_t window, size_t min_ncpg, size_t min_width)
+{
+  return rcpp_create_granges<false, false>(data, window, min_ncpg, min_width);
+}
+
+// [[Rcpp::export]]
+Rcpp::List rcpp_create_granges_unstranded_xiqr (Rcpp::List &data, size_t window, size_t min_ncpg, size_t min_width)
+{
+  return rcpp_create_granges<true, true>(data, window, min_ncpg, min_width);
+}
+
+// [[Rcpp::export]]
+Rcpp::List rcpp_create_granges_unstranded_logp (Rcpp::List &data, size_t window, size_t min_ncpg, size_t min_width)
+{
+  return rcpp_create_granges<true, false>(data, window, min_ncpg, min_width);
 }
 
 
