@@ -80,6 +80,9 @@ int rcpp_fit_beta (Rcpp::List &data)                                            
     } else if (method==2) {                                                     // TODO: numerical MLE
       Rcpp::stop("not implemented");
       // check how stats::optim works, maybe look for a C++ solution
+      // possibly should use multi-objective optimization of the set of my
+      // two equations with digamma:
+      // https://scicomp.stackexchange.com/questions/3318/simultaneous-maximization-of-two-functions-without-available-derivatives 
     }
     
     // logarithm of complete beta function in q[4]

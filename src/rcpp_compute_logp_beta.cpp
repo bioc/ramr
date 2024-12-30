@@ -1,13 +1,14 @@
 #include <vector>
 #include <Rcpp.h>
 #include "ramr.h"
+// #include <boost/math/special_functions/beta.hpp>
 
 // [[Rcpp::plugins(cpp20)]]
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // This is a *modified* version of regularised incomplete beta function
-// taken from https://github.com/codeplea/incbeta
+// taken from https://github.com/codeplea/incbeta,
 // which is distributed under the following license:
 
 /*
@@ -34,6 +35,25 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  */
+
+// Modifications: 
+//   1) logp instead of p
+//   2) it always returns the lowest logp of two (tails) and
+//   3) saves time on not computing complete beta function for every x
+
+// First, this function is not that slow (faster than boost::math::beta)
+// and not that off as compared to R's pbeta. It does produce slightly
+//  different logp for extreme outliers (boost::math::beta is worse), but that
+// doesn't change the filtering results, as logp is still very small.
+// NB, the AMR geometric mean of logp might be very different as compared
+// to pbeta - mainly because the logp averaging is wrong in pure R
+// implementation of getAMR (produces infinity values instead of using
+// pbeta(..., log.p=TRUE))
+
+// Future potential improvements:
+//   [ ] maybe try to use <boost/math/tools/fraction.hpp> to compute the
+//       continued fraction part
+//   [ ] modify the tolerance to produce values that are closer to R's pbeta 
 
 #define STOP 1.0e-8
 #define TINY 1.0e-30
@@ -98,6 +118,8 @@ static inline double incbeta (double a,                              /* alpha */
 // TODO:
 //   [ ] OpenMP
 //   [x] skip rows where len[r]==0
+//   [ ] templated for different implementations of incomplete beta:
+//       my own above, boost::math::beta, own with boost continued fractions
 
 // [[Rcpp::export]]
 int rcpp_compute_logp_beta (Rcpp::List &data)                                   // List output of rcpp_prepare_data
@@ -126,6 +148,8 @@ int rcpp_compute_logp_beta (Rcpp::List &data)                                   
         const auto coef_first = coef_data + r*NCOEF;                            // first element of 'coef' array
         out_first[r] = incbeta(coef_first[3], coef_first[4],                    // Regularized Incomplete Beta Function
                                coef_first[5], raw_first[r]);
+        // // boost incomplete beta
+        // out_first[r] = std::log(boost::math::beta(coef_first[3], coef_first[4], raw_first[r])) - coef_first[5];
       } else {
         out_first[r] = NA_REAL;
       }
