@@ -36,7 +36,7 @@ int rcpp_compute_xiqr (Rcpp::List &data)                                        
     const auto out_first = out_data + c*nrow;                                   // first element of c-th column in 'out'
     for (size_t r=0; r<nrow; r++) {
       const auto coef_first = coef_data + r*NCOEF;                              // first element of 'coef' array
-      out_first[r] = (raw_first[r] - coef_first[0]) / coef_first[3];            // (value-median)/IQR
+      out_first[r] = (raw_first[r] - coef_first[2]) / coef_first[5];            // (value-median)/IQR
     }
   }
   

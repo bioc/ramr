@@ -10,11 +10,11 @@
 //
 
 // CONSTS //
-const size_t NCOEF = 6;                                                         // number of coefficient values to compute per genomic position
-// median is always 0th
-// for IQR: [1]Q3, [2]Q1, [3]IQR
-// for beta (MoM): [1]mean, [2]variance, [3]alpha, [4]beta, [5]log(std::beta)
-// for beta (MLE): [1]sample geometric mean, [2]sample geometric mean based on (1 − X), [3]alpha, [4]beta, [5]log(std::beta)
+const size_t NCOEF = 8;                                                         // number of coefficient values to compute per genomic position
+// always: [0]number of zeros, [1]number of ones, [2]median
+// for IQR: [3]Q3, [4]Q1, [5]IQR
+// for beta (MoM): [3]mean, [4]variance, [5]alpha, [6]beta, [7]log(std::beta)
+// for beta (MLE): [3]sample geometric mean, [4]sample geometric mean based on (1 − X), [5]alpha, [6]beta, [7]log(std::beta)
 
 // TYPEDEFS //
 typedef std::vector<unsigned int> T_chr;                                        // vector of chromosomes
@@ -28,6 +28,9 @@ typedef std::vector<double> T_coef;                                             
 // OpenMP //
 #ifdef _OPENMP
 #include <omp.h>
+const size_t MAXTHREADS = omp_get_max_threads();
+#else
+const size_t MAXTHREADS = 1;
 #endif
 
 

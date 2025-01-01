@@ -116,6 +116,7 @@ static inline double incbeta (double a,                              /* alpha */
 // log(std::beta), and stores them in 'out' (not transposed anymore)
 //
 // TODO:
+//   [ ] make it ready for 0 and 1 - now it's not aware of them
 //   [ ] OpenMP
 //   [x] skip rows where len[r]==0
 //   [ ] templated for different implementations of incomplete beta:
@@ -146,10 +147,10 @@ int rcpp_compute_logp_beta (Rcpp::List &data)                                   
     for (size_t r=0; r<nrow; r++) {
       if (len_data[r] && !std::isnan(raw_first[r])) {                           // if row is not excluded and x is not NaN
         const auto coef_first = coef_data + r*NCOEF;                            // first element of 'coef' array
-        out_first[r] = incbeta(coef_first[3], coef_first[4],                    // Regularized Incomplete Beta Function
-                               coef_first[5], raw_first[r]);
+        out_first[r] = incbeta(coef_first[5], coef_first[6],                    // Regularized Incomplete Beta Function
+                               coef_first[7], raw_first[r]);
         // // boost incomplete beta
-        // out_first[r] = std::log(boost::math::beta(coef_first[3], coef_first[4], raw_first[r])) - coef_first[5];
+        // out_first[r] = std::log(boost::math::beta(coef_first[5], coef_first[6], raw_first[r])) - coef_first[7];
       } else {
         out_first[r] = NA_REAL;
       }

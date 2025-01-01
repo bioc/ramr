@@ -53,8 +53,8 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
   raw->shrink_to_fit();
   
   // initialize 'len', 'coef', and 'out'
-  len->resize(nrow);                                                            // init with 0 - a waste, but no choice
-  coef->resize(nrow*NCOEF);                                                     // nrow times NCOEF to store them all continuously
+  len->resize(nrow);                                                            // init with 0
+  coef->resize(nrow*NCOEF);                                                     // nrow times NCOEF to store them all continuously (all 0)
   out->resize(ncol*nrow, NA_REAL);                                              // init with NA_REAL - see if it breaks anything further. NB: default might be marginally faster
   
   // fast direct accessors
@@ -68,25 +68,30 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
   // have to rewrite this to become cache-friendly, 845 samples seriously suck on Mac
   double *buf  = (double*) malloc(ncol * sizeof(double));                       // buffer to gather values from each column (mcols[r,])
   for (size_t r=0; r<nrow; r++) {
+    const auto q = coef_data + r*NCOEF;                                         // pointer to coef NCOEF-element array
     size_t l = 0;                                                               // number of elements actually copied
-    for (size_t c=0; c<ncol; c++)                                               // column by column
-      if (!std::isnan(raw_data[r+nrow*c]))                                      // if value is not a NaN
-        buf[l++] = raw_data[r+nrow*c];                                          // gather it in the buffer; increase its length
+    for (size_t c=0; c<ncol; c++) {                                             // column by column
+      const auto raw_value = raw_data[r+nrow*c];                                // value to compare/transpose
+      if (!std::isnan(raw_value)) {                                             // if is not NaN
+        q[0] += (raw_value <= DBL_EPSILON);                                     // is it a 0?
+        q[1] += (raw_value >= 1-DBL_EPSILON);                                   // is it a 1?
+        buf[l++] = raw_value;                                                   // gather it in the buffer; increase its length
+      }
+    }
     
     // median
-    const auto q = coef_data + r*NCOEF;                                         // pointer to coef NCOEF-element array
-    const size_t hl = l/2;                                                      // half length
-    std::nth_element(buf, buf+hl, buf+l);                                       // order up to l/2-th
-    q[0] = buf[hl];                                                             // median for odd l
-    if ((l&1)==0) {                                                             // if l is even
-      std::nth_element(buf, buf+hl-1, buf+hl);                                  // order up to l/2-1-th
-      q[0] = (q[0] + buf[hl-1])/2;                                              // median for even l
-    }
-    if (q[0]<exclude_lower || q[0]>exclude_upper){                              // if median is less that exclude_lower or greater than exclude_upper
-      std::copy(buf, buf+l, out_data+ncol*r);                                   // copy 'buf' to 'out'
-      len_data[r] = l;                                                          // adjust observed length
-    } else {
-      len_data[r] = 0;                                                          // don't use this row in further analyses
+    if (l>0) {                                                                  // if there are values in the buffer
+      const size_t hl = l/2;                                                    // half length
+      std::nth_element(buf, buf+hl, buf+l);                                     // order up to l/2-th
+      q[3] = buf[hl];                                                           // median for odd l
+      if ((l&1)==0) {                                                           // if l is even
+        std::nth_element(buf, buf+hl-1, buf+hl);                                // order up to l/2-1-th
+        q[3] = (q[3] + buf[hl-1])/2;                                            // median for even l
+      }
+      if (q[3]<exclude_lower || q[3]>exclude_upper){                            // if median is less that exclude_lower or greater than exclude_upper
+        std::copy(buf, buf+l, out_data+ncol*r);                                 // copy 'buf' to 'out'
+        len_data[r] = l;                                                        // adjust observed length, because otherwise it's 0 and we won't use this row in further analyses
+      }
     }
   }
   free(buf);

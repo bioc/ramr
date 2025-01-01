@@ -6,9 +6,10 @@
 // [[Rcpp::depends(BH)]]
 
 // Function estimates parameters of beta distribution and stores them
-// in the vector of coefficients as {[3] alpha (p), [4] beta (q), [5] log(std::beta)}
+// in the vector of coefficients as {[5] alpha (p), [6] beta (q), [7] log(std::beta)}
 //
 // TODO:
+//   [ ] make it ready for 0 and 1 - now it is not aware of them
 //   [ ] OpenMP
 //   [ ] ...
 
@@ -32,9 +33,9 @@ int rcpp_fit_beta (Rcpp::List &data)                                            
   for (size_t r=0; r<nrow; r++) {
     const auto first = out_data + r*ncol;                                       // first element
     const size_t l = len_data[r];                                               // length = ncol - nNaNs
-    const auto q = coef_data + r*NCOEF + 1;                                     // pointer to the second element of 'coef' NCOEF-element array (first is median)
+    const auto q = coef_data + r*NCOEF + 3;                                     // pointer to the first free element of 'coef' NCOEF-element array
     if (l==0) {                                                                 // if no values to process (all are NaNs or excluded by median)
-      std::fill_n(q, NCOEF-1, NA_REAL);                                         // estimates are NaN
+      std::fill_n(q, NCOEF-3, NA_REAL);                                         // estimates are NaN
       continue;                                                                 // skip this row
     }
     
