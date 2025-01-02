@@ -28,9 +28,9 @@ typedef std::vector<double> T_coef;                                             
 // OpenMP //
 #ifdef _OPENMP
 #include <omp.h>
-const size_t MAXTHREADS = omp_get_max_threads();
 #else
-const size_t MAXTHREADS = 1;
+#define omp_get_max_threads() 1
+#define omp_get_thread_num() 0
 #endif
 
 
