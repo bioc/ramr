@@ -32,52 +32,53 @@ int rcpp_fit_beta (Rcpp::List &data)                                            
 
   for (size_t r=0; r<nrow; r++) {
     const auto first = out_data + r*ncol;                                       // first element
-    const auto q = coef_data + r*NCOEF + 3;                                     // pointer to the first free element of 'coef' NCOEF-element array
+    const auto q = coef_data + r*NCOEF;                                         // pointer to the first element of 'coef' NCOEF-element array
     const size_t l = len_data[r];                                               // length = ncol - nNaNs
-    const size_t lzo ;                                               // number of 0s and 1s
-    if (l==0) {                                                                 // if no values to process (all are NaNs or excluded by median)
-      std::fill_n(q, NCOEF-3, NA_REAL);                                         // estimates are NaN
+    const size_t lzo = (size_t)(q[0]+q[1]+0.5);                                 // number of 0s and 1s within l
+    if (l < (lzo+MINNSMPL)) {                                                   // if not enough values to process (either excluded by median, or too many NaN/0/1)
+      std::fill_n(q+3, NCOEF-3, NA_REAL);                                       // estimates are NaN
       continue;                                                                 // skip this row
     }
 
+    // WHICH ONES OF THESE NEED TO SKIP 0/1?
     if (method==0) {                                                            // method of moments
-      // mean in q[0]
-      q[0] = 0;
+      // mean in q[3]
+      q[3] = 0;
       for (size_t i=0; i<l; i++)
-        q[0] += first[i];
-      q[0] /= l;
+        q[3] += first[i];
+      q[3] /= l;
 
-      // variance in q[1]
-      q[1] = 0;
+      // variance in q[4]
+      q[4] = 0;
       for (size_t i=0; i<l; i++)
-        q[1] += std::pow(first[i] - q[0], 2);
-      q[1] /= l - 1;
+        q[4] += std::pow(first[i] - q[3], 2);
+      q[4] /= l - 1;
 
-      // alpha (shape parameter p) in q[2]
-      q[2] = q[0] * (( (q[0] * (1 - q[0])) / q[1]) - 1);
+      // alpha (shape parameter p) in q[5]
+      q[5] = q[3] * (( (q[3] * (1 - q[3])) / q[4]) - 1);
 
-      // beta (shape parameter q) in q[3]
-      q[3] = (1 - q[0]) * (((q[0] * (1 - q[0])) / q[1]) - 1);
+      // beta (shape parameter q) in q[6]
+      q[6] = (1 - q[3]) * (((q[3] * (1 - q[3])) / q[4]) - 1);
 
     } else if (method==1) {                                                     // approximate MLE
       // https://en.wikipedia.org/wiki/Beta_distribution#Maximum_likelihood
 
-      // sample geometric mean in q[0]
-      // sample geometric mean based on (1 − X) in q[1]
-      q[0] = 0;
-      q[1] = 0;
+      // sample geometric mean in q[3]
+      // sample geometric mean based on (1 − X) in q[4]
+      q[3] = 0;
+      q[4] = 0;
       for (size_t i=0; i<l; i++) {
-        q[0] += std::log(first[i]);
-        q[1] += std::log(1 - first[i]);
+        q[3] += std::log(first[i]);
+        q[4] += std::log(1 - first[i]);
       }
-      q[0] = exp(q[0]/l);
-      q[1] = exp(q[1]/l);
+      q[3] = exp(q[3]/l);
+      q[4] = exp(q[4]/l);
 
-      // alpha (shape parameter p) in q[2]
-      q[2] = 0.5 + q[0] / ( 2 * (1 - q[0] - q[1]) );
+      // alpha (shape parameter p) in q[5]
+      q[5] = 0.5 + q[3] / ( 2 * (1 - q[3] - q[4]) );
 
-      // beta (shape parameter q) in q[3]
-      q[3] = 0.5 + q[1] / ( 2 * (1 - q[0] - q[1]) );
+      // beta (shape parameter q) in q[6]
+      q[6] = 0.5 + q[4] / ( 2 * (1 - q[3] - q[4]) );
 
     } else if (method==2) {                                                     // TODO: numerical MLE
       Rcpp::stop("not implemented");
@@ -88,7 +89,7 @@ int rcpp_fit_beta (Rcpp::List &data)                                            
     }
 
     // logarithm of complete beta function in q[4]
-    q[4] = std::lgamma(q[2]) + std::lgamma(q[3]) - std::lgamma(q[2] + q[3]);
+    q[7] = std::lgamma(q[5]) + std::lgamma(q[6]) - std::lgamma(q[5] + q[6]);
     // there's absolutely no error handling here...
     // but all numbers are defined and finite, so should be fine?..
   }

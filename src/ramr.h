@@ -10,6 +10,7 @@
 //
 
 // CONSTS //
+const size_t MINNSMPL = 3;                                                      // minimum number of samples with value within (0;1) (i.e., excluding 0, 1 and NaN)
 const size_t NCOEF = 8;                                                         // number of coefficient values to compute per genomic position
 // always: [0]number of zeros, [1]number of ones, [2]median
 // for IQR: [3]Q3, [4]Q1, [5]IQR

@@ -64,7 +64,7 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
   const auto len_data = len->data();
   const auto coef_data = coef->data();
 
-  // transpose 'raw' to 'out', skipping NaNs; adjust 'len'
+  // transpose 'raw' to 'out', counting 0/1, skipping NaNs; adjust 'len'
   // should be more computationally efficient and parallelizable
   // have to rewrite this to become cache-friendly, 845 samples seriously suck on Mac
   double *buf  = (double*) malloc(ncol * sizeof(double));                       // buffer to gather values from each column (mcols[r,])
