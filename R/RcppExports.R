@@ -49,10 +49,6 @@ rcpp_get_iqr <- function(data) {
     .Call(`_ramr_rcpp_get_iqr`, data)
 }
 
-rcpp_prepare_data <- function(seqnames, seqrunlens, start, strand, mcols, exclude_lower, exclude_upper) {
-    .Call(`_ramr_rcpp_prepare_data`, seqnames, seqrunlens, start, strand, mcols, exclude_lower, exclude_upper)
-}
-
 wait_a_second_omp <- function(sec, ncores) {
     .Call(`_ramr_wait_a_second_omp`, sec, ncores)
 }
@@ -87,5 +83,13 @@ rcpp_test_iqr_type7 <- function(v) {
 
 rcpp_test_s4v <- function(x) {
     .Call(`_ramr_rcpp_test_s4v`, x)
+}
+
+rcpp_prepare_data <- function(seqnames, seqrunlens, start, strand, mcols, exclude_lower, exclude_upper) {
+    .Call(`_ramr_rcpp_prepare_data`, seqnames, seqrunlens, start, strand, mcols, exclude_lower, exclude_upper)
+}
+
+rcpp_test_omp <- function() {
+    .Call(`_ramr_rcpp_test_omp`)
 }
 

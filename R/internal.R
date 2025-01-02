@@ -14,16 +14,16 @@
 #' @importFrom parallel detectCores makeCluster stopCluster
 #' @importFrom S4Vectors queryHits
 #' @importFrom stats median na.omit rbeta pbeta
-#' @importFrom utils head tail
+#' @importFrom utils head tail packageVersion
 #' @importFrom Rcpp sourceCpp
 #' @useDynLib ramr, .registration=TRUE
 
 
-# internal globals, constants and helper functions 
+# internal globals, constants and helper functions
 #
 
 ################################################################################
-# Globals, unload
+# Globals, unload, attach
 ################################################################################
 
 utils::globalVariables(c(
@@ -33,6 +33,24 @@ utils::globalVariables(c(
 
 .onUnload <- function (libpath) {library.dynam.unload("ramr", libpath)}
 
+.onAttach <- function(libname, pkgname) {
+  if(interactive()) {
+    max.threads <- rcpp_test_omp()
+    msg <- ifelse(
+      max.threads<0,
+      paste0(
+        "Multithreading (OpenMP) is not available.\n",
+        "Check how to enable it at https://github.com/BBCG/ramr"
+      ),
+      sprintf(
+        "ramr v%s using %i out of %i available threads",
+        utils::packageVersion("ramr"), max(1, max.threads %/% 2), max.threads
+      )
+    )
+    packageStartupMessage(msg)
+  }
+  invisible()
+}
 
 ################################################################################
 # Constants

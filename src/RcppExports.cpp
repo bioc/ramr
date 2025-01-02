@@ -156,23 +156,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// rcpp_prepare_data
-Rcpp::List rcpp_prepare_data(Rcpp::IntegerVector& seqnames, Rcpp::IntegerVector& seqrunlens, Rcpp::IntegerVector& start, Rcpp::IntegerVector& strand, Rcpp::DataFrame& mcols, double exclude_lower, double exclude_upper);
-RcppExport SEXP _ramr_rcpp_prepare_data(SEXP seqnamesSEXP, SEXP seqrunlensSEXP, SEXP startSEXP, SEXP strandSEXP, SEXP mcolsSEXP, SEXP exclude_lowerSEXP, SEXP exclude_upperSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::IntegerVector& >::type seqnames(seqnamesSEXP);
-    Rcpp::traits::input_parameter< Rcpp::IntegerVector& >::type seqrunlens(seqrunlensSEXP);
-    Rcpp::traits::input_parameter< Rcpp::IntegerVector& >::type start(startSEXP);
-    Rcpp::traits::input_parameter< Rcpp::IntegerVector& >::type strand(strandSEXP);
-    Rcpp::traits::input_parameter< Rcpp::DataFrame& >::type mcols(mcolsSEXP);
-    Rcpp::traits::input_parameter< double >::type exclude_lower(exclude_lowerSEXP);
-    Rcpp::traits::input_parameter< double >::type exclude_upper(exclude_upperSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_prepare_data(seqnames, seqrunlens, start, strand, mcols, exclude_lower, exclude_upper));
-    return rcpp_result_gen;
-END_RCPP
-}
 // wait_a_second_omp
 bool wait_a_second_omp(int sec, int ncores);
 RcppExport SEXP _ramr_wait_a_second_omp(SEXP secSEXP, SEXP ncoresSEXP) {
@@ -272,6 +255,33 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// rcpp_prepare_data
+Rcpp::List rcpp_prepare_data(Rcpp::IntegerVector& seqnames, Rcpp::IntegerVector& seqrunlens, Rcpp::IntegerVector& start, Rcpp::IntegerVector& strand, Rcpp::DataFrame& mcols, double exclude_lower, double exclude_upper);
+RcppExport SEXP _ramr_rcpp_prepare_data(SEXP seqnamesSEXP, SEXP seqrunlensSEXP, SEXP startSEXP, SEXP strandSEXP, SEXP mcolsSEXP, SEXP exclude_lowerSEXP, SEXP exclude_upperSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector& >::type seqnames(seqnamesSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector& >::type seqrunlens(seqrunlensSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector& >::type start(startSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector& >::type strand(strandSEXP);
+    Rcpp::traits::input_parameter< Rcpp::DataFrame& >::type mcols(mcolsSEXP);
+    Rcpp::traits::input_parameter< double >::type exclude_lower(exclude_lowerSEXP);
+    Rcpp::traits::input_parameter< double >::type exclude_upper(exclude_upperSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_prepare_data(seqnames, seqrunlens, start, strand, mcols, exclude_lower, exclude_upper));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpp_test_omp
+int rcpp_test_omp();
+RcppExport SEXP _ramr_rcpp_test_omp() {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    rcpp_result_gen = Rcpp::wrap(rcpp_test_omp());
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_ramr_rcpp_compute_logp_beta", (DL_FUNC) &_ramr_rcpp_compute_logp_beta, 1},
@@ -286,7 +296,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ramr_rcpp_fit_beta_amle", (DL_FUNC) &_ramr_rcpp_fit_beta_amle, 1},
     {"_ramr_rcpp_fit_beta_nmle", (DL_FUNC) &_ramr_rcpp_fit_beta_nmle, 1},
     {"_ramr_rcpp_get_iqr", (DL_FUNC) &_ramr_rcpp_get_iqr, 1},
-    {"_ramr_rcpp_prepare_data", (DL_FUNC) &_ramr_rcpp_prepare_data, 7},
     {"_ramr_wait_a_second_omp", (DL_FUNC) &_ramr_wait_a_second_omp, 2},
     {"_ramr_rcpp_extract_out", (DL_FUNC) &_ramr_rcpp_extract_out, 1},
     {"_ramr_rcpp_extract_coef", (DL_FUNC) &_ramr_rcpp_extract_coef, 1},
@@ -296,6 +305,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ramr_rcpp_test_med", (DL_FUNC) &_ramr_rcpp_test_med, 1},
     {"_ramr_rcpp_test_iqr_type7", (DL_FUNC) &_ramr_rcpp_test_iqr_type7, 1},
     {"_ramr_rcpp_test_s4v", (DL_FUNC) &_ramr_rcpp_test_s4v, 1},
+    {"_ramr_rcpp_prepare_data", (DL_FUNC) &_ramr_rcpp_prepare_data, 7},
+    {"_ramr_rcpp_test_omp", (DL_FUNC) &_ramr_rcpp_test_omp, 0},
     {NULL, NULL, 0}
 };
 
