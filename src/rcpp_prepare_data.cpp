@@ -43,7 +43,7 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
 
   // fill 'chr' vector with seqname ids
   chr->reserve(nrow);                                                           // reserve space as required
-  for (size_t i=0; i<seqnames.size(); i++)
+  for (size_t i=0; i<(size_t)seqnames.size(); i++)
     chr->resize(chr->size()+seqrunlens[i], seqnames[i]);
   chr->shrink_to_fit();
 

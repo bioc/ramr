@@ -41,18 +41,20 @@ int rcpp_fit_beta (Rcpp::List &data)                                            
     }
 
     // WHICH ONES OF THESE NEED TO SKIP 0/1?
-    if (method==0) {                                                            // method of moments
+    if (method==0) {                                                            // method of moments based on the unbiased estimator of variance
       // mean in q[3]
       q[3] = 0;
       for (size_t i=0; i<l; i++)
-        q[3] += first[i];
-      q[3] /= l;
+        if (notZO(first[i]))
+          q[3] += first[i];
+      q[3] /= l-lzo;
 
       // variance in q[4]
       q[4] = 0;
       for (size_t i=0; i<l; i++)
-        q[4] += std::pow(first[i] - q[3], 2);
-      q[4] /= l - 1;
+        if (notZO(first[i]))
+          q[4] += std::pow(first[i] - q[3], 2);
+      q[4] /= l-lzo - 1;
 
       // alpha (shape parameter p) in q[5]
       q[5] = q[3] * (( (q[3] * (1 - q[3])) / q[4]) - 1);
@@ -68,11 +70,13 @@ int rcpp_fit_beta (Rcpp::List &data)                                            
       q[3] = 0;
       q[4] = 0;
       for (size_t i=0; i<l; i++) {
-        q[3] += std::log(first[i]);
-        q[4] += std::log(1 - first[i]);
+        if (notZO(first[i])) {
+          q[3] += std::log(first[i]);
+          q[4] += std::log(1 - first[i]);
+        }
       }
-      q[3] = exp(q[3]/l);
-      q[4] = exp(q[4]/l);
+      q[3] = exp(q[3]/(l-lzo));
+      q[4] = exp(q[4]/(l-lzo));
 
       // alpha (shape parameter p) in q[5]
       q[5] = 0.5 + q[3] / ( 2 * (1 - q[3] - q[4]) );

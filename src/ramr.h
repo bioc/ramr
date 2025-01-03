@@ -29,6 +29,7 @@ typedef std::vector<double> T_coef;                                             
 // MACRO //
 #define isZero(x) ((x) <= DBL_EPSILON)
 #define isOne(x) ((x) >= 1-DBL_EPSILON)
+#define notZO(x) (!isZero(x) && !isOne(x))
 
 // OpenMP //
 #ifdef _OPENMP
