@@ -9,8 +9,9 @@
 
 // This function prepares input data for further processing:
 //   1) makes a copy of raw methylation values ('raw')
-//   2) transposes raw values dropping NaNs (to 'out')
-//      and counting 0s, 1s and other valid values ('coef', 'len')
+//   2) transposes raw values dropping NaNs (to 'out'),
+//      optionally transforms to include {0;1} into (0,1),
+//      counts 0s, 1s and other valid values ('coef', 'len')
 //   3) arranges other vectors used in computations later.
 // NB: <input.ranges> for rcpp_prepare_data must be sorted
 //
@@ -65,7 +66,7 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
   const auto coef_data = coef->data();
   
   // linear transformation as described in https://pubmed.ncbi.nlm.nih.gov/16594767/
-  // squeezes {0,1} extremes within bounds of beta distribution
+  // squeezes {0;1} extremes within (0,1) bounds of beta distribution
   const double a = ((double)ncol - 1) / ncol;                                   // coefficient for linear transformation
   const double b = 0.5 / ncol;                                                  // coefficient for linear transformation
   
