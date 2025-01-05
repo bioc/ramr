@@ -12,14 +12,14 @@
 //   2) transposes raw values dropping NaNs (to 'out')
 //      and counting 0s, 1s and other valid values ('coef', 'len')
 //   3) arranges other vectors used in computations later.
+// NB: <input.ranges> for rcpp_prepare_data must be sorted
 //
 // TODO:
 //   [ ] more efficient access to S4Vectors with raw values
 //   [ ] OpenMP
 //   [ ] ...
 
-// <input.ranges> for rcpp_prepare_data must be sorted
-// [[Rcpp::export]]
+template<int transform>
 Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    // IntegerVector (factor) output of S4Vectors::runValue(GenomeInfoDb::seqnames(<input.ranges>))
                               Rcpp::IntegerVector &seqrunlens,                  // IntegerVector output of S4Vectors::runLength(GenomeInfoDb::seqnames(<input.ranges>))
                               Rcpp::IntegerVector &start,                       // IntegerVector output of BiocGenerics::start(<input.ranges>)
@@ -63,6 +63,12 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
   const auto out_data = out->data();
   const auto len_data = len->data();
   const auto coef_data = coef->data();
+  
+  // linear transformation as described in https://pubmed.ncbi.nlm.nih.gov/16594767/
+  // squeezes {0,1} extremes within bounds of beta distribution
+  const double a = ((double)ncol - 1) / ncol;                                   // coefficient for linear transformation
+  const double b = 0.5 / ncol;                                                  // coefficient for linear transformation
+  
 
   // transpose 'raw' to 'out', counting 0/1, skipping NaNs; adjust 'len'
   // should be more computationally efficient and parallelizable
@@ -74,9 +80,13 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
     for (size_t c=0; c<ncol; c++) {                                             // column by column
       const auto raw_value = raw_data[r+nrow*c];                                // value to compare/transpose
       if (!std::isnan(raw_value)) {                                             // if is not NaN
-        q[0] += isZero(raw_value);                                              // is it a 0?
-        q[1] += isOne(raw_value);                                               // is it a 1?
-        buf[l++] = raw_value;                                                   // gather it in the buffer; increase its length
+        if (transform==0) {                                                     // use raw values == do not transform
+          q[0] += isZero(raw_value);                                            // is it a 0?
+          q[1] += isOne(raw_value);                                             // is it a 1?
+          buf[l++] = raw_value;                                                 // gather it in the buffer; increase its length
+        } else if (transform==1) {                                              // do a linear transformation of values
+          buf[l++] = raw_value * a + b;                                         // transform, gather it in the buffer; increase its length
+        }
       }
     }
 
@@ -126,6 +136,19 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
   return(res);
 }
 
+// [[Rcpp::export]]
+Rcpp::List rcpp_prepare_data_identity (Rcpp::IntegerVector &seqnames, Rcpp::IntegerVector &seqrunlens, Rcpp::IntegerVector &start,
+                                       Rcpp::IntegerVector &strand, Rcpp::DataFrame &mcols, double exclude_lower, double exclude_upper)                                        // method of moments
+{
+  return rcpp_prepare_data<0>(seqnames, seqrunlens, start, strand, mcols, exclude_lower, exclude_upper);
+}
+
+// [[Rcpp::export]]
+Rcpp::List rcpp_prepare_data_linear (Rcpp::IntegerVector &seqnames, Rcpp::IntegerVector &seqrunlens, Rcpp::IntegerVector &start,
+                                     Rcpp::IntegerVector &strand, Rcpp::DataFrame &mcols, double exclude_lower, double exclude_upper)                                        // method of moments
+{
+  return rcpp_prepare_data<1>(seqnames, seqrunlens, start, strand, mcols, exclude_lower, exclude_upper);
+}
 
 
 // #############################################################################
