@@ -26,6 +26,7 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
                               Rcpp::IntegerVector &start,                       // IntegerVector output of BiocGenerics::start(<input.ranges>)
                               Rcpp::IntegerVector &strand,                      // IntegerVector (factor) output of as.factor(BiocGenerics::strand(<input.ranges>))
                               Rcpp::DataFrame &mcols,                           // DataFrame output of as.data.frame(GenomicRanges::mcols(<input.ranges>))
+                              Rcpp::DataFrame &coverage,                        // optional DataFrame with coverage data for binomial modelling of extremes {0;1}
                               double exclude_lower,                             // lower bound of range to exclude
                               double exclude_upper)                             // upper bound of range to exclude
 {
@@ -38,6 +39,7 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
   T_pos* pos = new T_pos(start.begin(), start.end());                           // genomic positions
   T_str* str = new T_str(strand.begin(), strand.end());                         // genomic strands
   T_raw* raw = new T_raw;                                                       // flat vector with raw values from &mcols
+  T_cov* cov = new T_cov;                                                       // optional flat vector with coverage values from &coverage
   T_out* out = new T_out;                                                       // vector to hold intermediate output values (e.g., transposed)
   T_len* len = new T_len;                                                       // lengths of &mcols rows minus number of NaNs
   T_coef* coef = new T_coef;                                                    // vector to hold per-row results (e.g., median, Q1, Q3, parameters of fitted distribution)
@@ -54,6 +56,14 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
     raw->insert(raw->end(), ((Rcpp::NumericVector)mcols[c]).begin(), ((Rcpp::NumericVector)mcols[c]).end());
   raw->shrink_to_fit();
 
+  // if given: fill 'cov' with values from &coverage
+  if ((size_t)coverage.size()==ncol && (size_t)coverage.nrows()==nrow) {
+    cov->reserve(ncol*nrow);                                                    // reserve space as required
+    for (size_t c=0; c<ncol; c++)
+      cov->insert(cov->end(), ((Rcpp::IntegerVector)coverage[c]).begin(), ((Rcpp::IntegerVector)coverage[c]).end());
+    cov->shrink_to_fit();
+  }
+
   // initialize 'len', 'coef', and 'out'
   len->resize(nrow);                                                            // init with 0
   coef->resize(nrow*NCOEF);                                                     // nrow times NCOEF to store them all continuously (all 0)
@@ -64,12 +74,12 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
   const auto out_data = out->data();
   const auto len_data = len->data();
   const auto coef_data = coef->data();
-  
+
   // linear transformation as described in https://pubmed.ncbi.nlm.nih.gov/16594767/
   // squeezes {0;1} extremes within (0,1) bounds of beta distribution
   const double a = ((double)ncol - 1) / ncol;                                   // coefficient for linear transformation
   const double b = 0.5 / ncol;                                                  // coefficient for linear transformation
-  
+
 
   // transpose 'raw' to 'out', counting 0/1, skipping NaNs; adjust 'len'
   // should be more computationally efficient and parallelizable
@@ -123,6 +133,7 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
   Rcpp::XPtr<T_pos> pos_xptr(pos, true);
   Rcpp::XPtr<T_str> str_xptr(str, true);
   Rcpp::XPtr<T_raw> raw_xptr(raw, true);
+  Rcpp::XPtr<T_cov> cov_xptr(cov, true);
   Rcpp::XPtr<T_out> out_xptr(out, true);
   Rcpp::XPtr<T_len> len_xptr(len, true);
   Rcpp::XPtr<T_coef> coef_xptr(coef, true);
@@ -130,6 +141,7 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
   res.attr("pos_xptr") = pos_xptr;
   res.attr("str_xptr") = str_xptr;
   res.attr("raw_xptr") = raw_xptr;
+  res.attr("cov_xptr") = cov_xptr;
   res.attr("out_xptr") = out_xptr;
   res.attr("len_xptr") = len_xptr;
   res.attr("coef_xptr") = coef_xptr;
@@ -138,17 +150,19 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
 }
 
 // [[Rcpp::export]]
-Rcpp::List rcpp_prepare_data_identity (Rcpp::IntegerVector &seqnames, Rcpp::IntegerVector &seqrunlens, Rcpp::IntegerVector &start,
-                                       Rcpp::IntegerVector &strand, Rcpp::DataFrame &mcols, double exclude_lower, double exclude_upper)                                        // method of moments
+Rcpp::List rcpp_prepare_data_identity (
+    Rcpp::IntegerVector &seqnames, Rcpp::IntegerVector &seqrunlens, Rcpp::IntegerVector &start,
+    Rcpp::IntegerVector &strand, Rcpp::DataFrame &mcols, Rcpp::DataFrame &coverage, double exclude_lower, double exclude_upper)
 {
-  return rcpp_prepare_data<0>(seqnames, seqrunlens, start, strand, mcols, exclude_lower, exclude_upper);
+  return rcpp_prepare_data<0>(seqnames, seqrunlens, start, strand, mcols, coverage, exclude_lower, exclude_upper);
 }
 
 // [[Rcpp::export]]
-Rcpp::List rcpp_prepare_data_linear (Rcpp::IntegerVector &seqnames, Rcpp::IntegerVector &seqrunlens, Rcpp::IntegerVector &start,
-                                     Rcpp::IntegerVector &strand, Rcpp::DataFrame &mcols, double exclude_lower, double exclude_upper)                                        // method of moments
+Rcpp::List rcpp_prepare_data_linear (
+    Rcpp::IntegerVector &seqnames, Rcpp::IntegerVector &seqrunlens, Rcpp::IntegerVector &start,
+    Rcpp::IntegerVector &strand, Rcpp::DataFrame &mcols, Rcpp::DataFrame &coverage, double exclude_lower, double exclude_upper)
 {
-  return rcpp_prepare_data<1>(seqnames, seqrunlens, start, strand, mcols, exclude_lower, exclude_upper);
+  return rcpp_prepare_data<1>(seqnames, seqrunlens, start, strand, mcols, coverage, exclude_lower, exclude_upper);
 }
 
 
