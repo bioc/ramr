@@ -85,12 +85,12 @@ rcpp_test_s4v <- function(x) {
     .Call(`_ramr_rcpp_test_s4v`, x)
 }
 
-rcpp_prepare_data_identity <- function(seqnames, seqrunlens, start, strand, mcols, covrg, exclude_lower, exclude_upper) {
-    .Call(`_ramr_rcpp_prepare_data_identity`, seqnames, seqrunlens, start, strand, mcols, covrg, exclude_lower, exclude_upper)
+rcpp_prepare_data_identity <- function(seqnames, seqrunlens, start, strand, mcols, coverage, exclude_lower, exclude_upper) {
+    .Call(`_ramr_rcpp_prepare_data_identity`, seqnames, seqrunlens, start, strand, mcols, coverage, exclude_lower, exclude_upper)
 }
 
-rcpp_prepare_data_linear <- function(seqnames, seqrunlens, start, strand, mcols, covrg, exclude_lower, exclude_upper) {
-    .Call(`_ramr_rcpp_prepare_data_linear`, seqnames, seqrunlens, start, strand, mcols, covrg, exclude_lower, exclude_upper)
+rcpp_prepare_data_linear <- function(seqnames, seqrunlens, start, strand, mcols, coverage, exclude_lower, exclude_upper) {
+    .Call(`_ramr_rcpp_prepare_data_linear`, seqnames, seqrunlens, start, strand, mcols, coverage, exclude_lower, exclude_upper)
 }
 
 rcpp_test_omp <- function() {

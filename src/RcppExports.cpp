@@ -256,8 +256,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // rcpp_prepare_data_identity
-Rcpp::List rcpp_prepare_data_identity(Rcpp::IntegerVector& seqnames, Rcpp::IntegerVector& seqrunlens, Rcpp::IntegerVector& start, Rcpp::IntegerVector& strand, Rcpp::DataFrame& mcols, Rcpp::DataFrame& covrg, double exclude_lower, double exclude_upper);
-RcppExport SEXP _ramr_rcpp_prepare_data_identity(SEXP seqnamesSEXP, SEXP seqrunlensSEXP, SEXP startSEXP, SEXP strandSEXP, SEXP mcolsSEXP, SEXP covrgSEXP, SEXP exclude_lowerSEXP, SEXP exclude_upperSEXP) {
+Rcpp::List rcpp_prepare_data_identity(Rcpp::IntegerVector& seqnames, Rcpp::IntegerVector& seqrunlens, Rcpp::IntegerVector& start, Rcpp::IntegerVector& strand, Rcpp::DataFrame& mcols, Rcpp::DataFrame& coverage, double exclude_lower, double exclude_upper);
+RcppExport SEXP _ramr_rcpp_prepare_data_identity(SEXP seqnamesSEXP, SEXP seqrunlensSEXP, SEXP startSEXP, SEXP strandSEXP, SEXP mcolsSEXP, SEXP coverageSEXP, SEXP exclude_lowerSEXP, SEXP exclude_upperSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -266,16 +266,16 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::IntegerVector& >::type start(startSEXP);
     Rcpp::traits::input_parameter< Rcpp::IntegerVector& >::type strand(strandSEXP);
     Rcpp::traits::input_parameter< Rcpp::DataFrame& >::type mcols(mcolsSEXP);
-    Rcpp::traits::input_parameter< Rcpp::DataFrame& >::type covrg(covrgSEXP);
+    Rcpp::traits::input_parameter< Rcpp::DataFrame& >::type coverage(coverageSEXP);
     Rcpp::traits::input_parameter< double >::type exclude_lower(exclude_lowerSEXP);
     Rcpp::traits::input_parameter< double >::type exclude_upper(exclude_upperSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_prepare_data_identity(seqnames, seqrunlens, start, strand, mcols, covrg, exclude_lower, exclude_upper));
+    rcpp_result_gen = Rcpp::wrap(rcpp_prepare_data_identity(seqnames, seqrunlens, start, strand, mcols, coverage, exclude_lower, exclude_upper));
     return rcpp_result_gen;
 END_RCPP
 }
 // rcpp_prepare_data_linear
-Rcpp::List rcpp_prepare_data_linear(Rcpp::IntegerVector& seqnames, Rcpp::IntegerVector& seqrunlens, Rcpp::IntegerVector& start, Rcpp::IntegerVector& strand, Rcpp::DataFrame& mcols, Rcpp::DataFrame& covrg, double exclude_lower, double exclude_upper);
-RcppExport SEXP _ramr_rcpp_prepare_data_linear(SEXP seqnamesSEXP, SEXP seqrunlensSEXP, SEXP startSEXP, SEXP strandSEXP, SEXP mcolsSEXP, SEXP covrgSEXP, SEXP exclude_lowerSEXP, SEXP exclude_upperSEXP) {
+Rcpp::List rcpp_prepare_data_linear(Rcpp::IntegerVector& seqnames, Rcpp::IntegerVector& seqrunlens, Rcpp::IntegerVector& start, Rcpp::IntegerVector& strand, Rcpp::DataFrame& mcols, Rcpp::DataFrame& coverage, double exclude_lower, double exclude_upper);
+RcppExport SEXP _ramr_rcpp_prepare_data_linear(SEXP seqnamesSEXP, SEXP seqrunlensSEXP, SEXP startSEXP, SEXP strandSEXP, SEXP mcolsSEXP, SEXP coverageSEXP, SEXP exclude_lowerSEXP, SEXP exclude_upperSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -284,10 +284,10 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::IntegerVector& >::type start(startSEXP);
     Rcpp::traits::input_parameter< Rcpp::IntegerVector& >::type strand(strandSEXP);
     Rcpp::traits::input_parameter< Rcpp::DataFrame& >::type mcols(mcolsSEXP);
-    Rcpp::traits::input_parameter< Rcpp::DataFrame& >::type covrg(covrgSEXP);
+    Rcpp::traits::input_parameter< Rcpp::DataFrame& >::type coverage(coverageSEXP);
     Rcpp::traits::input_parameter< double >::type exclude_lower(exclude_lowerSEXP);
     Rcpp::traits::input_parameter< double >::type exclude_upper(exclude_upperSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_prepare_data_linear(seqnames, seqrunlens, start, strand, mcols, covrg, exclude_lower, exclude_upper));
+    rcpp_result_gen = Rcpp::wrap(rcpp_prepare_data_linear(seqnames, seqrunlens, start, strand, mcols, coverage, exclude_lower, exclude_upper));
     return rcpp_result_gen;
 END_RCPP
 }
