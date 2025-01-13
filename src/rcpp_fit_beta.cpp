@@ -9,7 +9,7 @@
 // in the vector of coefficients as {[5] alpha (p), [6] beta (q), [7] log(std::beta)}
 //
 // TODO:
-//   [ ] make it ready for 0 and 1 - now it is not aware of them
+//   [x] make it ready for 0 and 1 - now it is not aware of them
 //   [ ] OpenMP
 //   [ ] ...
 

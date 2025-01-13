@@ -110,10 +110,11 @@ static inline double incbeta (double a,                              /* alpha */
 ////////////////////////////////////////////////////////////////////////////////
 
 
-// To be called after rcpp_fit_beta
+// To be called after rcpp_fit_beta (and optionally, rcpp_fit_binom)
 //
 // Function computes logp values using precomputed alpha, beta and
 // log(std::beta), and stores them in 'out' (not transposed anymore)
+// Optionally, computes probability of {0;1} using mean beta value and coverage
 //
 // TODO:
 //   [ ] make it ready for 0 and 1 - now it's not aware of them
@@ -122,8 +123,8 @@ static inline double incbeta (double a,                              /* alpha */
 //   [ ] templated for different implementations of incomplete beta:
 //       my own above, boost::math::beta, own with boost continued fractions
 
-// [[Rcpp::export]]
-int rcpp_compute_logp_beta (Rcpp::List &data)                                   // List output of rcpp_prepare_data
+template<bool binom>
+int rcpp_compute_logp (Rcpp::List &data)                                        // List output of rcpp_prepare_data
 {
   // consts
   const size_t ncol = data["ncol"];                                             // number of columns (samples)
@@ -131,25 +132,37 @@ int rcpp_compute_logp_beta (Rcpp::List &data)                                   
 
   // containers
   Rcpp::XPtr<T_raw> raw((SEXP)data.attr("raw_xptr"));                           // flat vector with raw values
+  Rcpp::XPtr<T_cov> cov((SEXP)data.attr("cov_xptr"));                           // optional vector with coverage values
   Rcpp::XPtr<T_out> out((SEXP)data.attr("out_xptr"));                           // vector to hold output values
   Rcpp::XPtr<T_len> len((SEXP)data.attr("len_xptr"));                           // lengths of input data rows minus number of NaNs
   Rcpp::XPtr<T_coef> coef((SEXP)data.attr("coef_xptr"));                        // vector with per-row results of rcpp_fit_beta
 
   // fast direct accessors
   const auto raw_data = raw->data();
+  const auto cov_data = cov->data();
   const auto out_data = out->data();
   const auto len_data = len->data();
   const auto coef_data = coef->data();
 
   for (size_t c=0; c<ncol; c++) {
     const auto raw_first = raw_data + c*nrow;                                   // first element of c-th column in 'raw'
+    const auto cov_first = cov_data + c*nrow;                                   // first element of c-th column in 'cov'
     const auto out_first = out_data + c*nrow;                                   // first element of c-th column in 'out'
     for (size_t r=0; r<nrow; r++) {
-      if (len_data[r] && !std::isnan(raw_first[r])) {                           // if row is not excluded and x is not NaN
+      const auto raw_value = raw_first[r];
+      if (len_data[r] && !std::isnan(raw_value)) {                              // if row is not excluded and x is not NaN
         const auto q = coef_data + r*NCOEF;                                     // first element of 'coef' array
-        out_first[r] = incbeta(q[5], q[6], q[7], raw_first[r]);                 // Regularized Incomplete Beta Function
-        // // boost incomplete beta
-        // out_first[r] = std::log(boost::math::beta(q[5], q[6], raw_first[r])) - q[7];
+        if (binom) {                                                            // should we calculate probability of {0;1} differently?
+          if (isZero(raw_value)) {                                              // if a 0
+            out_first[r] = q[3] * cov_first[r];                                 // p = p(0) ^ coverage [in log form]
+          } else if (isOne(raw_value)) {                                        // if a 1
+            out_first[r] = q[4] * cov_first[r];                                 // p = p(1) ^ coverage [in log form]
+          } else {
+            out_first[r] = incbeta(q[5], q[6], q[7], raw_value);                // Regularized Incomplete Beta Function for values inside (0,1)
+          }
+        } else {                                                                // if we don't - probabilities of {0;1} are 0
+          out_first[r] = incbeta(q[5], q[6], q[7], raw_value);                  // Regularized Incomplete Beta Function for values inside [0,1]
+        }
       } else {
         out_first[r] = NA_REAL;
       }
@@ -159,7 +172,19 @@ int rcpp_compute_logp_beta (Rcpp::List &data)                                   
   return 0;
 }
 
+// // boost incomplete beta
+// out_first[r] = std::log(boost::math::beta(q[5], q[6], raw_first[r])) - q[7];
 
 
+// [[Rcpp::export]]
+int rcpp_compute_logp_beta (Rcpp::List &data)
+{
+  return rcpp_compute_logp<false>(data);
+}
 
+// [[Rcpp::export]]
+int rcpp_compute_logp_betabinom (Rcpp::List &data)
+{
+  return rcpp_compute_logp<true>(data);
+}
 

@@ -5,6 +5,10 @@ rcpp_compute_logp_beta <- function(data) {
     .Call(`_ramr_rcpp_compute_logp_beta`, data)
 }
 
+rcpp_compute_logp_betabinom <- function(data) {
+    .Call(`_ramr_rcpp_compute_logp_betabinom`, data)
+}
+
 rcpp_compute_xiqr <- function(data) {
     .Call(`_ramr_rcpp_compute_xiqr`, data)
 }
