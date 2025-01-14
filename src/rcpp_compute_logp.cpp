@@ -117,10 +117,10 @@ static inline double incbeta (double a,                              /* alpha */
 // Optionally, computes probability of {0;1} using mean beta value and coverage
 //
 // TODO:
-//   [ ] make it ready for 0 and 1 - now it's not aware of them
+//   [x] make it ready for 0 and 1 - now it's not aware of them
 //   [ ] OpenMP
 //   [x] skip rows where len[r]==0
-//   [ ] templated for different implementations of incomplete beta:
+//   [?] templated for different implementations of incomplete beta:
 //       my own above, boost::math::beta, own with boost continued fractions
 
 template<bool binom>

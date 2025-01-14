@@ -156,6 +156,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// rcpp_fit_binom
+int rcpp_fit_binom(Rcpp::List& data);
+RcppExport SEXP _ramr_rcpp_fit_binom(SEXP dataSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_fit_binom(data));
+    return rcpp_result_gen;
+END_RCPP
+}
 // rcpp_get_iqr
 int rcpp_get_iqr(Rcpp::List& data);
 RcppExport SEXP _ramr_rcpp_get_iqr(SEXP dataSEXP) {
@@ -326,6 +337,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ramr_rcpp_fit_beta_mom", (DL_FUNC) &_ramr_rcpp_fit_beta_mom, 1},
     {"_ramr_rcpp_fit_beta_amle", (DL_FUNC) &_ramr_rcpp_fit_beta_amle, 1},
     {"_ramr_rcpp_fit_beta_nmle", (DL_FUNC) &_ramr_rcpp_fit_beta_nmle, 1},
+    {"_ramr_rcpp_fit_binom", (DL_FUNC) &_ramr_rcpp_fit_binom, 1},
     {"_ramr_rcpp_get_iqr", (DL_FUNC) &_ramr_rcpp_get_iqr, 1},
     {"_ramr_wait_a_second_omp", (DL_FUNC) &_ramr_wait_a_second_omp, 2},
     {"_ramr_rcpp_extract_out", (DL_FUNC) &_ramr_rcpp_extract_out, 1},

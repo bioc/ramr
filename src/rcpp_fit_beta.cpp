@@ -40,7 +40,7 @@ int rcpp_fit_beta (Rcpp::List &data)                                            
       continue;                                                                 // skip this row
     }
 
-    // WHICH ONES OF THESE NEED TO SKIP 0/1?
+    // NB: ALL OF THESE SKIP 0/1
     if (method==0) {                                                            // method of moments based on the unbiased estimator of variance
       // mean in q[3]
       q[3] = 0;
@@ -56,17 +56,17 @@ int rcpp_fit_beta (Rcpp::List &data)                                            
           q[4] += std::pow(first[i] - q[3], 2);
       q[4] /= l-lzo - 1;
 
-      // alpha (shape parameter p) in q[5]
+      // alpha (shape parameter p) is in q[5]
       q[5] = q[3] * (( (q[3] * (1 - q[3])) / q[4]) - 1);
 
-      // beta (shape parameter q) in q[6]
+      // beta (shape parameter q) is in q[6]
       q[6] = (1 - q[3]) * (((q[3] * (1 - q[3])) / q[4]) - 1);
 
     } else if (method==1) {                                                     // approximate MLE
       // https://en.wikipedia.org/wiki/Beta_distribution#Maximum_likelihood
 
-      // sample geometric mean in q[3]
-      // sample geometric mean based on (1 − X) in q[4]
+      // sample geometric mean is in q[3]
+      // sample geometric mean based on (1 − X) is in q[4]
       q[3] = 0;
       q[4] = 0;
       for (size_t i=0; i<l; i++) {
@@ -78,10 +78,10 @@ int rcpp_fit_beta (Rcpp::List &data)                                            
       q[3] = exp(q[3]/(l-lzo));
       q[4] = exp(q[4]/(l-lzo));
 
-      // alpha (shape parameter p) in q[5]
+      // alpha (shape parameter p) is in q[5]
       q[5] = 0.5 + q[3] / ( 2 * (1 - q[3] - q[4]) );
 
-      // beta (shape parameter q) in q[6]
+      // beta (shape parameter q) is in q[6]
       q[6] = 0.5 + q[4] / ( 2 * (1 - q[3] - q[4]) );
 
     } else if (method==2) {                                                     // TODO: numerical MLE

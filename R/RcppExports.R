@@ -49,6 +49,10 @@ rcpp_fit_beta_nmle <- function(data) {
     .Call(`_ramr_rcpp_fit_beta_nmle`, data)
 }
 
+rcpp_fit_binom <- function(data) {
+    .Call(`_ramr_rcpp_fit_binom`, data)
+}
+
 rcpp_get_iqr <- function(data) {
     .Call(`_ramr_rcpp_get_iqr`, data)
 }
