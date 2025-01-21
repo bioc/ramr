@@ -49,7 +49,7 @@ plotAMR <- function (data.ranges,
                      window=300)
 {
   if (!requireNamespace("ggplot2", quietly=TRUE)) stop("ggplot2 is required for plotting. Please install")
-  
+
   if (is.null(data.samples))
     data.samples <- colnames(GenomicRanges::mcols(data.ranges))
   amr.ranges.reduced  <- GenomicRanges::reduce(amr.ranges, min.gapwidth=window, with.revmap=TRUE)
@@ -61,7 +61,7 @@ plotAMR <- function (data.ranges,
     # revmap.rows <- unique(unlist(plot.ranges$revmap))
     data.hits   <- unique(S4Vectors::queryHits(GenomicRanges::findOverlaps(data.ranges, plot.ranges, maxgap=window, ignore.strand=TRUE)))
     if (length(data.hits)>0) {
-      plot.data <- data.table::as.data.table(data.ranges[data.hits, data.samples])
+      plot.data <- data.table::as.data.table(data.ranges[data.hits, data.samples], optional=TRUE)
       plot.data$median <- apply(plot.data[, ..data.samples], 1, median, na.rm=TRUE)
 
       colorify       <- c("median", if (is.null(highlight)) unique(plot.ranges$sample), highlight)
@@ -72,13 +72,13 @@ plotAMR <- function (data.ranges,
         alpha=0.5,
         color=factor("lightgrey",levels=c("lightgrey", colorify))
       )]
-      
+
       plot.data.melt[sample %in% colorify, `:=` (alpha=0.9, color=sample)]
       for (j in seq_along(plot.ranges)) {
         plot.data.melt[sample==plot.ranges$sample[j] & start %in% GenomicRanges::start( data.ranges[unlist(plot.ranges[j]$revmap)] ),
                        size:=1]
       }
-      
+
       gene.plot <- ggplot2::ggplot(plot.data.melt, ggplot2::aes(x=start, y=beta, group=sample, color=color, alpha=alpha)) +
         ggplot2::geom_line(linewidth=0.5) +
         ggplot2::geom_point(mapping=ggplot2::aes(size=size)) +
