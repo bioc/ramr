@@ -30,8 +30,8 @@
 #' @param limits Optional limits of y-axis. When default (NULL), limits
 #' are c(NA,1) for `transform=="log10"` and c(0,1) otherwise.
 #' @param breaks Optional breaks of y-axis. When default (NULL), breaks
-#' are `10**(seq(from=-3, to=0, length.out=4))` for `transform=="log10"` and
-#' `seq(from=0, to=1, length.out=5)` otherwise.
+#' are `10**(seq(from=-5, to=0, length.out=6))` for `transform=="log10"` and
+#' `seq(from=0, to=1, length.out=6)` otherwise.
 #' @param window An optional integer constant to expand genomic ranges of the
 #' `amr.ranges` object (the default: 300).
 #' @return The output is a list of `ggplot` objects.
@@ -64,7 +64,7 @@ plotAMR <- function (data.ranges,
   if (is.null(limits))
     limits <- if (transform=="log10") c(NA,1) else c(0,1)
   if (is.null(breaks))
-    breaks <- if (transform=="log10") 10**seq(from=-3, to=0, length.out=4) else seq(from=0, to=1, length.out=5)
+    breaks <- if (transform=="log10") 10**seq(from=-5, to=0, length.out=6) else seq(from=0, to=1, length.out=6)
   if (is.null(data.samples))
     data.samples <- colnames(GenomicRanges::mcols(data.ranges))
 
