@@ -25,6 +25,13 @@
 #' title is set to a genomic location of particular AMR.
 #' @param labs Optional axis labels for the plot. Default: c("genomic position",
 #' "beta value").
+#' @param transform Optional transformation of y-axis. Default: "identity"
+#' (no transformation).
+#' @param limits Optional limits of y-axis. When default (NULL), limits
+#' are c(NA,1) for `transform=="log10"` and c(0,1) otherwise.
+#' @param breaks Optional breaks of y-axis. When default (NULL), breaks
+#' are `10**(seq(from=-3, to=0, length.out=4))` for `transform=="log10"` and
+#' `seq(from=0, to=1, length.out=5)` otherwise.
 #' @param window An optional integer constant to expand genomic ranges of the
 #' `amr.ranges` object (the default: 300).
 #' @return The output is a list of `ggplot` objects.
@@ -46,12 +53,21 @@ plotAMR <- function (data.ranges,
                      highlight=NULL,
                      title=NULL,
                      labs=c("genomic position", "beta value"),
+                     transform=c("identity", "log1p", "log10"),
+                     limits=NULL,
+                     breaks=NULL,
                      window=300)
 {
   if (!requireNamespace("ggplot2", quietly=TRUE)) stop("ggplot2 is required for plotting. Please install")
 
+  transform <- match.arg(transform)
+  if (is.null(limits))
+    limits <- if (transform=="log10") c(NA,1) else c(0,1)
+  if (is.null(breaks))
+    breaks <- if (transform=="log10") 10**seq(from=-3, to=0, length.out=4) else seq(from=0, to=1, length.out=5)
   if (is.null(data.samples))
     data.samples <- colnames(GenomicRanges::mcols(data.ranges))
+
   amr.ranges.reduced  <- GenomicRanges::reduce(amr.ranges, min.gapwidth=window, with.revmap=TRUE)
   amr.ranges.relisted <- BiocGenerics::relist(amr.ranges[unlist(amr.ranges.reduced$revmap)], amr.ranges.reduced$revmap)
   plot.list <- list()
@@ -75,15 +91,16 @@ plotAMR <- function (data.ranges,
 
       plot.data.melt[sample %in% colorify, `:=` (alpha=0.9, color=sample)]
       for (j in seq_along(plot.ranges)) {
-        plot.data.melt[sample==plot.ranges$sample[j] & start %in% GenomicRanges::start( data.ranges[unlist(plot.ranges[j]$revmap)] ),
+        plot.data.melt[sample %in% plot.ranges$sample[j] & start %in% GenomicRanges::start( data.ranges[unlist(plot.ranges[j]$revmap)] ),
                        size:=1]
       }
 
+      plot.title <- if (is.null(title)) as.character(GenomicRanges::reduce(plot.ranges, min.gapwidth=window)) else title
       gene.plot <- ggplot2::ggplot(plot.data.melt, ggplot2::aes(x=start, y=beta, group=sample, color=color, alpha=alpha)) +
         ggplot2::geom_line(linewidth=0.5) +
         ggplot2::geom_point(mapping=ggplot2::aes(size=size)) +
         ggplot2::scale_x_continuous(name=labs[1]) +
-        ggplot2::scale_y_continuous(name=labs[2], limits=c(0, 1), breaks=c(0, 0.25, 0.5, 0.75, 1)) +
+        ggplot2::scale_y_continuous(name=labs[2], limits=limits, breaks=breaks, transform=transform) +
         ggplot2::scale_color_discrete(name="samples", limits=colorify) +
         ggplot2::scale_alpha_continuous(guide="none") +
         ggplot2::scale_size_identity(guide="none") +
@@ -91,11 +108,9 @@ plotAMR <- function (data.ranges,
         ggplot2::theme(legend.text=ggplot2::element_text(size=8),
                        axis.text.x=ggplot2::element_text(size=8, angle=0),
                        axis.text.y=ggplot2::element_text(size=8)) +
-        ggplot2::ggtitle(
-          if (is.null(title)) as.character(GenomicRanges::reduce(plot.ranges)) else title
-        )
+        ggplot2::ggtitle(plot.title)
 
-      plot.list[length(plot.list)+1] <- list(gene.plot)
+      plot.list <- c(plot.list, setNames(c(list(gene.plot)), plot.title))
     }
   }
 
