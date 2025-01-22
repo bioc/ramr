@@ -21,14 +21,14 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// rcpp_compute_logp_betabinom
-int rcpp_compute_logp_betabinom(Rcpp::List& data);
-RcppExport SEXP _ramr_rcpp_compute_logp_betabinom(SEXP dataSEXP) {
+// rcpp_compute_logp_beta_binom
+int rcpp_compute_logp_beta_binom(Rcpp::List& data);
+RcppExport SEXP _ramr_rcpp_compute_logp_beta_binom(SEXP dataSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_compute_logp_betabinom(data));
+    rcpp_result_gen = Rcpp::wrap(rcpp_compute_logp_beta_binom(data));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -326,7 +326,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_ramr_rcpp_compute_logp_beta", (DL_FUNC) &_ramr_rcpp_compute_logp_beta, 1},
-    {"_ramr_rcpp_compute_logp_betabinom", (DL_FUNC) &_ramr_rcpp_compute_logp_betabinom, 1},
+    {"_ramr_rcpp_compute_logp_beta_binom", (DL_FUNC) &_ramr_rcpp_compute_logp_beta_binom, 1},
     {"_ramr_rcpp_compute_xiqr", (DL_FUNC) &_ramr_rcpp_compute_xiqr, 1},
     {"_ramr_rcpp_create_granges_stranded_xiqr", (DL_FUNC) &_ramr_rcpp_create_granges_stranded_xiqr, 4},
     {"_ramr_rcpp_create_granges_stranded_logp", (DL_FUNC) &_ramr_rcpp_create_granges_stranded_logp, 4},

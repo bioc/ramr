@@ -123,7 +123,7 @@ static inline double incbeta (double a,                              /* alpha */
 //   [?] templated for different implementations of incomplete beta:
 //       my own above, boost::math::beta, own with boost continued fractions
 
-template<bool binom>
+template<int method>
 int rcpp_compute_logp (Rcpp::List &data)                                        // List output of rcpp_prepare_data
 {
   // consts
@@ -152,7 +152,9 @@ int rcpp_compute_logp (Rcpp::List &data)                                        
       const auto raw_value = raw_first[r];
       if (len_data[r] && !std::isnan(raw_value)) {                              // if row is not excluded and x is not NaN
         const auto q = coef_data + r*NCOEF;                                     // first element of 'coef' array
-        if (binom) {                                                            // should we calculate probability of {0;1} differently?
+        if (method==0) {                                                        // plain beta distribution (i.e., {0;1} will give p==0)
+          out_first[r] = incbeta(q[5], q[6], q[7], raw_value);                  // Regularized Incomplete Beta Function for values inside [0,1]
+        } else if (method==1) {                                                 // beta for values inside (0,1), binomial for {0;1}
           if (isZero(raw_value)) {                                              // if a 0
             out_first[r] = q[3] * cov_first[r];                                 // p = p(0) ^ coverage [in log form]
           } else if (isOne(raw_value)) {                                        // if a 1
@@ -160,8 +162,6 @@ int rcpp_compute_logp (Rcpp::List &data)                                        
           } else {
             out_first[r] = incbeta(q[5], q[6], q[7], raw_value);                // Regularized Incomplete Beta Function for values inside (0,1)
           }
-        } else {                                                                // if we don't - probabilities of {0;1} are 0
-          out_first[r] = incbeta(q[5], q[6], q[7], raw_value);                  // Regularized Incomplete Beta Function for values inside [0,1]
         }
       } else {
         out_first[r] = NA_REAL;
@@ -176,15 +176,17 @@ int rcpp_compute_logp (Rcpp::List &data)                                        
 // out_first[r] = std::log(boost::math::beta(q[5], q[6], raw_first[r])) - q[7];
 
 
+// plain beta distribution (i.e., {0,1} will give p==0)
 // [[Rcpp::export]]
 int rcpp_compute_logp_beta (Rcpp::List &data)
 {
-  return rcpp_compute_logp<false>(data);
+  return rcpp_compute_logp<0>(data);
 }
 
+// beta for values inside (0,1), binomial for {0;1}
 // [[Rcpp::export]]
-int rcpp_compute_logp_betabinom (Rcpp::List &data)
+int rcpp_compute_logp_beta_binom (Rcpp::List &data)
 {
-  return rcpp_compute_logp<true>(data);
+  return rcpp_compute_logp<1>(data);
 }
 
