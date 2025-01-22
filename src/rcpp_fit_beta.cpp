@@ -35,24 +35,26 @@ int rcpp_fit_beta (Rcpp::List &data)                                            
     const auto q = coef_data + r*NCOEF;                                         // pointer to the first element of 'coef' NCOEF-element array
     const size_t l = len_data[r];                                               // length = ncol - nNaNs
     const size_t lzo = (size_t)(q[0]+q[1]+0.5);                                 // number of 0s and 1s within l
-    if (l < ((method==0 ? 0 : lzo) + MINNSMPL)) {                               // if not enough values to process (MoM accepts 0/1)
+    if (l < (lzo+MINNSMPL)) {                                                   // if not enough values to process (either excluded by median, or too many NaN/0/1)
       std::fill_n(q+3, NCOEF-3, NA_REAL);                                       // estimates are NaN
       continue;                                                                 // skip this row
     }
 
-    // NB: MOM ALLOWS 0/1, *MLE SKIP 0/1
+    // NB: ALL OF THESE SKIP 0/1
     if (method==0) {                                                            // method of moments based on the unbiased estimator of variance
       // mean in q[3]
       q[3] = 0;
       for (size_t i=0; i<l; i++)
-        q[3] += first[i];
-      q[3] /= l;
+        if (notZO(first[i]))
+          q[3] += first[i];
+      q[3] /= l-lzo;
 
       // variance in q[4]
       q[4] = 0;
       for (size_t i=0; i<l; i++)
-        q[4] += std::pow(first[i] - q[3], 2);
-      q[4] /= l - 1;
+        if (notZO(first[i]))
+          q[4] += std::pow(first[i] - q[3], 2);
+      q[4] /= l-lzo - 1;
 
       // alpha (shape parameter p) is in q[5]
       q[5] = q[3] * (( (q[3] * (1 - q[3])) / q[4]) - 1);
