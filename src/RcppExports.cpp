@@ -178,6 +178,50 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// rcpp_get_meanvar_ari_equal
+int rcpp_get_meanvar_ari_equal(Rcpp::List& data);
+RcppExport SEXP _ramr_rcpp_get_meanvar_ari_equal(SEXP dataSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_get_meanvar_ari_equal(data));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpp_get_meanvar_ari_invdist
+int rcpp_get_meanvar_ari_invdist(Rcpp::List& data);
+RcppExport SEXP _ramr_rcpp_get_meanvar_ari_invdist(SEXP dataSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_get_meanvar_ari_invdist(data));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpp_get_meanvar_geo_equal
+int rcpp_get_meanvar_geo_equal(Rcpp::List& data);
+RcppExport SEXP _ramr_rcpp_get_meanvar_geo_equal(SEXP dataSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_get_meanvar_geo_equal(data));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpp_get_meanvar_geo_invdist
+int rcpp_get_meanvar_geo_invdist(Rcpp::List& data);
+RcppExport SEXP _ramr_rcpp_get_meanvar_geo_invdist(SEXP dataSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_get_meanvar_geo_invdist(data));
+    return rcpp_result_gen;
+END_RCPP
+}
 // wait_a_second_omp
 bool wait_a_second_omp(int sec, int ncores);
 RcppExport SEXP _ramr_wait_a_second_omp(SEXP secSEXP, SEXP ncoresSEXP) {
@@ -339,6 +383,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ramr_rcpp_fit_beta_nmle", (DL_FUNC) &_ramr_rcpp_fit_beta_nmle, 1},
     {"_ramr_rcpp_fit_binom", (DL_FUNC) &_ramr_rcpp_fit_binom, 1},
     {"_ramr_rcpp_get_iqr", (DL_FUNC) &_ramr_rcpp_get_iqr, 1},
+    {"_ramr_rcpp_get_meanvar_ari_equal", (DL_FUNC) &_ramr_rcpp_get_meanvar_ari_equal, 1},
+    {"_ramr_rcpp_get_meanvar_ari_invdist", (DL_FUNC) &_ramr_rcpp_get_meanvar_ari_invdist, 1},
+    {"_ramr_rcpp_get_meanvar_geo_equal", (DL_FUNC) &_ramr_rcpp_get_meanvar_geo_equal, 1},
+    {"_ramr_rcpp_get_meanvar_geo_invdist", (DL_FUNC) &_ramr_rcpp_get_meanvar_geo_invdist, 1},
     {"_ramr_wait_a_second_omp", (DL_FUNC) &_ramr_wait_a_second_omp, 2},
     {"_ramr_rcpp_extract_out", (DL_FUNC) &_ramr_rcpp_extract_out, 1},
     {"_ramr_rcpp_extract_coef", (DL_FUNC) &_ramr_rcpp_extract_coef, 1},

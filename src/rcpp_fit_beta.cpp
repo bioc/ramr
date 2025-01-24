@@ -5,11 +5,11 @@
 // [[Rcpp::plugins(cpp20)]]
 // [[Rcpp::depends(BH)]]
 
-// Function estimates parameters of beta distribution and stores them
-// in the vector of coefficients as {[5] alpha (p), [6] beta (q), [7] log(std::beta)}
+// Function estimates parameters of (optionally, weighted) beta distribution
+// and stores them in the vector of coefficients as
+// {[5] alpha (p), [6] beta (q), [7] log(std::beta)}
 //
 // TODO:
-//   [x] make it ready for 0 and 1 - now it is not aware of them
 //   [ ] OpenMP
 //   [ ] ...
 
@@ -17,42 +17,24 @@ template<int method>
 int rcpp_fit_beta (Rcpp::List &data)                                            // List output of rcpp_prepare_data
 {
   // consts
-  const size_t ncol = data["ncol"];                                             // number of columns (samples)
   const size_t nrow = data["nrow"];                                             // number of rows (genomic loci)
 
   // containers
-  Rcpp::XPtr<T_out> out((SEXP)data.attr("out_xptr"));                           // vector with intermediate output values (here: transposed 'raw')
-  Rcpp::XPtr<T_len> len((SEXP)data.attr("len_xptr"));                           // lengths of input data rows minus number of NaNs
   Rcpp::XPtr<T_coef> coef((SEXP)data.attr("coef_xptr"));                        // vector to hold per-row results
 
   // fast direct accessors
-  const auto out_data = out->data();
-  const auto len_data = len->data();
   const auto coef_data = coef->data();
 
   for (size_t r=0; r<nrow; r++) {
-    const auto first = out_data + r*ncol;                                       // first element
     const auto q = coef_data + r*NCOEF;                                         // pointer to the first element of 'coef' NCOEF-element array
-    const size_t l = len_data[r];                                               // length = ncol - nNaNs
-    const size_t lzo = (size_t)(q[0]+q[1]+0.5);                                 // number of 0s and 1s within l
-    if (l < ((method==0 ? 0 : lzo) + MINNSMPL)) {                               // if not enough values to process (MoM accepts 0/1)
-      std::fill_n(q+3, NCOEF-3, NA_REAL);                                       // estimates are NaN
+    if (std::isnan(q[3]))                                                       // if means were not computed (not enough values to process)
       continue;                                                                 // skip this row
-    }
 
     // NB: MOM ALLOWS 0/1, *MLE SKIP 0/1
     if (method==0) {                                                            // method of moments based on the unbiased estimator of variance
-      // mean in q[3]
-      q[3] = 0;
-      for (size_t i=0; i<l; i++)
-        q[3] += first[i];
-      q[3] /= l;
-
-      // variance in q[4]
-      q[4] = 0;
-      for (size_t i=0; i<l; i++)
-        q[4] += std::pow(first[i] - q[3], 2);
-      q[4] /= l - 1;
+      // after rcpp_get_meanvar():
+      //   mean in q[3]
+      //   variance in q[4]
 
       // alpha (shape parameter p) is in q[5]
       q[5] = q[3] * (( (q[3] * (1 - q[3])) / q[4]) - 1);
@@ -62,19 +44,9 @@ int rcpp_fit_beta (Rcpp::List &data)                                            
 
     } else if (method==1) {                                                     // approximate MLE
       // https://en.wikipedia.org/wiki/Beta_distribution#Maximum_likelihood
-
-      // sample geometric mean is in q[3]
-      // sample geometric mean based on (1 − X) is in q[4]
-      q[3] = 0;
-      q[4] = 0;
-      for (size_t i=0; i<l; i++) {
-        if (notZO(first[i])) {
-          q[3] += std::log(first[i]);
-          q[4] += std::log(1 - first[i]);
-        }
-      }
-      q[3] = exp(q[3]/(l-lzo));
-      q[4] = exp(q[4]/(l-lzo));
+      // after rcpp_get_meanvar():
+      //   sample geometric mean is in q[3]
+      //   sample geometric mean based on (1 − X) is in q[4]
 
       // alpha (shape parameter p) is in q[5]
       q[5] = 0.5 + q[3] / ( 2 * (1 - q[3] - q[4]) );

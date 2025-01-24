@@ -18,6 +18,7 @@
 // TODO:
 //   [ ] more efficient access to S4Vectors with raw values
 //   [ ] OpenMP
+//   [ ] cache-friendly (845 samples seriously suck on Mac)
 //   [ ] ...
 
 template<int transform>
@@ -105,12 +106,12 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
     if (l>0) {                                                                  // if there are values in the buffer
       const size_t hl = l/2;                                                    // half length
       std::nth_element(buf, buf+hl, buf+l);                                     // order up to l/2-th
-      q[3] = buf[hl];                                                           // median for odd l
+      q[2] = buf[hl];                                                           // median for odd l
       if ((l&1)==0) {                                                           // if l is even
         std::nth_element(buf, buf+hl-1, buf+hl);                                // order up to l/2-1-th
-        q[3] = (q[3] + buf[hl-1])/2;                                            // median for even l
+        q[2] = (q[2] + buf[hl-1])/2;                                            // median for even l
       }
-      if (q[3]<exclude_lower || q[3]>exclude_upper){                            // if median is less that exclude_lower or greater than exclude_upper
+      if (q[2]<exclude_lower || q[2]>exclude_upper){                            // if median is less that exclude_lower or greater than exclude_upper
         std::copy(buf, buf+l, out_data+ncol*r);                                 // copy 'buf' to 'out'
         len_data[r] = l;                                                        // adjust observed length, because otherwise it's 0 and we won't use this row in further analyses
       }

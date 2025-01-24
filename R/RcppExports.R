@@ -57,6 +57,22 @@ rcpp_get_iqr <- function(data) {
     .Call(`_ramr_rcpp_get_iqr`, data)
 }
 
+rcpp_get_meanvar_ari_equal <- function(data) {
+    .Call(`_ramr_rcpp_get_meanvar_ari_equal`, data)
+}
+
+rcpp_get_meanvar_ari_invdist <- function(data) {
+    .Call(`_ramr_rcpp_get_meanvar_ari_invdist`, data)
+}
+
+rcpp_get_meanvar_geo_equal <- function(data) {
+    .Call(`_ramr_rcpp_get_meanvar_geo_equal`, data)
+}
+
+rcpp_get_meanvar_geo_invdist <- function(data) {
+    .Call(`_ramr_rcpp_get_meanvar_geo_invdist`, data)
+}
+
 wait_a_second_omp <- function(sec, ncores) {
     .Call(`_ramr_wait_a_second_omp`, sec, ncores)
 }
