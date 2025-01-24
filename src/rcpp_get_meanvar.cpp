@@ -24,7 +24,7 @@
 //   [ ] ...
 
 // MACRO //
-#define invDist(x) (1 / (std::abs(q[2] - (x)) + DBL_EPSILON))                   /* weight inversely correlates with distance from the median */
+#define invDist(x) (1 / (std::abs(q[2] - (x)) + FLT_EPSILON))                   /* weight inversely correlates with distance from the median */
 #define invSqrtDist(x) (std::sqrt(invDist(x)))                                  /* weight inversely correlates with square root of distance from the median */
 #define negLogDist(x) (std::log(invDist(x)))                                    /* weight is a negative logarithm of distance from the median */
 #define getWeight(x) {                                                         \
