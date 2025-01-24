@@ -25,6 +25,18 @@
 
 // MACRO //
 #define invDist(x) (1 / (std::abs(q[2] - (x)) + DBL_EPSILON))                   /* weight inversely correlates with distance from the median */
+#define invSqrtDist(x) (std::sqrt(invDist(x)))                                  /* weight inversely correlates with square root of distance from the median */
+#define negLogDist(x) (std::log(invDist(x)))                                    /* weight is a negative logarithm of distance from the median */
+#define getWeight(x) {                                                         \
+  switch (tWeight) {                                                           \
+  case 1:                                /* weight = 1 / abs(x - median(x)) */ \
+    w = invDist(x); break;                                                     \
+  case 2:                       /* weight = sqrt ( 1 / abs(x - median(x)) ) */ \
+    w = invSqrtDist(x); break;                                                 \
+  case 3:                        /* weight = log ( 1 / abs(x - median(x)) ) */ \
+    w = negLogDist(x); break;                                                  \
+  }                                                                            \
+};
 
 
 template<int tMean, int tWeight>                                                // templated for 'type of mean' and 'type of weighting'
@@ -53,6 +65,7 @@ int rcpp_get_meanvar (Rcpp::List &data)                                         
       std::fill_n(q+3, NCOEF-3, NA_REAL);                                       // estimates are NaN
       continue;                                                                 // skip this row
     }
+    double w;                                                                   // weight
     double sumweights = 0;                                                      // accumulator of weights
     double sumsquares = 0;                                                      // accumulator of weights^2
 
@@ -63,15 +76,15 @@ int rcpp_get_meanvar (Rcpp::List &data)                                         
       for (size_t i=0; i<l; i++) {
         if (tWeight==0) {                                                       // equal weights
           q[3] += first[i];
-        } else if (tWeight==1) {                                                // weight = 1 / abs(x - median(x))
-          const double w = invDist(first[i]);
+        } else {                                                                // weighted estimates
+          getWeight(first[i]);
           q[3] += first[i] * w;
           sumweights += w;
         }
       }
       if (tWeight==0) {
         q[3] /= l;
-      } else if (tWeight==1) {
+      } else {
         q[3] /= sumweights;
       }
 
@@ -80,15 +93,15 @@ int rcpp_get_meanvar (Rcpp::List &data)                                         
       for (size_t i=0; i<l; i++) {
         if (tWeight==0) {                                                       // equal weights
           q[4] += std::pow(first[i] - q[3], 2);
-        } else if (tWeight==1) {                                                // weight = 1 / abs(x - median(x))
-          const double w = invDist(first[i]);
+        } else {                                                                // weighted estimates
+          getWeight(first[i]);
           q[4] += std::pow(first[i] - q[3], 2) * w;
           sumsquares += std::pow(w, 2);
         }
       }
       if (tWeight==0) {
         q[4] /= l - 1;
-      } else if (tWeight==1) {
+      } else {
         q[4] /= sumweights - sumsquares/sumweights;                             // https://en.wikipedia.org/wiki/Weighted_arithmetic_mean#Reliability_weights
                                                                                 // or as in Hmisc::wtd.var(x, w, normwt=TRUE)
       }
@@ -103,8 +116,8 @@ int rcpp_get_meanvar (Rcpp::List &data)                                         
           if (tWeight==0) {                                                     // equal weights
             q[3] += std::log(first[i]);
             q[4] += std::log(1 - first[i]);
-          } else if (tWeight==1) {                                              // weight = 1 / abs(x - median(x))
-            const double w = invDist(first[i]);
+          } else {                                                              // weighted geometric means
+            getWeight(first[i]);
             q[3] += std::log(first[i]) * w;
             q[4] += std::log(1 - first[i]) * w;
             sumweights += w;
@@ -114,7 +127,7 @@ int rcpp_get_meanvar (Rcpp::List &data)                                         
       if (tWeight==0) {
         q[3] = exp(q[3] / (l-lzo));
         q[4] = exp(q[4] / (l-lzo));
-      } else if (tWeight==1) {
+      } else {
         q[3] = exp(q[3] / sumweights);
         q[4] = exp(q[4] / sumweights);
       }
@@ -138,6 +151,18 @@ int rcpp_get_meanvar_ari_invdist (Rcpp::List &data)                             
 }
 
 // [[Rcpp::export]]
+int rcpp_get_meanvar_ari_invsqrtdist (Rcpp::List &data)                         // arithmetic mean, sqrt inverse distance weights
+{
+  return rcpp_get_meanvar<0, 2>(data);
+}
+
+// [[Rcpp::export]]
+int rcpp_get_meanvar_ari_neglogdist (Rcpp::List &data)                          // arithmetic mean, log inverse distance weights
+{
+  return rcpp_get_meanvar<0, 3>(data);
+}
+
+// [[Rcpp::export]]
 int rcpp_get_meanvar_geo_equal (Rcpp::List &data)                               // geometric mean, equal weights
 {
   return rcpp_get_meanvar<1, 0>(data);
@@ -147,6 +172,18 @@ int rcpp_get_meanvar_geo_equal (Rcpp::List &data)                               
 int rcpp_get_meanvar_geo_invdist (Rcpp::List &data)                             // geometric mean, inverse distance weights
 {
   return rcpp_get_meanvar<1, 1>(data);
+}
+
+// [[Rcpp::export]]
+int rcpp_get_meanvar_geo_invsqrtdist (Rcpp::List &data)                         // geometric mean, sqrt inverse distance weights
+{
+  return rcpp_get_meanvar<1, 2>(data);
+}
+
+// [[Rcpp::export]]
+int rcpp_get_meanvar_geo_neglogdist (Rcpp::List &data)                          // geometric mean, log inverse distance weights
+{
+  return rcpp_get_meanvar<1, 3>(data);
 }
 
 
