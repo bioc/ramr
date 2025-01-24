@@ -54,6 +54,7 @@ int rcpp_get_meanvar (Rcpp::List &data)                                         
       continue;                                                                 // skip this row
     }
     double sumweights = 0;                                                      // accumulator of weights
+    double sumsquares = 0;                                                      // accumulator of weights^2
 
     // NB: ARITHMETIC MEAN ALLOWS 0/1, GEOMETRIC MEAN SKIPS 0/1
     if (tMean==0) {                                                             // arithmetic mean and variance
@@ -82,12 +83,14 @@ int rcpp_get_meanvar (Rcpp::List &data)                                         
         } else if (tWeight==1) {                                                // weight = 1 / abs(x - median(x))
           const double w = invDist(first[i]);
           q[4] += std::pow(first[i] - q[3], 2) * w;
+          sumsquares += std::pow(w, 2);
         }
       }
       if (tWeight==0) {
         q[4] /= l - 1;
       } else if (tWeight==1) {
-        q[4] /= sumweights * (l - 1) / l;
+        q[4] /= sumweights - sumsquares/sumweights;                             // https://en.wikipedia.org/wiki/Weighted_arithmetic_mean#Reliability_weights
+                                                                                // or as in Hmisc::wtd.var(x, w, normwt=TRUE)
       }
 
     } else if (tMean==1) {                                                      // geometric means
