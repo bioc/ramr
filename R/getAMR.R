@@ -2,7 +2,7 @@
 #'
 #' @description
 #' `getAMR` returns a `GRanges` object with all the aberrantly methylated
-#' regions (AMRs) for all samples in a data set.
+#' regions (AMRs or epimutations) for all samples in a data set.
 #'
 #' @details
 #' In the provided data set, `getAMR` compares methylation beta values of each
@@ -88,19 +88,77 @@
 #'   getAMR(ramr.data, ramr.samples, ramr.method="beta",
 #'          min.cpgs=5, merge.window=1000, qval.cutoff=1e-3, cores=2)
 #' @export
+getAMR.IQR <- function (data.ranges,
+                        data.samples=NULL,
+                        exclude.range=NULL,
+                        iqr.threshold=5,
+                        merge.window=300,
+                        min.cpgs=7,
+                        min.width=1,
+                        cores=NULL,
+                        verbose=TRUE)
+{
+  getAMR(
+    data.ranges=data.ranges, data.samples=data.samples, data.coverage=NULL,
+    exclude.range=exclude.range, transform="identity", compute="IQR",
+    compute.params=NULL, combine="threshold",
+    combine.params=list(
+      iqr.threshold=iqr.threshold, merge.window=merge.window,
+      min.cpgs=min.cpgs, min.width=min.width
+    ),
+    cores=cores,
+    verbose=verbose
+  )
+}
+
+#' @export
+getAMR.beta <- function (data.ranges,
+                         data.samples=NULL,
+                         data.coverage=NULL,
+                         exclude.range=NULL,
+                         transform=c("identity", "linear"),
+                         estimate.by=c("mom", "amle", "nmle"),
+                         weights=c("equal", "invDist", "sqrtInvDist", "logInvDist"),
+                         combine=c("threshold", "comb-p"),
+                         p.threshold=1e-3,
+                         merge.window=300,
+                         min.cpgs=7,
+                         min.width=1,
+                         cores=NULL,
+                         verbose=TRUE)
+{
+  transform <- match.arg(transform)
+  estimate.by <- match.arg(estimate.by)
+  weights <- match.arg(weights)
+  combine <- match.arg(combine)
+  getAMR(
+    data.ranges=data.ranges, data.samples=data.samples, data.coverage=data.coverage,
+    exclude.range=exclude.range, transform=transform, compute="beta",
+    compute.params=list(
+      estimate.by=estimate.by, weights=weights
+    ),
+    combine=combine,
+    combine.params=list(
+      p.threshold=p.threshold, merge.window=merge.window,
+      min.cpgs=min.cpgs, min.width=min.width
+    ),
+    cores=cores,
+    verbose=verbose
+  )
+}
+
+#' @export
 getAMR <- function (data.ranges,
                     data.samples=NULL,
-                    ramr.method=c("IQR", "beta", "wbeta", "beinf"),
-                    iqr.cutoff=5,
-                    pval.cutoff=5e-2,
-                    qval.cutoff=NULL,
-                    merge.window=300,
-                    min.cpgs=7,
-                    min.width=1,
+                    data.coverage=NULL,
                     exclude.range=NULL,
-                    cores=max(1,parallel::detectCores()-1),
-                    verbose=TRUE,
-                    ...)
+                    transform=c("identity", "linear"),
+                    compute=c("IQR", "beta"),
+                    compute.params,
+                    combine=c("threshold", "comb-p"),
+                    combine.params,
+                    cores=NULL,
+                    verbose=TRUE)
 {
   if (!methods::is(data.ranges,"GRanges"))
     stop("'data.ranges' must be a GRanges object")
