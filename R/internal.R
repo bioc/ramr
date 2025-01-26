@@ -13,7 +13,7 @@
 #' @importFrom methods as is
 #' @importFrom parallel detectCores makeCluster stopCluster
 #' @importFrom S4Vectors queryHits
-#' @importFrom stats median na.omit rbeta pbeta
+#' @importFrom stats median na.omit rbeta pbeta setNames
 #' @importFrom utils head tail packageVersion
 #' @importFrom Rcpp sourceCpp
 #' @useDynLib ramr, .registration=TRUE

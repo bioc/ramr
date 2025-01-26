@@ -104,14 +104,14 @@ plotAMR <- function (data.ranges,
         ggplot2::scale_color_discrete(name="samples", limits=colorify) +
         ggplot2::scale_alpha_continuous(guide="none") +
         ggplot2::scale_size_identity(guide="none") +
-        ggplot2::guides(color=guide_legend(ncol=1)) +
+        ggplot2::guides(color=ggplot2::guide_legend(ncol=1)) +
         ggplot2::theme_light() +
         ggplot2::theme(legend.text=ggplot2::element_text(size=8),
                        axis.text.x=ggplot2::element_text(size=8, angle=0),
                        axis.text.y=ggplot2::element_text(size=8)) +
         ggplot2::ggtitle(plot.title)
 
-      plot.list <- c(plot.list, setNames(c(list(gene.plot)), plot.title))
+      plot.list <- c(plot.list, stats::setNames(c(list(gene.plot)), plot.title))
     }
   }
 
