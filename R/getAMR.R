@@ -87,6 +87,7 @@
 #'   data(ramr)
 #'   getAMR(ramr.data, ramr.samples, ramr.method="beta",
 #'          min.cpgs=5, merge.window=1000, qval.cutoff=1e-3, cores=2)
+#' @rdname getAMR
 #' @export
 getAMR.IQR <- function (data.ranges,
                         data.samples=NULL,
@@ -111,6 +112,7 @@ getAMR.IQR <- function (data.ranges,
   )
 }
 
+#' @rdname getAMR
 #' @export
 getAMR.beta <- function (data.ranges,
                          data.samples=NULL,
@@ -147,6 +149,7 @@ getAMR.beta <- function (data.ranges,
   )
 }
 
+#' @rdname getAMR
 #' @export
 getAMR <- function (data.ranges,
                     data.samples=NULL,
