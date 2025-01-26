@@ -21,35 +21,27 @@
 int rcpp_fit_binom (Rcpp::List &data)                                           // List output of rcpp_prepare_data
 {
   // consts
-  const size_t ncol = data["ncol"];                                             // number of columns (samples)
   const size_t nrow = data["nrow"];                                             // number of rows (genomic loci)
   
   // containers
-  Rcpp::XPtr<T_out> out((SEXP)data.attr("out_xptr"));                           // vector with intermediate output values (here: transposed 'raw')
   Rcpp::XPtr<T_len> len((SEXP)data.attr("len_xptr"));                           // lengths of input data rows minus number of NaNs
   Rcpp::XPtr<T_coef> coef((SEXP)data.attr("coef_xptr"));                        // vector to hold per-row results
   
   // fast direct accessors
-  const auto out_data = out->data();
   const auto len_data = len->data();
   const auto coef_data = coef->data();
   
   for (size_t r=0; r<nrow; r++) {
     const auto q = coef_data + r*NCOEF;                                         // pointer to the first element of 'coef' NCOEF-element array
-    const size_t l = len_data[r];                                               // length = ncol - nNaNs
-    if (isZero(q[0]+q[1]) || l==0) continue;                                    // if no 0/1 or no data, skip this row
-    const auto first = out_data + r*ncol;                                       // first element
+    if (isZero(q[0]+q[1]) || len_data[r]==0) continue;                          // if no 0/1 or no data, skip this row
     
-    // mean in m
-    double m = 0;
-    for (size_t i=0; i<l; i++)
-      m += first[i];
-    m /= l;
+    // mean in q[3] after 'rcpp_get_meanvar'
+    const double m = q[3];
     
-    // log probability of 0 is in q[3]
+    // log probability of 0 goes to q[3]
     q[3] = std::log(1 - m);
           
-    // log probability of 1 is in q[4]
+    // log probability of 1 goes to q[4]
     q[4] = std::log(m);
   }
   

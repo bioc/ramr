@@ -29,6 +29,8 @@
 #define negLogDist(x) (std::log(invDist(x)))                                    /* weight is a negative logarithm of distance from the median */
 #define getWeight(x) {                                                         \
   switch (tWeight) {                                                           \
+  case 0:                                                  /* equal weights */ \
+    break;                                                                     \
   case 1:                                /* weight = 1 / abs(x - median(x)) */ \
     w = invDist(x); break;                                                     \
   case 2:                       /* weight = sqrt ( 1 / abs(x - median(x)) ) */ \
@@ -65,7 +67,7 @@ int rcpp_get_meanvar (Rcpp::List &data)                                         
       std::fill_n(q+3, NCOEF-3, NA_REAL);                                       // estimates are NaN
       continue;                                                                 // skip this row
     }
-    double w;                                                                   // weight
+    double w = 1;                                                               // weight
     double sumweights = 0;                                                      // accumulator of weights
     double sumsquares = 0;                                                      // accumulator of weights^2
 
@@ -74,38 +76,21 @@ int rcpp_get_meanvar (Rcpp::List &data)                                         
       // mean in q[3]
       q[3] = 0;
       for (size_t i=0; i<l; i++) {
-        if (tWeight==0) {                                                       // equal weights
-          q[3] += first[i];
-        } else {                                                                // weighted estimates
-          getWeight(first[i]);
-          q[3] += first[i] * w;
-          sumweights += w;
-        }
+        getWeight(first[i]);
+        q[3] += first[i] * w;
+        sumweights += w;
       }
-      if (tWeight==0) {
-        q[3] /= l;
-      } else {
-        q[3] /= sumweights;
-      }
+      q[3] /= sumweights;
 
       // unbiased variance in q[4]
       q[4] = 0;
       for (size_t i=0; i<l; i++) {
-        if (tWeight==0) {                                                       // equal weights
-          q[4] += std::pow(first[i] - q[3], 2);
-        } else {                                                                // weighted estimates
-          getWeight(first[i]);
-          q[4] += std::pow(first[i] - q[3], 2) * w;
-          sumsquares += std::pow(w, 2);
-        }
+        getWeight(first[i]);
+        q[4] += std::pow(first[i] - q[3], 2) * w;
+        sumsquares += std::pow(w, 2);
       }
-      if (tWeight==0) {
-        q[4] /= l - 1;
-      } else {
-        q[4] /= sumweights - sumsquares/sumweights;                             // https://en.wikipedia.org/wiki/Weighted_arithmetic_mean#Reliability_weights
+      q[4] /= sumweights - sumsquares/sumweights;                               // https://en.wikipedia.org/wiki/Weighted_arithmetic_mean#Reliability_weights
                                                                                 // or as in Hmisc::wtd.var(x, w, normwt=TRUE)
-      }
-
     } else if (tMean==1) {                                                      // geometric means
       // sample geometric mean is in q[3]
       // sample geometric mean based on (1 − X) is in q[4]
@@ -113,25 +98,14 @@ int rcpp_get_meanvar (Rcpp::List &data)                                         
       q[4] = 0;
       for (size_t i=0; i<l; i++) {
         if (notZO(first[i])) {
-          if (tWeight==0) {                                                     // equal weights
-            q[3] += std::log(first[i]);
-            q[4] += std::log(1 - first[i]);
-          } else {                                                              // weighted geometric means
-            getWeight(first[i]);
-            q[3] += std::log(first[i]) * w;
-            q[4] += std::log(1 - first[i]) * w;
-            sumweights += w;
-          }
+          getWeight(first[i]);
+          q[3] += std::log(first[i]) * w;
+          q[4] += std::log(1 - first[i]) * w;
+          sumweights += w;
         }
       }
-      if (tWeight==0) {
-        q[3] = exp(q[3] / (l-lzo));
-        q[4] = exp(q[4] / (l-lzo));
-      } else {
-        q[3] = exp(q[3] / sumweights);
-        q[4] = exp(q[4] / sumweights);
-      }
-
+      q[3] = exp(q[3] / sumweights);
+      q[4] = exp(q[4] / sumweights);
     }
   }
 
