@@ -11,6 +11,9 @@ plotAMR(
   highlight = NULL,
   title = NULL,
   labs = c("genomic position", "beta value"),
+  transform = c("identity", "log1p", "log10"),
+  limits = NULL,
+  breaks = NULL,
   window = 300
 )
 }
@@ -34,6 +37,16 @@ title is set to a genomic location of particular AMR.}
 
 \item{labs}{Optional axis labels for the plot. Default: c("genomic position",
 "beta value").}
+
+\item{transform}{Optional transformation of y-axis. Default: "identity"
+(no transformation).}
+
+\item{limits}{Optional limits of y-axis. When default (NULL), limits
+are c(NA,1) for `transform=="log10"` and c(0,1) otherwise.}
+
+\item{breaks}{Optional breaks of y-axis. When default (NULL), breaks
+are `10**(seq(from=-5, to=0, length.out=6))` for `transform=="log10"` and
+`seq(from=0, to=1, length.out=6)` otherwise.}
 
 \item{window}{An optional integer constant to expand genomic ranges of the
 `amr.ranges` object (the default: 300).}
