@@ -61,8 +61,39 @@ utils::globalVariables(c(
 #
 
 ################################################################################
-# Functions: ...
+# Functions
 ################################################################################
 
-# descr: ...
-# value: ...
+# descr: preprocesses data
+# value: list
+
+.preprocessData <- function (data.ranges,
+                             data.samples,
+                             data.coverage,
+                             transform,
+                             exclude.range,
+                             ncores,
+                             verbose)
+{
+  if (verbose) message("Preprocessing data ", appendLF=FALSE)
+  tm <- proc.time()
+  
+  fn <- paste0("rcpp_prepare_data_", transform)
+  data.object <- do.call(what=fn, args=list(
+    seqnames=S4Vectors::runValue(GenomeInfoDb::seqnames(data.ranges)),
+    seqrunlens=S4Vectors::runLength(GenomeInfoDb::seqnames(data.ranges)),
+    start=BiocGenerics::start(data.ranges),
+    strand=as.factor(BiocGenerics::strand(data.ranges)),
+    mcols=as.data.frame(GenomicRanges::mcols(data.ranges), optional=TRUE),
+    coverage=data.coverage,
+    exclude_lower=exclude.range[1],
+    exclude_upper=exclude.range[2]
+  ))
+  
+  if (verbose) message(sprintf("[%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
+  return(data.object)
+}
+
+################################################################################
+
+

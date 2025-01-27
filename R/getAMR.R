@@ -91,8 +91,8 @@
 getAMR <- function (data.ranges,
                     data.samples=NULL,
                     data.coverage=NULL,
-                    exclude.range=NULL,
                     transform=c("identity", "linear"),
+                    exclude.range=NULL,
                     compute=c("IQR", "beta"),
                     compute.estimate=c("mom", "amle", "nmle"),
                     compute.weights=c("equal", "invDist", "sqrtInvDist", "logInvDist"),
@@ -113,11 +113,16 @@ getAMR <- function (data.ranges,
     stop("'data.ranges' metadata must include 'data.samples'")
   if (!is.null(data.coverage) &
       !methods::is(data.coverage,"data.frame") &
-      !identical(dim(data.mcols), dim(data.coverage))
-      stop("'data.coverage' must be a 'data.frame' object",
-           " of the same dimensions as 'data.ranges' metadata")
+      !identical(dim(data.mcols), dim(data.coverage)))
+    stop("When provided, 'data.coverage' must be a 'data.frame' object",
+         " of the same dimensions as 'data.ranges' metadata")
   if (length(data.samples)<3)
     stop("at least three 'data.samples' must be provided")
+  
+  if (is.null(data.coverage))
+    data.coverage <- data.frame
+  if (is.null(exclude.range))
+    exclude.range <- c(2,0) # // <= than 2 and >= than 0
   transform <- match.arg(transform)
   compute <- match.arg(compute)
   compute.estimate <- match.arg(compute.estimate)
@@ -126,129 +131,24 @@ getAMR <- function (data.ranges,
   
   #####################################################################################
 
-  getPValues.beta <- function (data.chunk, ...) {
-    chunk.filt <- apply(data.chunk, 1, function (x) {
-      x.median    <- stats::median(x, na.rm=TRUE)
-      x[is.na(x)] <- x.median
-      beta.fit <- suppressWarnings( EnvStats::ebeta(as.numeric(x), ...) )
-      pvals    <- stats::pbeta(x, beta.fit$parameters[1], beta.fit$parameters[2])
-      pvals[x>x.median] <- 1 - pvals[x>x.median]
-      return(pvals)
-    })
-    return(t(chunk.filt))
+  .data <- .preprocessData(
+    data.ranges=data.ranges, data.samples=data.samples,
+    data.coverage=data.coverage, transform=transform,
+    exclude.range=exclude.range, ncores=ncores, verbose=verbose
+  )
+
+  if (compute=="IQR") {
+    .getAMR.IQR(
+      data=.data
+    )
+  } else if (compute=="beta") {
+    .getAMR.beta(
+      data=.data
+    )
   }
-  getPValues.wbeta<- function (data.chunk, ...) {
-    chunk.filt  <- apply(data.chunk, 1, function (x) {
-      x.median    <- stats::median(x, na.rm=TRUE)
-      x[is.na(x)] <- x.median
-      # weight directly correlates with bin contents (number of values per bin)
-      # and inversely - with the distance from the median value, thus narrowing
-      # the estimated distribution and emphasizing outliers
-      c           <- cut(x, c(0:100)/100)
-      b           <- table(c)
-      w           <- as.numeric(b[c]) * (1 - abs(x-x.median))
-      beta.fit    <- suppressWarnings( ExtDist::eBeta(as.numeric(x), w, ...) )
-      pvals       <- ExtDist::pBeta(x, params=beta.fit)
-      pvals[x>x.median] <- 1 - pvals[x>x.median]
-      return(pvals)
-    })
-    return(t(chunk.filt))
-  }
-  inv.logit <- function (x) exp(x)/(1+exp(x))
-  getPValues.beinf <- function (data.chunk, ...) {
-    chunk.filt <- apply(data.chunk, 1, function (x) {
-      x.median    <- stats::median(x, na.rm=TRUE)
-      x[is.na(x)] <- x.median
-      beinf.fit <- gamlss::gamlss(
-        as.numeric(x)~1, sigma.formula=~1, nu.formula=~1, tau.formula=~1,
-        family=gamlss.dist::BEINF(mu.link="logit", sigma.link="logit",
-                                  nu.link="log", tau.link="log"),
-        control=gamlss::gamlss.control(trace=FALSE), ...
-      )
-      pvals <- gamlss.dist::pBEINF(
-        q=x, mu=inv.logit(beinf.fit$mu.coefficients),
-        sigma=inv.logit(beinf.fit$sigma.coefficients),
-        nu=exp(beinf.fit$nu.coefficients),
-        tau=exp(beinf.fit$tau.coefficients),
-        lower.tail=TRUE, log.p=FALSE
-      )
-      pvals[x>x.median] <- 1 - pvals[x>x.median]
-      return(pvals)
-    })
-    return(t(chunk.filt))
-  }
+
   
-
-  #####################################################################################
-
-  if (verbose) message("Identifying AMRs", appendLF=FALSE)
-  tm <- proc.time()
-
-  doParallel::registerDoParallel(cores)
-  cl <- parallel::makeCluster(cores)
-
-  universe      <- getUniverse(data.ranges, merge.window=merge.window, min.cpgs=min.cpgs, min.width=min.width)
-  universe.cpgs <- unlist(universe$revmap)
-
-  betas <- as.matrix(mcols(data.ranges)[universe.cpgs, data.samples, drop=FALSE])
-  if (is.null(qval.cutoff))
-    qval.cutoff <- pval.cutoff/ncol(betas)
-
-  chunks  <- split(seq_len(nrow(betas)), if (cores>1) cut(seq_len(nrow(betas)), cores) else 1)
-  medians <- foreach (chunk=chunks, .combine=c) %dorng% matrixStats::rowMedians(betas[chunk, ], na.rm=TRUE)
-
-  if (ramr.method=="IQR") {
-    iqrs <- foreach (chunk=chunks, .combine=c) %dorng% matrixStats::rowIQRs(betas[chunk, ], na.rm=TRUE)
-    betas.filtered <- (betas-medians)/iqrs
-    betas.filtered[abs(betas.filtered)<iqr.cutoff]  <- NA
-  } else if (ramr.method=="beta") {
-    # multi-threaded EnvStats::ebeta (speed: mme=mmue>mle>>>fitdistrplus::fitdist)
-    betas.filtered <- foreach (chunk=chunks) %dorng% getPValues.beta(betas[chunk, ], ...)
-    betas.filtered <- do.call(rbind, betas.filtered)
-    betas.filtered[betas.filtered>=qval.cutoff] <- NA
-  } else if (ramr.method=="wbeta") {
-    betas.filtered <- foreach (chunk=chunks) %dorng% getPValues.wbeta(betas[chunk, ], ...)
-    betas.filtered <- do.call(rbind, betas.filtered)
-    betas.filtered[betas.filtered>=qval.cutoff] <- NA
-  } else if (ramr.method=="beinf") {
-    betas.filtered <- foreach (chunk=chunks) %dorng% getPValues.beinf(betas[chunk, ], ...)
-    betas.filtered <- do.call(rbind, betas.filtered)
-    betas.filtered[betas.filtered>=qval.cutoff] <- NA
-  }
-
-  if (!is.null(exclude.range))
-    betas.filtered[medians>=exclude.range[1] & medians<=exclude.range[2]] <- NA
-
-
-  getMergedRanges <- function (column) {
-    not.na <- which(!is.na(betas.filtered[,column]))
-    ranges <- GenomicRanges::reduce(data.ranges[universe.cpgs[not.na]], min.gapwidth=merge.window, with.revmap=TRUE)
-    if (length(ranges)>0) {
-      ranges$ncpg   <- unlist(lapply(ranges$revmap, length))
-      ranges$sample <- column
-      ranges        <- subset(ranges, `ncpg`>=min.cpgs & `width`>=max(1,min.width))
-      ranges$dbeta  <- vapply(ranges$revmap, function (revmap) {
-        mean(betas[not.na[revmap],column,drop=FALSE] - medians[not.na[revmap]])
-      }, numeric(1))
-
-      if (ramr.method=="IQR") {
-        ranges$xiqr   <- vapply(ranges$revmap, function (revmap) {
-          mean(betas.filtered[not.na[revmap],column,drop=FALSE], na.rm=TRUE)
-        }, numeric(1))
-      } else {
-        ranges$pval <- vapply(ranges$revmap, function (revmap) {
-          return( 10**mean(log10(betas.filtered[not.na[revmap],column] + .Machine$double.xmin), na.rm=TRUE) )
-        }, numeric(1))
-      }
-
-      ranges$revmap <- lapply(ranges$revmap, function (i) {universe.cpgs[not.na[i]]})
-    }
-    return(ranges)
-  }
-
-  amr.ranges <- foreach (column=colnames(betas.filtered)) %dorng% getMergedRanges(column)
-
-  parallel::stopCluster(cl)
+  
   if (verbose) message(sprintf(" [%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
   return(unlist(methods::as(amr.ranges, "GRangesList")))
 }
