@@ -106,14 +106,24 @@ getAMR <- function (data.ranges,
 {
   if (!methods::is(data.ranges,"GRanges"))
     stop("'data.ranges' must be a GRanges object")
+  data.mcols <- GenomicRanges::mcols(data.ranges)
   if (is.null(data.samples))
-    data.samples <- colnames(GenomicRanges::mcols(data.ranges))
-  if (!all(data.samples %in% colnames(GenomicRanges::mcols(data.ranges))))
+    data.samples <- colnames(data.mcols)
+  if (!all(data.samples %in% colnames(data.mcols)))
     stop("'data.ranges' metadata must include 'data.samples'")
+  if (!is.null(data.coverage) &
+      !methods::is(data.coverage,"data.frame") &
+      !identical(dim(data.mcols), dim(data.coverage))
+      stop("'data.coverage' must be a 'data.frame' object",
+           " of the same dimensions as 'data.ranges' metadata")
   if (length(data.samples)<3)
     stop("at least three 'data.samples' must be provided")
-  ramr.method <- match.arg(ramr.method)
-
+  transform <- match.arg(transform)
+  compute <- match.arg(compute)
+  compute.estimate <- match.arg(compute.estimate)
+  compute.weights <- match.arg(compute.weights)
+  combine <- match.arg(combine)
+  
   #####################################################################################
 
   getPValues.beta <- function (data.chunk, ...) {
