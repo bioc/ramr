@@ -189,36 +189,36 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// rcpp_get_meanvar_ari_invdist
-int rcpp_get_meanvar_ari_invdist(Rcpp::List& data);
-RcppExport SEXP _ramr_rcpp_get_meanvar_ari_invdist(SEXP dataSEXP) {
+// rcpp_get_meanvar_ari_invDist
+int rcpp_get_meanvar_ari_invDist(Rcpp::List& data);
+RcppExport SEXP _ramr_rcpp_get_meanvar_ari_invDist(SEXP dataSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_get_meanvar_ari_invdist(data));
+    rcpp_result_gen = Rcpp::wrap(rcpp_get_meanvar_ari_invDist(data));
     return rcpp_result_gen;
 END_RCPP
 }
-// rcpp_get_meanvar_ari_invsqrtdist
-int rcpp_get_meanvar_ari_invsqrtdist(Rcpp::List& data);
-RcppExport SEXP _ramr_rcpp_get_meanvar_ari_invsqrtdist(SEXP dataSEXP) {
+// rcpp_get_meanvar_ari_sqrtInvDist
+int rcpp_get_meanvar_ari_sqrtInvDist(Rcpp::List& data);
+RcppExport SEXP _ramr_rcpp_get_meanvar_ari_sqrtInvDist(SEXP dataSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_get_meanvar_ari_invsqrtdist(data));
+    rcpp_result_gen = Rcpp::wrap(rcpp_get_meanvar_ari_sqrtInvDist(data));
     return rcpp_result_gen;
 END_RCPP
 }
-// rcpp_get_meanvar_ari_neglogdist
-int rcpp_get_meanvar_ari_neglogdist(Rcpp::List& data);
-RcppExport SEXP _ramr_rcpp_get_meanvar_ari_neglogdist(SEXP dataSEXP) {
+// rcpp_get_meanvar_ari_logInvDist
+int rcpp_get_meanvar_ari_logInvDist(Rcpp::List& data);
+RcppExport SEXP _ramr_rcpp_get_meanvar_ari_logInvDist(SEXP dataSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_get_meanvar_ari_neglogdist(data));
+    rcpp_result_gen = Rcpp::wrap(rcpp_get_meanvar_ari_logInvDist(data));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -233,36 +233,36 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// rcpp_get_meanvar_geo_invdist
-int rcpp_get_meanvar_geo_invdist(Rcpp::List& data);
-RcppExport SEXP _ramr_rcpp_get_meanvar_geo_invdist(SEXP dataSEXP) {
+// rcpp_get_meanvar_geo_invDist
+int rcpp_get_meanvar_geo_invDist(Rcpp::List& data);
+RcppExport SEXP _ramr_rcpp_get_meanvar_geo_invDist(SEXP dataSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_get_meanvar_geo_invdist(data));
+    rcpp_result_gen = Rcpp::wrap(rcpp_get_meanvar_geo_invDist(data));
     return rcpp_result_gen;
 END_RCPP
 }
-// rcpp_get_meanvar_geo_invsqrtdist
-int rcpp_get_meanvar_geo_invsqrtdist(Rcpp::List& data);
-RcppExport SEXP _ramr_rcpp_get_meanvar_geo_invsqrtdist(SEXP dataSEXP) {
+// rcpp_get_meanvar_geo_sqrtInvDist
+int rcpp_get_meanvar_geo_sqrtInvDist(Rcpp::List& data);
+RcppExport SEXP _ramr_rcpp_get_meanvar_geo_sqrtInvDist(SEXP dataSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_get_meanvar_geo_invsqrtdist(data));
+    rcpp_result_gen = Rcpp::wrap(rcpp_get_meanvar_geo_sqrtInvDist(data));
     return rcpp_result_gen;
 END_RCPP
 }
-// rcpp_get_meanvar_geo_neglogdist
-int rcpp_get_meanvar_geo_neglogdist(Rcpp::List& data);
-RcppExport SEXP _ramr_rcpp_get_meanvar_geo_neglogdist(SEXP dataSEXP) {
+// rcpp_get_meanvar_geo_logInvDist
+int rcpp_get_meanvar_geo_logInvDist(Rcpp::List& data);
+RcppExport SEXP _ramr_rcpp_get_meanvar_geo_logInvDist(SEXP dataSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_get_meanvar_geo_neglogdist(data));
+    rcpp_result_gen = Rcpp::wrap(rcpp_get_meanvar_geo_logInvDist(data));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -428,13 +428,13 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ramr_rcpp_fit_binom", (DL_FUNC) &_ramr_rcpp_fit_binom, 1},
     {"_ramr_rcpp_get_iqr", (DL_FUNC) &_ramr_rcpp_get_iqr, 1},
     {"_ramr_rcpp_get_meanvar_ari_equal", (DL_FUNC) &_ramr_rcpp_get_meanvar_ari_equal, 1},
-    {"_ramr_rcpp_get_meanvar_ari_invdist", (DL_FUNC) &_ramr_rcpp_get_meanvar_ari_invdist, 1},
-    {"_ramr_rcpp_get_meanvar_ari_invsqrtdist", (DL_FUNC) &_ramr_rcpp_get_meanvar_ari_invsqrtdist, 1},
-    {"_ramr_rcpp_get_meanvar_ari_neglogdist", (DL_FUNC) &_ramr_rcpp_get_meanvar_ari_neglogdist, 1},
+    {"_ramr_rcpp_get_meanvar_ari_invDist", (DL_FUNC) &_ramr_rcpp_get_meanvar_ari_invDist, 1},
+    {"_ramr_rcpp_get_meanvar_ari_sqrtInvDist", (DL_FUNC) &_ramr_rcpp_get_meanvar_ari_sqrtInvDist, 1},
+    {"_ramr_rcpp_get_meanvar_ari_logInvDist", (DL_FUNC) &_ramr_rcpp_get_meanvar_ari_logInvDist, 1},
     {"_ramr_rcpp_get_meanvar_geo_equal", (DL_FUNC) &_ramr_rcpp_get_meanvar_geo_equal, 1},
-    {"_ramr_rcpp_get_meanvar_geo_invdist", (DL_FUNC) &_ramr_rcpp_get_meanvar_geo_invdist, 1},
-    {"_ramr_rcpp_get_meanvar_geo_invsqrtdist", (DL_FUNC) &_ramr_rcpp_get_meanvar_geo_invsqrtdist, 1},
-    {"_ramr_rcpp_get_meanvar_geo_neglogdist", (DL_FUNC) &_ramr_rcpp_get_meanvar_geo_neglogdist, 1},
+    {"_ramr_rcpp_get_meanvar_geo_invDist", (DL_FUNC) &_ramr_rcpp_get_meanvar_geo_invDist, 1},
+    {"_ramr_rcpp_get_meanvar_geo_sqrtInvDist", (DL_FUNC) &_ramr_rcpp_get_meanvar_geo_sqrtInvDist, 1},
+    {"_ramr_rcpp_get_meanvar_geo_logInvDist", (DL_FUNC) &_ramr_rcpp_get_meanvar_geo_logInvDist, 1},
     {"_ramr_wait_a_second_omp", (DL_FUNC) &_ramr_wait_a_second_omp, 2},
     {"_ramr_rcpp_extract_out", (DL_FUNC) &_ramr_rcpp_extract_out, 1},
     {"_ramr_rcpp_extract_coef", (DL_FUNC) &_ramr_rcpp_extract_coef, 1},

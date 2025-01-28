@@ -18,6 +18,7 @@ getAMR(
   combine.window = 300,
   combine.min.cpgs = 7,
   combine.min.width = 1,
+  combine.ignore.strand = FALSE,
   cores = NULL,
   verbose = TRUE
 )

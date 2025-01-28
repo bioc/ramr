@@ -101,6 +101,7 @@ getAMR <- function (data.ranges,
                     combine.window=300,
                     combine.min.cpgs=7,
                     combine.min.width=1,
+                    combine.ignore.strand=FALSE,
                     cores=NULL,
                     verbose=TRUE)
 {
@@ -118,9 +119,9 @@ getAMR <- function (data.ranges,
          " of the same dimensions as 'data.ranges' metadata")
   if (length(data.samples)<3)
     stop("at least three 'data.samples' must be provided")
-  
+
   if (is.null(data.coverage))
-    data.coverage <- data.frame
+    data.coverage <- data.frame()
   if (is.null(exclude.range))
     exclude.range <- c(2,0) # // <= than 2 and >= than 0
   transform <- match.arg(transform)
@@ -128,7 +129,7 @@ getAMR <- function (data.ranges,
   compute.estimate <- match.arg(compute.estimate)
   compute.weights <- match.arg(compute.weights)
   combine <- match.arg(combine)
-  
+
   #####################################################################################
 
   .data <- .preprocessData(
@@ -139,16 +140,29 @@ getAMR <- function (data.ranges,
 
   if (compute=="IQR") {
     .getAMR.IQR(
-      data=.data
+      data.list=.data, threshold=combine.threshold, verbose=verbose
     )
   } else if (compute=="beta") {
     .getAMR.beta(
-      data=.data
+      data.list=.data,
+      estimate=compute.estimate,
+      weights=compute.weights,
+      coverage=identical(dim(data.mcols), dim(data.coverage)),
+      threshold=combine.threshold,
+      verbose=verbose
     )
   }
 
-  
-  
+  amr.ranges <- .createGranges(
+    data.list=.data,
+    compute=compute,
+    window=combine.window,
+    min.cpgs=combine.min.cpgs,
+    min.width=combine.min.width,
+    ignore.strand=combine.ignore.strand,
+    verbose=verbose
+  )
+
   if (verbose) message(sprintf(" [%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
-  return(unlist(methods::as(amr.ranges, "GRangesList")))
+  return(amr.ranges)
 }

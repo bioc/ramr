@@ -25,8 +25,8 @@
 
 // MACRO //
 #define invDist(x) (1 / (std::abs(q[2] - (x)) + FLT_EPSILON))                   /* weight inversely correlates with distance from the median */
-#define invSqrtDist(x) (std::sqrt(invDist(x)))                                  /* weight inversely correlates with square root of distance from the median */
-#define negLogDist(x) (std::log(invDist(x)))                                    /* weight is a negative logarithm of distance from the median */
+#define sqrtInvDist(x) (std::sqrt(invDist(x)))                                  /* weight inversely correlates with square root of distance from the median */
+#define logInvDist(x) (std::log(invDist(x)))                                    /* weight is a negative logarithm of distance from the median */
 #define getWeight(x) {                                                         \
   switch (tWeight) {                                                           \
   case 0:                                                  /* equal weights */ \
@@ -34,9 +34,9 @@
   case 1:                                /* weight = 1 / abs(x - median(x)) */ \
     w = invDist(x); break;                                                     \
   case 2:                       /* weight = sqrt ( 1 / abs(x - median(x)) ) */ \
-    w = invSqrtDist(x); break;                                                 \
+    w = sqrtInvDist(x); break;                                                 \
   case 3:                        /* weight = log ( 1 / abs(x - median(x)) ) */ \
-    w = negLogDist(x); break;                                                  \
+    w = logInvDist(x); break;                                                  \
   }                                                                            \
 };
 
@@ -119,19 +119,19 @@ int rcpp_get_meanvar_ari_equal (Rcpp::List &data)                               
 }
 
 // [[Rcpp::export]]
-int rcpp_get_meanvar_ari_invdist (Rcpp::List &data)                             // arithmetic mean, inverse distance weights
+int rcpp_get_meanvar_ari_invDist (Rcpp::List &data)                             // arithmetic mean, inverse distance weights
 {
   return rcpp_get_meanvar<0, 1>(data);
 }
 
 // [[Rcpp::export]]
-int rcpp_get_meanvar_ari_invsqrtdist (Rcpp::List &data)                         // arithmetic mean, sqrt inverse distance weights
+int rcpp_get_meanvar_ari_sqrtInvDist (Rcpp::List &data)                         // arithmetic mean, sqrt inverse distance weights
 {
   return rcpp_get_meanvar<0, 2>(data);
 }
 
 // [[Rcpp::export]]
-int rcpp_get_meanvar_ari_neglogdist (Rcpp::List &data)                          // arithmetic mean, log inverse distance weights
+int rcpp_get_meanvar_ari_logInvDist (Rcpp::List &data)                          // arithmetic mean, log inverse distance weights
 {
   return rcpp_get_meanvar<0, 3>(data);
 }
@@ -143,19 +143,19 @@ int rcpp_get_meanvar_geo_equal (Rcpp::List &data)                               
 }
 
 // [[Rcpp::export]]
-int rcpp_get_meanvar_geo_invdist (Rcpp::List &data)                             // geometric mean, inverse distance weights
+int rcpp_get_meanvar_geo_invDist (Rcpp::List &data)                             // geometric mean, inverse distance weights
 {
   return rcpp_get_meanvar<1, 1>(data);
 }
 
 // [[Rcpp::export]]
-int rcpp_get_meanvar_geo_invsqrtdist (Rcpp::List &data)                         // geometric mean, sqrt inverse distance weights
+int rcpp_get_meanvar_geo_sqrtInvDist (Rcpp::List &data)                         // geometric mean, sqrt inverse distance weights
 {
   return rcpp_get_meanvar<1, 2>(data);
 }
 
 // [[Rcpp::export]]
-int rcpp_get_meanvar_geo_neglogdist (Rcpp::List &data)                          // geometric mean, log inverse distance weights
+int rcpp_get_meanvar_geo_logInvDist (Rcpp::List &data)                          // geometric mean, log inverse distance weights
 {
   return rcpp_get_meanvar<1, 3>(data);
 }

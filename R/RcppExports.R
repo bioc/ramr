@@ -61,32 +61,32 @@ rcpp_get_meanvar_ari_equal <- function(data) {
     .Call(`_ramr_rcpp_get_meanvar_ari_equal`, data)
 }
 
-rcpp_get_meanvar_ari_invdist <- function(data) {
-    .Call(`_ramr_rcpp_get_meanvar_ari_invdist`, data)
+rcpp_get_meanvar_ari_invDist <- function(data) {
+    .Call(`_ramr_rcpp_get_meanvar_ari_invDist`, data)
 }
 
-rcpp_get_meanvar_ari_invsqrtdist <- function(data) {
-    .Call(`_ramr_rcpp_get_meanvar_ari_invsqrtdist`, data)
+rcpp_get_meanvar_ari_sqrtInvDist <- function(data) {
+    .Call(`_ramr_rcpp_get_meanvar_ari_sqrtInvDist`, data)
 }
 
-rcpp_get_meanvar_ari_neglogdist <- function(data) {
-    .Call(`_ramr_rcpp_get_meanvar_ari_neglogdist`, data)
+rcpp_get_meanvar_ari_logInvDist <- function(data) {
+    .Call(`_ramr_rcpp_get_meanvar_ari_logInvDist`, data)
 }
 
 rcpp_get_meanvar_geo_equal <- function(data) {
     .Call(`_ramr_rcpp_get_meanvar_geo_equal`, data)
 }
 
-rcpp_get_meanvar_geo_invdist <- function(data) {
-    .Call(`_ramr_rcpp_get_meanvar_geo_invdist`, data)
+rcpp_get_meanvar_geo_invDist <- function(data) {
+    .Call(`_ramr_rcpp_get_meanvar_geo_invDist`, data)
 }
 
-rcpp_get_meanvar_geo_invsqrtdist <- function(data) {
-    .Call(`_ramr_rcpp_get_meanvar_geo_invsqrtdist`, data)
+rcpp_get_meanvar_geo_sqrtInvDist <- function(data) {
+    .Call(`_ramr_rcpp_get_meanvar_geo_sqrtInvDist`, data)
 }
 
-rcpp_get_meanvar_geo_neglogdist <- function(data) {
-    .Call(`_ramr_rcpp_get_meanvar_geo_neglogdist`, data)
+rcpp_get_meanvar_geo_logInvDist <- function(data) {
+    .Call(`_ramr_rcpp_get_meanvar_geo_logInvDist`, data)
 }
 
 wait_a_second_omp <- function(sec, ncores) {

@@ -77,8 +77,8 @@ utils::globalVariables(c(
 {
   if (verbose) message("Preprocessing data ", appendLF=FALSE)
   tm <- proc.time()
-  
-  fn <- paste0("rcpp_prepare_data_", transform)
+
+  fn <- paste("rcpp_prepare_data", transform, sep="_")
   data.object <- do.call(what=fn, args=list(
     seqnames=S4Vectors::runValue(GenomeInfoDb::seqnames(data.ranges)),
     seqrunlens=S4Vectors::runLength(GenomeInfoDb::seqnames(data.ranges)),
@@ -89,11 +89,106 @@ utils::globalVariables(c(
     exclude_lower=exclude.range[1],
     exclude_upper=exclude.range[2]
   ))
-  
+
   if (verbose) message(sprintf("[%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
   return(data.object)
 }
 
 ################################################################################
 
+# descr: computes and filters by IQR
+# value: void
 
+.getAMR.IQR <- function (data.list,
+                         threshold,
+                         verbose)
+{
+  if (verbose) message("Computing IQR ", appendLF=FALSE)
+  tm <- proc.time()
+
+  rcpp_get_iqr(data=data.list)
+  rcpp_compute_xiqr(data=data.list)
+  rcpp_filter_threshold_xiqr(data=data.list, thr=threshold)
+
+  if (verbose) message(sprintf("[%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
+}
+
+################################################################################
+
+# descr: fits beta distribution and filters by p-value
+# value: void
+
+.getAMR.beta <- function (data.list,
+                          estimate,
+                          weights,
+                          coverage,
+                          threshold,
+                          verbose)
+{
+  if (verbose) message("Fitting beta distribution ", appendLF=FALSE)
+  tm <- proc.time()
+
+  fn.mean <- paste(
+    "rcpp_get_meanvar",
+    if (estimate=="mom") "ari" else "geo",
+    weights,
+    sep="_"
+  )
+  do.call(what=fn.mean, args=list(data=data.list))
+
+  fn.fit <- paste("rcpp_fit_beta", estimate, sep="_")
+  do.call(what=fn.fit, args=list(data=data.list))
+
+  if (coverage==TRUE)
+    rcpp_fit_binom(data=data.list)
+
+  fn.logp <- paste0("rcpp_compute_logp_beta", if (coverage) "_binom")
+  do.call(what=fn.logp, args=list(data=data.list))
+
+  rcpp_filter_threshold_logp(data=data.list, thr=threshold)
+
+  if (verbose) message(sprintf("[%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
+}
+
+################################################################################
+
+# descr: creates GenomicRanges
+# value: GRanges object
+
+.createGranges <- function (data.list,
+                            compute,
+                            window,
+                            min.cpgs,
+                            min.width,
+                            ignore.strand,
+                            verbose)
+{
+  if (verbose) message("Creating genomic ranges ", appendLF=FALSE)
+  tm <- proc.time()
+
+  fn.ranges <- paste(
+    "rcpp_create_granges",
+    if (ignore.strand) "unstranded" else "stranded",
+    if (compute=="IQR") "xiqr" else "logp",
+    sep="_"
+  )
+  amr.list <- do.call(what=fn.ranges, args=list(
+    data=data.list, window=window,min_ncpg=min.cpgs, min_width=min.width
+  ))
+
+  amr.ranges <- GenomicRanges::GRanges(
+    seqnames=amr.list$seqnames,
+    ranges=IRanges::IRanges(start=amr.list$start, end=amr.list$end),
+    strand=amr.list$strand,
+    revmap=S4Vectors::I(amr.list$revmap),
+    S4Vectors::DataFrame(
+      amr.list[c("ncpg", "sample", "dbeta",
+                 if (compute=="IQR") "xiqr" else "pval")]
+    )
+  )
+
+  if (verbose) message(sprintf("[%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
+  return(amr.ranges)
+}
+
+################################################################################
