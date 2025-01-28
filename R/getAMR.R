@@ -130,6 +130,11 @@ getAMR <- function (data.ranges,
   compute.weights <- match.arg(compute.weights)
   combine <- match.arg(combine)
 
+  if (compute.estimate=="nmle")
+    stop("compute.estimate=='nmle' is not available yet")
+  if (combine=="comb-p")
+    stop("combine=='comb-p' is not available yet")
+
   #####################################################################################
 
   .data <- .preprocessData(
