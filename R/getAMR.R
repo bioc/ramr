@@ -153,7 +153,7 @@ getAMR <- function (data.ranges,
       estimate=compute.estimate,
       weights=compute.weights,
       coverage=identical(dim(data.mcols), dim(data.coverage)),
-      threshold=combine.threshold,
+      threshold=log(combine.threshold),
       verbose=verbose
     )
   }
@@ -168,6 +168,5 @@ getAMR <- function (data.ranges,
     verbose=verbose
   )
 
-  if (verbose) message(sprintf(" [%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
   return(amr.ranges)
 }
