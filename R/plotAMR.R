@@ -81,6 +81,7 @@ plotAMR <- function (data.ranges,
 
   for (i in seq_along(amr.ranges.relisted)) {
     plot.ranges <- unlist(amr.ranges.relisted[i])
+    plot.ranges <- plot.ranges[order(plot.ranges$dbeta, decreasing=TRUE)]
     # plot.key <- data.table::as.data.table(GenomicRanges::reduce(plot.ranges, ignore.strand=ignore.strand))
     plot.key <- data.table::as.data.table(GenomicRanges::granges(plot.ranges))
     plot.key[, `:=` (start=start-window, end=end+window)]
@@ -89,11 +90,14 @@ plotAMR <- function (data.ranges,
     data.hits <- unique(data.table::foverlaps(data.ranges.dt, plot.key, mult="all", nomatch=NULL, which=TRUE)$xid)
     # old.data.hits <- unique(S4Vectors::queryHits(GenomicRanges::findOverlaps(data.ranges, plot.ranges, maxgap=window, ignore.strand=ignore.strand)))
     # if (!identical(data.hits, old.data.hits)) stop("different hits")
+    revmap.hits <- unique(unlist(plot.ranges$revmap, recursive=TRUE, use.names=FALSE))
+    if (!all(revmap.hits %in% data.hits))
+      stop("AMRs don't map to 'data.ranges'! Was the 'data.ranges' object modified after AMR search?")
     if (length(data.hits)>0) {
       plot.data <- data.ranges.dt[data.hits]
       plot.data$median <- apply(plot.data[, ..data.samples], 1, median, na.rm=TRUE)
 
-      amr.samples <- plot.ranges$sample
+      amr.samples <- na.omit(plot.ranges$sample)
       amr.revmaps <- plot.ranges$revmap
 
       colorify       <- c("median", if (is.null(highlight)) unique(as.character(amr.samples)), highlight)
