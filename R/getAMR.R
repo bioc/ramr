@@ -102,7 +102,7 @@ getAMR <- function (data.ranges,
                     combine.min.cpgs=7,
                     combine.min.width=1,
                     combine.ignore.strand=FALSE,
-                    cores=NULL,
+                    ncores=NULL,
                     verbose=TRUE)
 {
   if (!methods::is(data.ranges,"GRanges"))

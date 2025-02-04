@@ -87,9 +87,10 @@ simulateData <- function (template.ranges,
                           nsamples,
                           amr.ranges=NULL,
                           sample.names=NULL,
-                          min.beta=0.001,
-                          max.beta=0.999,
-                          cores=max(1,parallel::detectCores()-1),
+                          compute="beta",
+                          compute.estimate=c("mom", "amle", "nmle"),
+                          compute.weights=c("equal", "invDist", "sqrtInvDist", "logInvDist"),
+                          ncores=NULL,
                           verbose=TRUE)
 {
   if (!methods::is(template.ranges,"GRanges"))
@@ -110,53 +111,27 @@ simulateData <- function (template.ranges,
       stop("Malformed 'amr.ranges' object: 'dbeta' field is missing or is outside the range c(0,1)")
   }
 
-  #####################################################################################
-
-  getRandomBeta <- function(data.chunk) {
-    chunk.filt <- apply(data.chunk, 1, function(x) {
-      x.median    <- stats::median(x, na.rm=TRUE)
-      x[is.na(x)] <- x.median
-      beta.fit    <- suppressWarnings( EnvStats::ebeta(as.numeric(x)) )
-      random.beta <- stats::rbeta(nsamples, beta.fit$parameters[1], beta.fit$parameters[2])
-      return(random.beta)
-    })
-    return(t(chunk.filt))
-  }
+  template.mcols <- GenomicRanges::mcols(template.ranges)
+  template.samples <- colnames(template.mcols)
+  compute.estimate <- match.arg(compute.estimate)
+  compute.weights <- match.arg(compute.weights)
 
   #####################################################################################
 
-  if (verbose) message("Simulating data", appendLF=FALSE)
-  tm <- proc.time()
+  .data <- .preprocessData(
+    data.ranges=template.ranges, data.samples=template.samples,
+    data.coverage=data.frame(), transform="identity",
+    exclude.range=c(2,0), ncores=ncores, verbose=verbose
+  )
 
-  template.betas <- as.matrix(GenomicRanges::mcols(template.ranges, use.names=FALSE))
-  chunks <- split(seq_len(nrow(template.betas)), if (cores>1) cut(seq_len(nrow(template.betas)), cores) else 1)
-
-  doParallel::registerDoParallel(cores)
-  cl <- parallel::makeCluster(cores)
-  random.betas <- foreach (chunk=chunks) %dorng% getRandomBeta(template.betas[chunk,])
-  random.betas <- do.call(rbind, random.betas)
-  colnames(random.betas) <- sample.names
-  parallel::stopCluster(cl)
-
-  if (verbose) message(sprintf(" [%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
+  random.betas <- .getRandomValues(
+    data.list=.data, estimate=compute.estimate, weights=compute.weights,
+    nsamples=nsamples, sample.names=sample.names, verbose=verbose
+  )
 
   if (!is.null(amr.ranges)) {
-    if (verbose) message("Introducing epimutations", appendLF=FALSE)
-    tm <- proc.time()
-
-    amr.mcols <- data.frame(GenomicRanges::mcols(amr.ranges))
-    for (i in seq_len(nrow(amr.mcols))) {
-      revmap <- unlist(amr.mcols[i,"revmap"])
-      dbeta  <- sign(0.5 - mean(random.betas[revmap,], na.omit=TRUE)) * amr.mcols[i,"dbeta"]
-      sample <- amr.mcols[i,"sample"]
-      random.betas[revmap, sample] <- random.betas[revmap, sample] + dbeta
-    }
-
-    if (verbose) message(sprintf(" [%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
+    .addEpimutations()
   }
-
-  random.betas[random.betas>max.beta] <- max.beta
-  random.betas[random.betas<min.beta] <- min.beta
 
   data.ranges <- GenomicRanges::granges(template.ranges)
   GenomicRanges::mcols(data.ranges) <- random.betas

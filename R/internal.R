@@ -192,3 +192,64 @@ utils::globalVariables(c(
 }
 
 ################################################################################
+
+# descr: produces random data
+# value: data.table
+
+.getRandomValues <- function (data.list,
+                              estimate,
+                              weights,
+                              nsamples,
+                              sample.names,
+                              verbose)
+{
+  if (verbose) message("Simulating data", appendLF=FALSE)
+  tm <- proc.time()
+
+  fn.mean <- paste(
+    "rcpp_get_meanvar",
+    if (estimate=="mom") "ari" else "geo",
+    weights,
+    sep="_"
+  )
+  do.call(what=fn.mean, args=list(data=data.list))
+
+  fn.fit <- paste("rcpp_fit_beta", estimate, sep="_")
+  do.call(what=fn.fit, args=list(data=data.list))
+
+  rcpp_fit_binom(data=data.list)
+
+  random.values <- rcpp_generate_random_values(data=data.list)
+
+  colnames(random.values) <- sample.names
+
+  if (verbose) message(sprintf("[%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
+  return(random.values)
+}
+
+################################################################################
+
+# descr: introduces epimutations in random data
+# value: data.table
+
+.addEpimutations <- function (random.data,
+                              amr.ranges,
+                              verbose)
+{
+  if (verbose) message("Introducing epimutations", appendLF=FALSE)
+  tm <- proc.time()
+
+  amr.mcols <- data.frame(GenomicRanges::mcols(amr.ranges))
+  for (i in seq_len(nrow(amr.mcols))) {
+    revmap <- unlist(amr.mcols[i,"revmap"])
+    dbeta  <- sign(0.5 - mean(random.betas[revmap,], na.omit=TRUE)) * amr.mcols[i,"dbeta"]
+    sample <- amr.mcols[i,"sample"]
+    random.betas[revmap, sample] <- random.betas[revmap, sample] + dbeta
+  }
+
+  if (verbose) message(sprintf("[%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
+}
+
+################################################################################
+
+
