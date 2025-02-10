@@ -217,8 +217,6 @@ utils::globalVariables(c(
   fn.fit <- paste("rcpp_fit_beta", estimate, sep="_")
   do.call(what=fn.fit, args=list(data=data.list))
 
-  rcpp_fit_binom(data=data.list)
-
   random.values <- rcpp_generate_random_values(data=data.list)
 
   colnames(random.values) <- sample.names

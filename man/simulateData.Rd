@@ -9,9 +9,10 @@ simulateData(
   nsamples,
   amr.ranges = NULL,
   sample.names = NULL,
-  min.beta = 0.001,
-  max.beta = 0.999,
-  cores = max(1, parallel::detectCores() - 1),
+  compute = "beta",
+  compute.estimate = c("mom", "amle", "nmle"),
+  compute.weights = c("equal", "invDist", "sqrtInvDist", "logInvDist"),
+  ncores = NULL,
   verbose = TRUE
 )
 }
@@ -44,6 +45,8 @@ default), sample names will be computed as
 `paste0("sample", seq_len(nsamples))`. When specified, the length of the
 `sample.names` vector must be equal to the value of `nsamples`.}
 
+\item{verbose}{boolean to report progress and timings (default: TRUE).}
+
 \item{min.beta}{A single numeric within the range c(0,1). All beta values
 in the generated data set below this value will be assigned this value.
 The default: 0.001.}
@@ -55,8 +58,6 @@ The default: 0.999.}
 \item{cores}{A single integer >= 1. Number of processes for parallel
 computation (the default: all but one cores). Results of parallel processing
 are fully reproducible when the same seed is used (thanks to doRNG).}
-
-\item{verbose}{boolean to report progress and timings (default: TRUE).}
 }
 \value{
 The output is a `GRanges` object with genomic ranges that are equal

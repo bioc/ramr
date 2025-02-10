@@ -53,6 +53,10 @@ rcpp_fit_binom <- function(data) {
     .Call(`_ramr_rcpp_fit_binom`, data)
 }
 
+rcpp_generate_random_values <- function(data, ncol) {
+    .Call(`_ramr_rcpp_generate_random_values`, data, ncol)
+}
+
 rcpp_get_iqr <- function(data) {
     .Call(`_ramr_rcpp_get_iqr`, data)
 }

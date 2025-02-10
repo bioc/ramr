@@ -35,25 +35,27 @@ Rcpp::NumericVector rcpp_generate_random_values (Rcpp::List &data,              
 
   for (size_t r=0; r<nrow; r++) {
     const auto q = coef_data + r*NCOEF;                                         // pointer to the first element of 'coef' NCOEF-element array
-    if (len_data[r]==0 || std::isnan(q[5])) continue;                           // skip this row if estimates are invalid
+    if (len_data[r]==0) continue;                                               // skip this row if empty
     const double p0 = q[0] / len_data[r];                                       // probability of 0
     const double p1 = q[1] / (len_data[r] - q[0]);                              // probability of 1 among non-0
+    const bool has0 = !isZero(q[0]);                                            // are there 0s?
+    const bool has1 = !isZero(q[1]);                                            // are there 1s?
+    const bool hasB = !std::isnan(q[5]);                                        // are beta estimates valid?
 
     for (size_t c=0; c<ncol; c++) {                                             // sample by sample
-      double v = 0.5;                                                           // random value "in between"
-      if (p0>0) {                                                               // if probability of 0 is >0
-        v = 1 - R::rbinom(1, p0);                                               // is it a zero then? v==0 if so
-      } else if (v>0 && p1>0) {                                                 // if not zero and probability of 1 is >0
-        v = R::rbinom(1, p1);                                                   // is it a one then?
-      } else if (v<1) {                                                         // if neither zero nor one
-        v = R::rbeta(q[5], q[6]);                                               // random beta
+      if (has0 && R::rbinom(1, p0)>0.5) {                                       // if probability of 0s is >0 and it's a 0
+        res_data[r+c*nrow] = 0;
+      } else if (has1 && R::rbinom(1, p1)>0.5) {                                // else if probability of 1s is >0 and it's a 1
+        res_data[r+c*nrow] = 1;
+      } else if (hasB) {                                                        // if neither zero nor one and estimates are valid
+        res_data[r+c*nrow] = R::rbeta(q[5], q[6]);                              // random beta
       }
-      res_data[r+c*nrow] = v;                                                   // store random value
     }
   }
 
   Rcpp::NumericVector res_matrix = Rcpp::wrap(res);                             // wrap it
-  res_matrix.attr("dim") = (Rcpp::IntegerVector){(int)nrow, (int)ncol};         // set dimensions
+  Rcpp::IntegerVector dim = {(int)nrow, (int)ncol};
+  res_matrix.attr("dim") = dim;                                                 // set dimensions
   return res_matrix;
 }
 

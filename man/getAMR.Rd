@@ -19,7 +19,7 @@ getAMR(
   combine.min.cpgs = 7,
   combine.min.width = 1,
   combine.ignore.strand = FALSE,
-  cores = NULL,
+  ncores = NULL,
   verbose = TRUE
 )
 }
@@ -34,10 +34,6 @@ columns) are included in the analysis.}
 \item{exclude.range}{A numeric vector of length two. If not `NULL` (the
 default), all `data.ranges` genomic locations with their median methylation
 beta value within the `exclude.range` interval are filtered out.}
-
-\item{cores}{A single integer >= 1. Number of processes for parallel
-computation (the default: all but one cores). Results of parallel processing
-are fully reproducible when the same seed is used (thanks to doRNG).}
 
 \item{verbose}{boolean to report progress and timings (default: TRUE).}
 
@@ -74,6 +70,10 @@ merged to create AMRs (the default: 300).}
 
 \item{min.width}{A single integer >= 1 (the default). Only AMRs with the
 width of at least `min.width` are returned.}
+
+\item{cores}{A single integer >= 1. Number of processes for parallel
+computation (the default: all but one cores). Results of parallel processing
+are fully reproducible when the same seed is used (thanks to doRNG).}
 
 \item{...}{Further arguments to be passed to `EnvStats::ebeta` or
 `ExtDist::eBeta` functions.}

@@ -167,6 +167,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// rcpp_generate_random_values
+Rcpp::NumericVector rcpp_generate_random_values(Rcpp::List& data, const size_t ncol);
+RcppExport SEXP _ramr_rcpp_generate_random_values(SEXP dataSEXP, SEXP ncolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< const size_t >::type ncol(ncolSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_generate_random_values(data, ncol));
+    return rcpp_result_gen;
+END_RCPP
+}
 // rcpp_get_iqr
 int rcpp_get_iqr(Rcpp::List& data);
 RcppExport SEXP _ramr_rcpp_get_iqr(SEXP dataSEXP) {
@@ -426,6 +438,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ramr_rcpp_fit_beta_amle", (DL_FUNC) &_ramr_rcpp_fit_beta_amle, 1},
     {"_ramr_rcpp_fit_beta_nmle", (DL_FUNC) &_ramr_rcpp_fit_beta_nmle, 1},
     {"_ramr_rcpp_fit_binom", (DL_FUNC) &_ramr_rcpp_fit_binom, 1},
+    {"_ramr_rcpp_generate_random_values", (DL_FUNC) &_ramr_rcpp_generate_random_values, 2},
     {"_ramr_rcpp_get_iqr", (DL_FUNC) &_ramr_rcpp_get_iqr, 1},
     {"_ramr_rcpp_get_meanvar_ari_equal", (DL_FUNC) &_ramr_rcpp_get_meanvar_ari_equal, 1},
     {"_ramr_rcpp_get_meanvar_ari_invDist", (DL_FUNC) &_ramr_rcpp_get_meanvar_ari_invDist, 1},
