@@ -5,7 +5,7 @@
 #' package for consistency, as it was used in `ramr` publication
 #' (\doi{10.1093/bioinformatics/btab586}). Please use faster and more capable
 #' \code{\link{simulateData}} instead.
-#' 
+#'
 #' `simulateData.obsolete` generates aberration-free methylation data using an
 #' experimental data set as a template, and further introduces methylation
 #' aberrations if `GRanges` object containing a set of aberrantly methylated
@@ -104,8 +104,8 @@ simulateData.obsolete <- function (template.ranges,
             "Please use faster and more capable 'simulateData' instead.\n")
   for (ns in c("EnvStats", "doParallel", "parallel", "doRNG", "foreach"))
     if (!requireNamespace(ns, quietly=TRUE))
-      stop(ns, " is required for plotting. Please install")
-  
+      stop(ns, " is required for this function. Please install")
+
   if (!methods::is(template.ranges,"GRanges"))
     stop("'template.ranges' must be a GRanges object")
   if (!is.null(sample.names) & length(sample.names)!=nsamples)

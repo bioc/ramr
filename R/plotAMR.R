@@ -13,11 +13,14 @@
 #'
 #' @param data.ranges A `GRanges` object with genomic locations and
 #' corresponding beta values included as metadata.
+#' @param amr.ranges An output of `getAMR` - a `GRanges` object that contain
+#' aberrantly methylated regions (AMRs).
 #' @param data.samples A character vector with sample names (a subset of
 #' metadata column names) to be included in the plot. If `NULL` (the default),
 #' then all samples (metadata columns) are included.
-#' @param amr.ranges An output of `getAMR` - a `GRanges` object that contain
-#' aberrantly methylated regions (AMRs).
+#' @param window An optional integer constant to expand genomic ranges of the
+#' `amr.ranges` object (the default: 300).
+#' @param ignore.strand Boolean to ignore strand of AMR region. Default: FALSE.
 #' @param highlight An optional list of samples to highlight. If NULL (the
 #' default), will contain sample IDs from the `sample` metadata column of
 #' `amr.ranges` object.
@@ -32,8 +35,7 @@
 #' @param breaks Optional breaks of y-axis. When default (NULL), breaks
 #' are `10**(seq(from=-5, to=0, length.out=6))` for `transform=="log10"` and
 #' `seq(from=0, to=1, length.out=6)` otherwise.
-#' @param window An optional integer constant to expand genomic ranges of the
-#' `amr.ranges` object (the default: 300).
+#' @param verbose Boolean to report progress and timings (default: TRUE).
 #' @return The output is a list of `ggplot` objects.
 #' @seealso \code{\link{getAMR}} for identification of AMRs,
 #' \code{\link{getUniverse}} for info on enrichment analysis,

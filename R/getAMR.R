@@ -61,7 +61,7 @@
 #' @param cores A single integer >= 1. Number of processes for parallel
 #' computation (the default: all but one cores). Results of parallel processing
 #' are fully reproducible when the same seed is used (thanks to doRNG).
-#' @param verbose boolean to report progress and timings (default: TRUE).
+#' @param verbose Boolean to report progress and timings (default: TRUE).
 #' @param ... Further arguments to be passed to `EnvStats::ebeta` or
 #' `ExtDist::eBeta` functions.
 #' @return The output is a `GRanges` object that contains all the aberrantly
@@ -93,9 +93,9 @@ getAMR <- function (data.ranges,
                     data.coverage=NULL,
                     transform=c("identity", "linear"),
                     exclude.range=NULL,
-                    compute=c("IQR", "beta"),
+                    compute=c("IQR", "beta+binom"),
                     compute.estimate=c("mom", "amle", "nmle"),
-                    compute.weights=c("equal", "invDist", "sqrtInvDist", "logInvDist"),
+                    compute.weights=c("equal", "logInvDist", "sqrtInvDist", "invDist"),
                     combine=c("threshold", "comb-p"),
                     combine.threshold=ifelse(compute=="IQR", 5, 1e-3),
                     combine.window=300,
@@ -147,7 +147,7 @@ getAMR <- function (data.ranges,
     .getAMR.IQR(
       data.list=.data, threshold=combine.threshold, verbose=verbose
     )
-  } else if (compute=="beta") {
+  } else if (compute=="beta+binom") {
     .getAMR.beta(
       data.list=.data,
       estimate=compute.estimate,

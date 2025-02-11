@@ -5,7 +5,7 @@
 #' package for consistency, as it was used in `ramr` publication
 #' (\doi{10.1093/bioinformatics/btab586}). Please use faster and more capable
 #' \code{\link{getAMR}} instead.
-#' 
+#'
 #' `getAMR.obsolete` returns a `GRanges` object with all the aberrantly
 #' methylated regions (AMRs) for all samples in a data set.
 #'
@@ -113,8 +113,8 @@ getAMR.obsolete <- function (data.ranges,
   for (ns in c("EnvStats", "ExtDist", "gamlss", "gamlss.dist", "doParallel",
                "parallel", "doRNG", "foreach", "matrixStats"))
     if (!requireNamespace(ns, quietly=TRUE))
-      stop(ns, " is required for plotting. Please install")
-  
+      stop(ns, " is required for this function. Please install")
+
   if (!methods::is(data.ranges,"GRanges"))
     stop("'data.ranges' must be a GRanges object")
   if (is.null(data.samples))
@@ -178,7 +178,7 @@ getAMR.obsolete <- function (data.ranges,
     })
     return(t(chunk.filt))
   }
-  
+
 
   #####################################################################################
 

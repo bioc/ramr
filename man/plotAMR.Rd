@@ -33,6 +33,8 @@ then all samples (metadata columns) are included.}
 \item{window}{An optional integer constant to expand genomic ranges of the
 `amr.ranges` object (the default: 300).}
 
+\item{ignore.strand}{Boolean to ignore strand of AMR region. Default: FALSE.}
+
 \item{highlight}{An optional list of samples to highlight. If NULL (the
 default), will contain sample IDs from the `sample` metadata column of
 `amr.ranges` object.}
@@ -52,6 +54,8 @@ are c(NA,1) for `transform=="log10"` and c(0,1) otherwise.}
 \item{breaks}{Optional breaks of y-axis. When default (NULL), breaks
 are `10**(seq(from=-5, to=0, length.out=6))` for `transform=="log10"` and
 `seq(from=0, to=1, length.out=6)` otherwise.}
+
+\item{verbose}{Boolean to report progress and timings (default: TRUE).}
 }
 \value{
 The output is a list of `ggplot` objects.

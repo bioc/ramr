@@ -9,23 +9,23 @@ simulateData(
   nsamples,
   amr.ranges = NULL,
   sample.names = NULL,
-  compute = "beta",
+  compute = "beta+binom",
   compute.estimate = c("mom", "amle", "nmle"),
-  compute.weights = c("equal", "invDist", "sqrtInvDist", "logInvDist"),
+  compute.weights = c("equal", "logInvDist", "sqrtInvDist", "invDist"),
   ncores = NULL,
   verbose = TRUE
 )
 }
 \arguments{
 \item{template.ranges}{A `GRanges` object with genomic locations and
-corresponding beta values included as metadata (same object
+corresponding methylation beta values included as metadata (the same object
 must be supplied to this and to the `simulateAMR` functions).}
 
 \item{nsamples}{A single integer >= 1 indicating the number of samples to
 generate.}
 
-\item{amr.ranges}{A `GRanges` object with genomic locations of (rare)
-methylation aberrations. If `NULL` (the default), no aberrations is
+\item{amr.ranges}{A `GRanges` object with genomic locations of methylation
+aberrations (epimutations). If `NULL` (the default), no aberrations is
 introduced, and function will return "smoothed" data set. If supplied,
 `GRanges` object must contain the following metadata columns:
 \itemize{
@@ -34,30 +34,48 @@ introduced, and function will return "smoothed" data set. If supplied,
   \item `sample` -- an identifier of a sample to which corresponding AMR
   belongs. Must be among the supplied or auto generated `sample.names`
   \item `dbeta` -- absolute deviation to be introduced. Must be numeric
-  within the range c(0,1) or NA. When NA - the resulting beta value for
-  the corresponding genomic position will also be NA
+  within the closed interval [0,1] or NA. When NA - the resulting beta value
+  for the corresponding genomic position will also be NA
 }
 Such an object can be obtained using \code{\link{simulateAMR}} method or
 manually.}
 
 \item{sample.names}{A character vector with sample names. If `NULL` (the
-default), sample names will be computed as
-`paste0("sample", seq_len(nsamples))`. When specified, the length of the
-`sample.names` vector must be equal to the value of `nsamples`.}
+default), sample names will be auto generated. When specified, the length
+of the `sample.names` vector must be equal to the value of `nsamples`.}
+
+\item{compute}{A single string for the distribution to fit to the data.
+Currently accepts "beta+binom" (the default) only, which stands for
+endpoint-inflated beta distribution. See Details section
+and \code{\link{getAMR}} method description for additional explanations.}
+
+\item{compute.estimate}{A single string for the method of parameter
+estimation of beta distribution. The default ("mom") stands for the method
+of moments based on the unbiased estimator of variance and includes {0;1}
+endpoints in calculation of moments (mean, unbiased variance).
+Other options are "amle" (approximation of maximum likelihood estimation)
+and "nmle" (numeric maximum likelihood estimation) - both ignore {0;1}
+endpoints in calculations. More details on these methods are given in
+\code{\link{getAMR}} method description.}
+
+\item{compute.weights}{A single string for the method to compute optional
+sample weights that are used during estimation of beta distribution
+parameters. If default ("equal"), all weights are equal. Otherwise, weight of
+a value equals to a natural logarithm of inverse absolute distance of this
+value to the sample median ("logInvDist"), a square root of inverse absolute
+distance of this value to the sample median ("sqrtInvDist"), or an inverse
+absolute distance of this value to the sample median ("invDist"). Using
+weighted parameter estimation allows to increase sensitivity of outlier
+detection. More details on weighted parameter estimation are given in
+\code{\link{getAMR}} method description.}
+
+\item{ncores}{A single integer >= 1 for the number of processes for parallel
+computation. By default (NULL), function will use half of available cores.
+Results of this function are identical (reproducible)
+\strong{only when random seed is set} by `set.seed` function
+\strong{and a single core is used}.}
 
 \item{verbose}{boolean to report progress and timings (default: TRUE).}
-
-\item{min.beta}{A single numeric within the range c(0,1). All beta values
-in the generated data set below this value will be assigned this value.
-The default: 0.001.}
-
-\item{max.beta}{A single numeric within the range c(0,1). All beta values
-in the generated data set above this value will be assigned this value.
-The default: 0.999.}
-
-\item{cores}{A single integer >= 1. Number of processes for parallel
-computation (the default: all but one cores). Results of parallel processing
-are fully reproducible when the same seed is used (thanks to doRNG).}
 }
 \value{
 The output is a `GRanges` object with genomic ranges that are equal
@@ -76,12 +94,21 @@ methylated regions.
 }
 \details{
 For every genomic location in the template data set (`GRanges` object with
-genomic locations and corresponding beta values included as metadata)
-`simulateData` estimates the parameters of beta distribution by means of
-`EnvStats::ebeta` function, and then uses estimated parameters to generate
-`nsamples` random beta values by means of `stats::rbeta` function. This
-results in "smoothed" data set that has biologically relevant distribution
-of beta values at every genomic location, but does not contain methylation
+genomic locations and corresponding methylation beta values included as
+metadata) `simulateData` does the following:
+\itemize{
+  \item estimates parameters of beta distribution
+  \item in the same input, calculates frequencies of zero and one values
+  (endpoints; whenever present)
+  \item uses estimated parameters of beta distribution and probabilities
+  (observed frequencies) of {0;1} values to generate `nsamples` random
+  values by means of `stats::rbeta` function (for beta values) and/or
+  `stats::rbinom` function (for {0;1} endpoint values, according to their
+  frequencies and therefore probabilities).
+}
+This results in "smoothed" data set that has biologically relevant
+distribution of methylation values at every genomic location,
+but does not contain methylation
 aberrations. If the `amr.ranges` parameter points to a `GRanges` object with
 aberrations, every AMR is then introduced into the "smoothed" data set as
 following: if mean methylation beta value for AMR region across all samples
@@ -93,6 +120,13 @@ positive aberrations can be used as test data set to evaluate performance
 of algorithms for search of differentially (DMR) or aberrantly (AMR)
 methylated regions.
 }
+\note{
+NA values within metadata columns of `template.ranges` are silently dropped
+in all computations. NA values will also not appear in the result of
+this function, unless parameters of beta distribution and/or probabilities
+of zeros or ones cannot be estimated (e.g., due to too many NA values in
+`template.ranges` metadata).
+}
 \examples{
   data(ramr)
   amrs <-
@@ -102,8 +136,8 @@ methylated regions.
     simulateAMR(ramr.data, nsamples=10, regions.per.sample=20,
                 exclude.ranges=amrs, min.cpgs=1, max.cpgs=1, merge.window=1)
   noisy.data <-
-    simulateData(ramr.data, nsamples=10, amr.ranges=c(amrs,noise), cores=2)
-  plotAMR(noisy.data, amr.ranges=amrs[1])
+    simulateData(template.ranges=ramr.data, nsamples=10, amr.ranges=c(amrs,noise))
+  plotAMR(data.ranges=noisy.data, amr.ranges=amrs[1])
 }
 \seealso{
 \code{\link{simulateAMR}} for the generation of random methylation

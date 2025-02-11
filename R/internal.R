@@ -194,7 +194,7 @@ utils::globalVariables(c(
 ################################################################################
 
 # descr: produces random data
-# value: data.table
+# value: matrix
 
 .getRandomValues <- function (data.list,
                               estimate,
@@ -228,7 +228,7 @@ utils::globalVariables(c(
 ################################################################################
 
 # descr: introduces epimutations in random data
-# value: data.table
+# value: matrix
 
 .addEpimutations <- function (random.data,
                               amr.ranges,
@@ -240,12 +240,13 @@ utils::globalVariables(c(
   amr.mcols <- data.frame(GenomicRanges::mcols(amr.ranges))
   for (i in seq_len(nrow(amr.mcols))) {
     revmap <- unlist(amr.mcols[i,"revmap"])
-    dbeta  <- sign(0.5 - mean(random.betas[revmap,], na.omit=TRUE)) * amr.mcols[i,"dbeta"]
+    dbeta  <- sign(0.5 - mean(random.data[revmap,], na.omit=TRUE)) * amr.mcols[i,"dbeta"]
     sample <- amr.mcols[i,"sample"]
-    random.betas[revmap, sample] <- random.betas[revmap, sample] + dbeta
+    random.data[revmap, sample] <- random.data[revmap, sample] + dbeta
   }
 
   if (verbose) message(sprintf("[%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
+  return(random.data)
 }
 
 ################################################################################

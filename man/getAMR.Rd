@@ -10,9 +10,9 @@ getAMR(
   data.coverage = NULL,
   transform = c("identity", "linear"),
   exclude.range = NULL,
-  compute = c("IQR", "beta"),
+  compute = c("IQR", "beta+binom"),
   compute.estimate = c("mom", "amle", "nmle"),
-  compute.weights = c("equal", "invDist", "sqrtInvDist", "logInvDist"),
+  compute.weights = c("equal", "logInvDist", "sqrtInvDist", "invDist"),
   combine = c("threshold", "comb-p"),
   combine.threshold = ifelse(compute == "IQR", 5, 0.001),
   combine.window = 300,
@@ -35,7 +35,7 @@ columns) are included in the analysis.}
 default), all `data.ranges` genomic locations with their median methylation
 beta value within the `exclude.range` interval are filtered out.}
 
-\item{verbose}{boolean to report progress and timings (default: TRUE).}
+\item{verbose}{Boolean to report progress and timings (default: TRUE).}
 
 \item{ramr.method}{A character scalar: when ramr.method is "IQR" (the
 default), the filtering based on interquantile range is used (`iqr.cutoff`
