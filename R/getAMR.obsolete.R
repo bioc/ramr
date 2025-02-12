@@ -114,7 +114,8 @@ getAMR.obsolete <- function (data.ranges,
                "parallel", "doRNG", "foreach", "matrixStats"))
     if (!requireNamespace(ns, quietly=TRUE))
       stop(ns, " is required for this function. Please install")
-
+  `%dorng%` <- doRNG::`%dorng%`
+  
   if (!methods::is(data.ranges,"GRanges"))
     stop("'data.ranges' must be a GRanges object")
   if (is.null(data.samples))
@@ -196,23 +197,23 @@ getAMR.obsolete <- function (data.ranges,
     qval.cutoff <- pval.cutoff/ncol(betas)
 
   chunks  <- split(seq_len(nrow(betas)), if (cores>1) cut(seq_len(nrow(betas)), cores) else 1)
-  medians <- foreach (chunk=chunks, .combine=c) %dorng% matrixStats::rowMedians(betas[chunk, ], na.rm=TRUE)
+  medians <- foreach::foreach (chunk=chunks, .combine=c) %dorng% matrixStats::rowMedians(betas[chunk, ], na.rm=TRUE)
 
   if (ramr.method=="IQR") {
-    iqrs <- foreach (chunk=chunks, .combine=c) %dorng% matrixStats::rowIQRs(betas[chunk, ], na.rm=TRUE)
+    iqrs <- foreach::foreach (chunk=chunks, .combine=c) %dorng% matrixStats::rowIQRs(betas[chunk, ], na.rm=TRUE)
     betas.filtered <- (betas-medians)/iqrs
     betas.filtered[abs(betas.filtered)<iqr.cutoff]  <- NA
   } else if (ramr.method=="beta") {
     # multi-threaded EnvStats::ebeta (speed: mme=mmue>mle>>>fitdistrplus::fitdist)
-    betas.filtered <- foreach (chunk=chunks) %dorng% getPValues.beta(betas[chunk, ], ...)
+    betas.filtered <- foreach::foreach (chunk=chunks) %dorng% getPValues.beta(betas[chunk, ], ...)
     betas.filtered <- do.call(rbind, betas.filtered)
     betas.filtered[betas.filtered>=qval.cutoff] <- NA
   } else if (ramr.method=="wbeta") {
-    betas.filtered <- foreach (chunk=chunks) %dorng% getPValues.wbeta(betas[chunk, ], ...)
+    betas.filtered <- foreach::foreach (chunk=chunks) %dorng% getPValues.wbeta(betas[chunk, ], ...)
     betas.filtered <- do.call(rbind, betas.filtered)
     betas.filtered[betas.filtered>=qval.cutoff] <- NA
   } else if (ramr.method=="beinf") {
-    betas.filtered <- foreach (chunk=chunks) %dorng% getPValues.beinf(betas[chunk, ], ...)
+    betas.filtered <- foreach::foreach (chunk=chunks) %dorng% getPValues.beinf(betas[chunk, ], ...)
     betas.filtered <- do.call(rbind, betas.filtered)
     betas.filtered[betas.filtered>=qval.cutoff] <- NA
   }
@@ -247,7 +248,7 @@ getAMR.obsolete <- function (data.ranges,
     return(ranges)
   }
 
-  amr.ranges <- foreach (column=colnames(betas.filtered)) %dorng% getMergedRanges(column)
+  amr.ranges <- foreach::foreach (column=colnames(betas.filtered)) %dorng% getMergedRanges(column)
 
   parallel::stopCluster(cl)
   if (verbose) message(sprintf(" [%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)

@@ -105,14 +105,15 @@ simulateData.obsolete <- function (template.ranges,
   for (ns in c("EnvStats", "doParallel", "parallel", "doRNG", "foreach"))
     if (!requireNamespace(ns, quietly=TRUE))
       stop(ns, " is required for this function. Please install")
-
+  `%dorng%` <- doRNG::`%dorng%`
+  
   if (!methods::is(template.ranges,"GRanges"))
     stop("'template.ranges' must be a GRanges object")
   if (!is.null(sample.names) & length(sample.names)!=nsamples)
     stop("'sample.names' length must be equal to 'nsamples'")
 
   if (is.null(sample.names))
-    sample.names <- paste0("sample", seq_len(nsamples))
+    sample.names <- sprintf(paste0("sample%0", nchar(as.character(nsamples)), "i"), seq_len(nsamples))
   if (!is.null(amr.ranges)) {
     if(!methods::is(amr.ranges,"GRanges"))
       stop("'amr.ranges' must be a GRanges object")
@@ -147,7 +148,7 @@ simulateData.obsolete <- function (template.ranges,
 
   doParallel::registerDoParallel(cores)
   cl <- parallel::makeCluster(cores)
-  random.betas <- foreach (chunk=chunks) %dorng% getRandomBeta(template.betas[chunk,])
+  random.betas <- foreach::foreach (chunk=chunks) %dorng% getRandomBeta(template.betas[chunk,])
   random.betas <- do.call(rbind, random.betas)
   colnames(random.betas) <- sample.names
   parallel::stopCluster(cl)
