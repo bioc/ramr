@@ -99,7 +99,7 @@ simulateData.obsolete <- function (template.ranges,
                           cores=max(1,parallel::detectCores()-1),
                           verbose=TRUE)
 {
-  if (interactive())
+  if (interactive() | Sys.getenv("R_COVR")!="")
     message("This function is fully functional but *obsolete*.\n",
             "Please use faster and more capable 'simulateData' instead.\n")
   for (ns in c("EnvStats", "doParallel", "parallel", "doRNG", "foreach"))

@@ -107,7 +107,7 @@ getAMR.obsolete <- function (data.ranges,
                              verbose=TRUE,
                              ...)
 {
-  if (interactive())
+  if (interactive() | Sys.getenv("R_COVR")!="")
     message("This function is fully functional but *obsolete*.\n",
             "Please use faster and more capable 'getAMR' instead.\n")
   for (ns in c("EnvStats", "ExtDist", "gamlss", "gamlss.dist", "doParallel",

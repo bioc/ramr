@@ -18,6 +18,9 @@ test_simulateData.obsolete <- function () {
   RUnit::checkException(
     simulateData.obsolete(ramr.data, nsamples=100, amr.ranges=ramr.tp.unique)
   )
+  RUnit::checkException(
+    simulateData.obsolete(ramr.data, nsamples=99, amr.ranges=ramr.tp.unique)
+  )
   
   noise <- simulateAMR(ramr.data, nsamples=10, merge.window=1, min.cpgs=1, max.cpgs=1,
                        regions.per.sample=100, samples.per.region=1, dbeta=1)

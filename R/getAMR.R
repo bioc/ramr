@@ -118,8 +118,8 @@ getAMR <- function (data.ranges,
   if (!all(data.samples %in% colnames(data.mcols)))
     stop("'data.ranges' metadata must include 'data.samples'")
   if (!is.null(data.coverage) &
-      !methods::is(data.coverage,"data.frame") &
-      !identical(dim(data.mcols), dim(data.coverage)))
+      (!methods::is(data.coverage,"data.frame") |
+       !identical(dim(data.mcols), dim(data.coverage))))
     stop("When provided, 'data.coverage' must be a 'data.frame' object",
          " of the same dimensions as 'data.ranges' metadata")
   if (length(data.samples)<3)

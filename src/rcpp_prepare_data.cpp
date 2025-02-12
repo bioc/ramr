@@ -25,7 +25,7 @@ template<int transform>
 Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    // IntegerVector (factor) output of S4Vectors::runValue(GenomeInfoDb::seqnames(<input.ranges>))
                               Rcpp::IntegerVector &seqrunlens,                  // IntegerVector output of S4Vectors::runLength(GenomeInfoDb::seqnames(<input.ranges>))
                               Rcpp::IntegerVector &start,                       // IntegerVector output of BiocGenerics::start(<input.ranges>)
-                              Rcpp::IntegerVector &strand,                      // IntegerVector (factor) output of as.factor(BiocGenerics::strand(<input.ranges>))
+                              Rcpp::IntegerVector &strand,                      // IntegerVector (factor) output of S4Vectors::as.factor(BiocGenerics::strand(<input.ranges>))
                               Rcpp::DataFrame &mcols,                           // DataFrame output of as.data.frame(GenomicRanges::mcols(<input.ranges>), optional=TRUE)
                               Rcpp::DataFrame &coverage,                        // optional DataFrame with coverage data for binomial modelling of extremes {0;1}
                               double exclude_lower,                             // lower bound of range to exclude

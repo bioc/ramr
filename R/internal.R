@@ -5,7 +5,7 @@
 #' @importFrom IRanges IRanges subsetByOverlaps
 #' @importFrom methods as is
 #' @importFrom Rcpp sourceCpp
-#' @importFrom S4Vectors DataFrame I queryHits runLength runValue
+#' @importFrom S4Vectors as.factor DataFrame I queryHits runLength runValue
 #' @importFrom stats median na.omit setNames
 #' @importFrom utils globalVariables head packageVersion tail
 #' @useDynLib ramr, .registration=TRUE
@@ -24,7 +24,7 @@ utils::globalVariables(c(
 .onUnload <- function (libpath) {library.dynam.unload("ramr", libpath)}
 
 .onAttach <- function(libname, pkgname) {
-  if(interactive()) {
+  if(interactive() | Sys.getenv("R_COVR")!="") {
     max.threads <- rcpp_test_omp()
     msg <- ifelse(
       max.threads<0,
@@ -73,7 +73,7 @@ utils::globalVariables(c(
     seqnames=S4Vectors::runValue(GenomeInfoDb::seqnames(data.ranges)),
     seqrunlens=S4Vectors::runLength(GenomeInfoDb::seqnames(data.ranges)),
     start=BiocGenerics::start(data.ranges),
-    strand=as.factor(BiocGenerics::strand(data.ranges)),
+    strand=S4Vectors::as.factor(BiocGenerics::strand(data.ranges)),
     mcols=as.data.frame(GenomicRanges::mcols(data.ranges), optional=TRUE),
     coverage=data.coverage,
     exclude_lower=exclude.range[1],
@@ -163,9 +163,9 @@ utils::globalVariables(c(
     sep="_"
   )
   amr.list <- do.call(what=fn.ranges, args=list(
-    data=data.list, window=window,min_ncpg=min.cpgs, min_width=min.width
+    data=data.list, window=window, min_ncpg=min.cpgs, min_width=min.width
   ))
-
+  
   amr.ranges <- GenomicRanges::GRanges(
     seqnames=amr.list$seqnames,
     ranges=IRanges::IRanges(start=amr.list$start, end=amr.list$end),
