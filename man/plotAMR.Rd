@@ -73,10 +73,10 @@ significantly different methylation profiles ('sample' column of
 }
 \examples{
   data(ramr)
-  plotAMR(ramr.data, ramr.samples, ramr.tp.unique[1])
+  plotAMR(data.ranges=ramr.data, amr.ranges=ramr.tp.unique[1])
   library(gridExtra)
   do.call("grid.arrange",
-          c(plotAMR(ramr.data, ramr.samples, ramr.tp.nonunique), ncol=2))
+          c(plotAMR(data.ranges=ramr.data, amr.ranges=ramr.tp.nonunique), ncol=2))
 }
 \seealso{
 \code{\link{getAMR}} for identification of AMRs,

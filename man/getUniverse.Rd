@@ -37,8 +37,10 @@ be used as a reference set of genomic regions for AMR enrichment analysis.
   universe <- getUniverse(ramr.data, min.cpgs=5, merge.window=1000)
 \donttest{
   # identify AMRs
-  amrs <- getAMR(ramr.data, ramr.samples, ramr.method="beta", min.cpgs=5,
-                 merge.window=1000, qval.cutoff=1e-3, cores=2)
+  amrs <- getAMR(
+    data.ranges=ramr.data, compute="beta+binom",
+    combine.min.cpgs=5, combine.window=1000, combine.threshold=1e-3
+  )
 
   # AMR enrichment analysis using LOLA
   library(LOLA)

@@ -31,13 +31,15 @@ corresponding beta values included as metadata.}
 metadata column names). If `NULL` (the default), then all samples (metadata
 columns) are included in the analysis.}
 
+\item{data.coverage}{description}
+
+\item{transform}{description}
+
 \item{exclude.range}{A numeric vector of length two. If not `NULL` (the
 default), all `data.ranges` genomic locations with their median methylation
 beta value within the `exclude.range` interval are filtered out.}
 
-\item{verbose}{Boolean to report progress and timings (default: TRUE).}
-
-\item{ramr.method}{A character scalar: when ramr.method is "IQR" (the
+\item{compute}{A character scalar: when ramr.method is "IQR" (the
 default), the filtering based on interquantile range is used (`iqr.cutoff`
 value is then used as a threshold). When "beta", "wbeta" or "beinf" -
 filtering based on fitting non-weighted (`EnvStats::ebeta`), weighted
@@ -48,35 +50,40 @@ correlate with bin contents (number of values per bin) and inversly - with
 the distances from the median value, thus narrowing the estimated
 distribution and emphasizing outliers.}
 
-\item{iqr.cutoff}{A single integer >= 1. Methylation beta values differing
+\item{compute.estimate}{description}
+
+\item{compute.weights}{description}
+
+\item{combine}{description}
+
+\item{combine.threshold}{A single integer >= 1. Methylation beta values differing
 from the median value by more than `iqr.cutoff` interquartile ranges are
-considered to be significant (the default: 5).}
-
-\item{pval.cutoff}{A numeric scalar (the default: 5e-2). Bonferroni
+considered to be significant (the default: 5).
+param pval.cutoff A numeric scalar (the default: 5e-2). Bonferroni
 correction of `pval.cutoff` by the length of the `data.samples` object is
-used to calculate `qval.cutoff` if the latter is `NULL`.}
-
-\item{qval.cutoff}{A numeric scalar. Used as a threshold for filtering based
+used to calculate `qval.cutoff` if the latter is `NULL`.
+param qval.cutoff A numeric scalar. Used as a threshold for filtering based
 on fitting non-weighted or weighted beta distributions: all p-values lower
 than `qval.cutoff` are considered to be significant. If `NULL` (the default),
 it is calculated using `pval.cutoff`}
 
-\item{merge.window}{A positive integer. All significant (survived the
+\item{combine.window}{A positive integer. All significant (survived the
 filtering stage) `data.ranges` genomic locations within this distance will be
 merged to create AMRs (the default: 300).}
 
-\item{min.cpgs}{A single integer >= 1. All AMRs containing less than
+\item{combine.min.cpgs}{A single integer >= 1. All AMRs containing less than
 `min.cpgs` significant genomic locations are filtered out (the default: 7).}
 
-\item{min.width}{A single integer >= 1 (the default). Only AMRs with the
+\item{combine.min.width}{A single integer >= 1 (the default). Only AMRs with the
 width of at least `min.width` are returned.}
 
-\item{cores}{A single integer >= 1. Number of processes for parallel
+\item{combine.ignore.strand}{description}
+
+\item{ncores}{A single integer >= 1. Number of processes for parallel
 computation (the default: all but one cores). Results of parallel processing
 are fully reproducible when the same seed is used (thanks to doRNG).}
 
-\item{...}{Further arguments to be passed to `EnvStats::ebeta` or
-`ExtDist::eBeta` functions.}
+\item{verbose}{Boolean to report progress and timings (default: TRUE).}
 }
 \value{
 The output is a `GRanges` object that contains all the aberrantly
@@ -120,8 +127,9 @@ ranges (by `min.cpgs` and `min.width`).
 }
 \examples{
   data(ramr)
-  getAMR(ramr.data, ramr.samples, ramr.method="beta",
-         min.cpgs=5, merge.window=1000, qval.cutoff=1e-3, cores=2)
+  getAMR(data.ranges=ramr.data, data.samples=ramr.samples,
+         compute="beta+binom", compute.estimate="amle",
+         combine.min.cpgs=5, combine.window=1000, combine.threshold=1e-3)
 }
 \seealso{
 \code{\link{plotAMR}} for plotting AMRs, \code{\link{getUniverse}}
