@@ -278,20 +278,8 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// wait_a_second_omp
-bool wait_a_second_omp(int sec, int ncores);
-RcppExport SEXP _ramr_wait_a_second_omp(SEXP secSEXP, SEXP ncoresSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type sec(secSEXP);
-    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
-    rcpp_result_gen = Rcpp::wrap(wait_a_second_omp(sec, ncores));
-    return rcpp_result_gen;
-END_RCPP
-}
 // rcpp_extract_out
-std::vector<double> rcpp_extract_out(Rcpp::List& data);
+Rcpp::NumericVector rcpp_extract_out(Rcpp::List& data);
 RcppExport SEXP _ramr_rcpp_extract_out(SEXP dataSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -302,78 +290,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // rcpp_extract_coef
-std::vector<double> rcpp_extract_coef(Rcpp::List& data);
+Rcpp::NumericVector rcpp_extract_coef(Rcpp::List& data);
 RcppExport SEXP _ramr_rcpp_extract_coef(SEXP dataSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
     rcpp_result_gen = Rcpp::wrap(rcpp_extract_coef(data));
-    return rcpp_result_gen;
-END_RCPP
-}
-// rcpp_test_nan
-double rcpp_test_nan();
-RcppExport SEXP _ramr_rcpp_test_nan() {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(rcpp_test_nan());
-    return rcpp_result_gen;
-END_RCPP
-}
-// rcpp_test_med_boost
-double rcpp_test_med_boost(std::vector<double> v);
-RcppExport SEXP _ramr_rcpp_test_med_boost(SEXP vSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::vector<double> >::type v(vSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_test_med_boost(v));
-    return rcpp_result_gen;
-END_RCPP
-}
-// rcpp_test_iqr_boost
-double rcpp_test_iqr_boost(std::vector<double> v);
-RcppExport SEXP _ramr_rcpp_test_iqr_boost(SEXP vSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::vector<double> >::type v(vSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_test_iqr_boost(v));
-    return rcpp_result_gen;
-END_RCPP
-}
-// rcpp_test_med
-double rcpp_test_med(std::vector<double> v);
-RcppExport SEXP _ramr_rcpp_test_med(SEXP vSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::vector<double> >::type v(vSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_test_med(v));
-    return rcpp_result_gen;
-END_RCPP
-}
-// rcpp_test_iqr_type7
-std::vector<double> rcpp_test_iqr_type7(std::vector<double> v);
-RcppExport SEXP _ramr_rcpp_test_iqr_type7(SEXP vSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::vector<double> >::type v(vSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_test_iqr_type7(v));
-    return rcpp_result_gen;
-END_RCPP
-}
-// rcpp_test_s4v
-double rcpp_test_s4v(SEXP x);
-RcppExport SEXP _ramr_rcpp_test_s4v(SEXP xSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_test_s4v(x));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -448,15 +371,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ramr_rcpp_get_meanvar_geo_invDist", (DL_FUNC) &_ramr_rcpp_get_meanvar_geo_invDist, 1},
     {"_ramr_rcpp_get_meanvar_geo_sqrtInvDist", (DL_FUNC) &_ramr_rcpp_get_meanvar_geo_sqrtInvDist, 1},
     {"_ramr_rcpp_get_meanvar_geo_logInvDist", (DL_FUNC) &_ramr_rcpp_get_meanvar_geo_logInvDist, 1},
-    {"_ramr_wait_a_second_omp", (DL_FUNC) &_ramr_wait_a_second_omp, 2},
     {"_ramr_rcpp_extract_out", (DL_FUNC) &_ramr_rcpp_extract_out, 1},
     {"_ramr_rcpp_extract_coef", (DL_FUNC) &_ramr_rcpp_extract_coef, 1},
-    {"_ramr_rcpp_test_nan", (DL_FUNC) &_ramr_rcpp_test_nan, 0},
-    {"_ramr_rcpp_test_med_boost", (DL_FUNC) &_ramr_rcpp_test_med_boost, 1},
-    {"_ramr_rcpp_test_iqr_boost", (DL_FUNC) &_ramr_rcpp_test_iqr_boost, 1},
-    {"_ramr_rcpp_test_med", (DL_FUNC) &_ramr_rcpp_test_med, 1},
-    {"_ramr_rcpp_test_iqr_type7", (DL_FUNC) &_ramr_rcpp_test_iqr_type7, 1},
-    {"_ramr_rcpp_test_s4v", (DL_FUNC) &_ramr_rcpp_test_s4v, 1},
     {"_ramr_rcpp_prepare_data_identity", (DL_FUNC) &_ramr_rcpp_prepare_data_identity, 8},
     {"_ramr_rcpp_prepare_data_linear", (DL_FUNC) &_ramr_rcpp_prepare_data_linear, 8},
     {"_ramr_rcpp_test_omp", (DL_FUNC) &_ramr_rcpp_test_omp, 0},

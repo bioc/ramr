@@ -93,40 +93,12 @@ rcpp_get_meanvar_geo_logInvDist <- function(data) {
     .Call(`_ramr_rcpp_get_meanvar_geo_logInvDist`, data)
 }
 
-wait_a_second_omp <- function(sec, ncores) {
-    .Call(`_ramr_wait_a_second_omp`, sec, ncores)
-}
-
 rcpp_extract_out <- function(data) {
     .Call(`_ramr_rcpp_extract_out`, data)
 }
 
 rcpp_extract_coef <- function(data) {
     .Call(`_ramr_rcpp_extract_coef`, data)
-}
-
-rcpp_test_nan <- function() {
-    .Call(`_ramr_rcpp_test_nan`)
-}
-
-rcpp_test_med_boost <- function(v) {
-    .Call(`_ramr_rcpp_test_med_boost`, v)
-}
-
-rcpp_test_iqr_boost <- function(v) {
-    .Call(`_ramr_rcpp_test_iqr_boost`, v)
-}
-
-rcpp_test_med <- function(v) {
-    .Call(`_ramr_rcpp_test_med`, v)
-}
-
-rcpp_test_iqr_type7 <- function(v) {
-    .Call(`_ramr_rcpp_test_iqr_type7`, v)
-}
-
-rcpp_test_s4v <- function(x) {
-    .Call(`_ramr_rcpp_test_s4v`, x)
 }
 
 rcpp_prepare_data_identity <- function(seqnames, seqrunlens, start, strand, mcols, coverage, exclude_lower, exclude_upper) {
