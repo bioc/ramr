@@ -44,10 +44,10 @@
 #' usage and sample data.
 #' @examples
 #'   data(ramr)
-#'   plotAMR(ramr.data, ramr.samples, ramr.tp.unique[1])
+#'   plotAMR(data.ranges=ramr.data, amr.ranges=ramr.tp.unique[1])
 #'   library(gridExtra)
 #'   do.call("grid.arrange",
-#'           c(plotAMR(ramr.data, ramr.samples, ramr.tp.nonunique), ncol=2))
+#'           c(plotAMR(data.ranges=ramr.data, amr.ranges=ramr.tp.nonunique), ncol=2))
 #' @export
 plotAMR <- function (data.ranges,
                      amr.ranges,
@@ -83,7 +83,8 @@ plotAMR <- function (data.ranges,
 
   for (i in seq_along(amr.ranges.relisted)) {
     plot.ranges <- unlist(amr.ranges.relisted[i])
-    plot.ranges <- plot.ranges[order(plot.ranges$dbeta, decreasing=TRUE)]
+    if (!is.null(plot.ranges$dbeta))
+      plot.ranges <- plot.ranges[order(plot.ranges$dbeta, decreasing=TRUE)]
     # plot.key <- data.table::as.data.table(GenomicRanges::reduce(plot.ranges, ignore.strand=ignore.strand))
     plot.key <- data.table::as.data.table(GenomicRanges::granges(plot.ranges))
     plot.key[, `:=` (start=start-window, end=end+window)]
@@ -97,7 +98,7 @@ plotAMR <- function (data.ranges,
       stop("AMRs don't map to 'data.ranges'! Was the 'data.ranges' object modified after AMR search?")
     if (length(data.hits)>0) {
       plot.data <- data.ranges.dt[data.hits]
-      plot.data$median <- apply(plot.data[, ..data.samples], 1, median, na.rm=TRUE)
+      plot.data$median <- apply(plot.data[, ..data.samples], 1, stats::median, na.rm=TRUE)
 
       amr.samples <- na.omit(plot.ranges$sample)
       amr.revmaps <- plot.ranges$revmap

@@ -1,34 +1,24 @@
-#' @importFrom BiocGenerics relist
-#' @importFrom data.table as.data.table melt.data.table
-#' @importFrom doParallel registerDoParallel
-#' @importFrom doRNG %dorng%
-#' @importFrom EnvStats ebeta
-#' @importFrom ExtDist eBeta pBeta
-#' @importFrom foreach foreach
-#' @importFrom gamlss gamlss gamlss.control
-#' @importFrom gamlss.dist pBEINF
-#' @importFrom GenomicRanges mcols `mcols<-` granges reduce findOverlaps
-#' @importFrom IRanges subsetByOverlaps
-#' @importFrom matrixStats rowMedians rowIQRs
+#' @importFrom BiocGenerics relist start strand
+#' @importFrom data.table as.data.table foverlaps melt.data.table setkeyv
+#' @importFrom GenomeInfoDb seqnames
+#' @importFrom GenomicRanges findOverlaps GRanges granges mcols `mcols<-` reduce
+#' @importFrom IRanges IRanges subsetByOverlaps
 #' @importFrom methods as is
-#' @importFrom parallel detectCores makeCluster stopCluster
-#' @importFrom S4Vectors queryHits
-#' @importFrom stats median na.omit rbeta pbeta setNames
-#' @importFrom utils head tail packageVersion
 #' @importFrom Rcpp sourceCpp
+#' @importFrom S4Vectors DataFrame I queryHits runLength runValue
+#' @importFrom stats median na.omit setNames
+#' @importFrom utils globalVariables head packageVersion tail
 #' @useDynLib ramr, .registration=TRUE
 
-
-# internal globals, constants and helper functions
-#
+# egrep -RIho -E "[a-zA-Z0-9._]+::[a-zA-Z0-9._]+" R/* | sort -f | uniq -c
 
 ################################################################################
 # Globals, unload, attach
 ################################################################################
 
 utils::globalVariables(c(
-  "chunk", "column", "ncpg", "width", "..data.samples", ":=", "alpha", "color",
-  "size", "start"
+  "..data.samples", ":=", "alpha", "chunk", "color", "column", "end", "ncpg",
+  "size", "start", "width"
 ))
 
 .onUnload <- function (libpath) {library.dynam.unload("ramr", libpath)}
@@ -217,7 +207,7 @@ utils::globalVariables(c(
   fn.fit <- paste("rcpp_fit_beta", estimate, sep="_")
   do.call(what=fn.fit, args=list(data=data.list))
 
-  random.values <- rcpp_generate_random_values(data=data.list)
+  random.values <- rcpp_generate_random_values(data=data.list, ncol=nsamples)
 
   colnames(random.values) <- sample.names
 
@@ -244,6 +234,8 @@ utils::globalVariables(c(
     sample <- amr.mcols[i,"sample"]
     random.data[revmap, sample] <- random.data[revmap, sample] + dbeta
   }
+  random.data[random.data<0] <- 0
+  random.data[random.data>1] <- 1
 
   if (verbose) message(sprintf("[%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
   return(random.data)

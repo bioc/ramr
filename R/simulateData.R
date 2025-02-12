@@ -17,9 +17,9 @@
 #'   \item in the same input, calculates frequencies of zero and one values
 #'   (endpoints; whenever present)
 #'   \item uses estimated parameters of beta distribution and probabilities
-#'   (observed frequencies) of {0;1} values to generate `nsamples` random
+#'   (observed frequencies) of \{0;1\} values to generate `nsamples` random
 #'   values by means of `stats::rbeta` function (for beta values) and/or
-#'   `stats::rbinom` function (for {0;1} endpoint values, according to their
+#'   `stats::rbinom` function (for \{0;1\} endpoint values, according to their
 #'   frequencies and therefore probabilities).
 #' }
 #' This results in "smoothed" data set that has biologically relevant
@@ -72,10 +72,10 @@
 #' and \code{\link{getAMR}} method description for additional explanations.
 #' @param compute.estimate A single string for the method of parameter
 #' estimation of beta distribution. The default ("mom") stands for the method
-#' of moments based on the unbiased estimator of variance and includes {0;1}
+#' of moments based on the unbiased estimator of variance and includes \{0;1\}
 #' endpoints in calculation of moments (mean, unbiased variance).
 #' Other options are "amle" (approximation of maximum likelihood estimation)
-#' and "nmle" (numeric maximum likelihood estimation) - both ignore {0;1}
+#' and "nmle" (numeric maximum likelihood estimation) - both ignore \{0;1\}
 #' endpoints in calculations. More details on these methods are given in
 #' \code{\link{getAMR}} method description.
 #' @param compute.weights A single string for the method to compute optional

@@ -110,7 +110,7 @@ simulateAMR <- function (template.ranges,
   if (methods::is(exclude.ranges,"GRanges"))
     universe.ranges <- IRanges::subsetByOverlaps(universe.ranges, exclude.ranges, invert=TRUE)
   if (is.null(sample.names))
-    sample.names <- paste0("sample", seq_len(nsamples))
+    sample.names <- sprintf(paste0("sample%0", nchar(as.character(nsamples)), "i"), seq_len(nsamples))
 
   if (nsamples > length(universe.ranges)) {
     nsamples <- length(universe.ranges)
