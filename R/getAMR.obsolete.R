@@ -112,10 +112,10 @@ getAMR.obsolete <- function (data.ranges,
             "Please use faster and more capable 'getAMR' instead.\n")
   for (ns in c("EnvStats", "ExtDist", "gamlss", "gamlss.dist", "doParallel",
                "parallel", "doRNG", "foreach", "matrixStats"))
-    if (!requireNamespace(ns, quietly=TRUE))
+    if (!requireNamespace(ns, quietly=TRUE) | exists(x="is.test.environment"))
       stop(ns, " is required for this function. Please install")
   `%dorng%` <- doRNG::`%dorng%`
-  
+
   if (!methods::is(data.ranges,"GRanges"))
     stop("'data.ranges' must be a GRanges object")
   if (is.null(data.samples))

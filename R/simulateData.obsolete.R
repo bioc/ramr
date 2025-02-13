@@ -103,10 +103,10 @@ simulateData.obsolete <- function (template.ranges,
     message("This function is fully functional but *obsolete*.\n",
             "Please use faster and more capable 'simulateData' instead.\n")
   for (ns in c("EnvStats", "doParallel", "parallel", "doRNG", "foreach"))
-    if (!requireNamespace(ns, quietly=TRUE))
+    if (!requireNamespace(ns, quietly=TRUE) | exists(x="is.test.environment"))
       stop(ns, " is required for this function. Please install")
   `%dorng%` <- doRNG::`%dorng%`
-  
+
   if (!methods::is(template.ranges,"GRanges"))
     stop("'template.ranges' must be a GRanges object")
   if (!is.null(sample.names) & length(sample.names)!=nsamples)

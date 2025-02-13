@@ -21,7 +21,7 @@ test_simulateData.obsolete <- function () {
   RUnit::checkException(
     simulateData.obsolete(ramr.data, nsamples=99, amr.ranges=ramr.tp.unique)
   )
-  
+
   noise <- simulateAMR(ramr.data, nsamples=10, merge.window=1, min.cpgs=1, max.cpgs=1,
                        regions.per.sample=100, samples.per.region=1, dbeta=1)
   betas <- as.matrix(GenomicRanges::mcols( simulateData.obsolete(ramr.data, nsamples=10, amr.ranges=noise, cores=2) ))
@@ -37,5 +37,16 @@ test_simulateData.obsolete <- function () {
   betas <- as.matrix(GenomicRanges::mcols( simulateData.obsolete(ramr.data, nsamples=10, amr.ranges=noise, cores=2) ))
   RUnit::checkTrue(
     sum(is.na(betas)) == length(noise)
+  )
+
+  ### if suggested library is not available
+  test.env <- new.env()
+  assign(x="is.test.environment", value=TRUE, envir=test.env)
+  test.func <- function(f, env, ...) {
+    environment(f) <- env
+    f(...)
+  }
+  RUnit::checkException(
+    test.func(f=simulateData.obsolete, env=test.env, ramr.data, nsamples=10, amr.ranges=noise, cores=2)
   )
 }

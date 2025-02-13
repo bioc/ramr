@@ -62,7 +62,8 @@ plotAMR <- function (data.ranges,
                      breaks=NULL,
                      verbose=TRUE)
 {
-  if (!requireNamespace("ggplot2", quietly=TRUE)) stop("ggplot2 is required for plotting. Please install")
+  if (!requireNamespace("ggplot2", quietly=TRUE) | exists(x="is.test.environment"))
+    stop("ggplot2 is required for plotting. Please install")
 
   transform <- match.arg(transform)
   if (is.null(limits))
