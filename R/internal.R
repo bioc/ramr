@@ -54,6 +54,38 @@ utils::globalVariables(c(
 # Functions
 ################################################################################
 
+# descr: partitions SeqRunLengths for parallel processing
+# value: integer vector
+
+.getPartitions <- function (runlengths,
+                            ncores)
+{
+  # need a warning if too many runlengths
+
+  ncores <- 6
+  chunks <- integer(ncores)
+  lim <- sum(sl) %/% ncores
+  i <- 1
+  j <- 1
+  cs <- 0
+  while (i<=length(sl)) {
+    cs <- cs + sl[i]
+    if (cs>=lim) {
+      chunks[j] <- cs
+      j <- j+1
+      cs <- 0
+    }
+    i <- i+1
+  }
+  if (cs>0) chunks[j] <- cs
+  print(chunks)
+  print(sum(chunks))
+
+  return(chunks)
+}
+
+################################################################################
+
 # descr: preprocesses data
 # value: list
 
@@ -77,7 +109,8 @@ utils::globalVariables(c(
     mcols=as.data.frame(GenomicRanges::mcols(data.ranges), optional=TRUE),
     coverage=data.coverage,
     exclude_lower=exclude.range[1],
-    exclude_upper=exclude.range[2]
+    exclude_upper=exclude.range[2],
+    ncores=ncores
   ))
 
   if (verbose) message(sprintf("[%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
@@ -165,7 +198,7 @@ utils::globalVariables(c(
   amr.list <- do.call(what=fn.ranges, args=list(
     data=data.list, window=window, min_ncpg=min.cpgs, min_width=min.width
   ))
-  
+
   amr.ranges <- GenomicRanges::GRanges(
     seqnames=amr.list$seqnames,
     ranges=IRanges::IRanges(start=amr.list$start, end=amr.list$end),

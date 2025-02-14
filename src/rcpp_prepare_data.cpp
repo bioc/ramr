@@ -29,7 +29,8 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
                               Rcpp::DataFrame &mcols,                           // DataFrame output of as.data.frame(GenomicRanges::mcols(<input.ranges>), optional=TRUE)
                               Rcpp::DataFrame &coverage,                        // optional DataFrame with coverage data for binomial modelling of extremes {0;1}
                               double exclude_lower,                             // lower bound of range to exclude
-                              double exclude_upper)                             // upper bound of range to exclude
+                              double exclude_upper,                             // upper bound of range to exclude
+                              size_t ncores)                                    // cores to use == split data in that many chunks
 {
   // consts
   const size_t ncol = mcols.ncol();                                             // number of columns (samples)
@@ -153,17 +154,17 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
 // [[Rcpp::export]]
 Rcpp::List rcpp_prepare_data_identity (
     Rcpp::IntegerVector &seqnames, Rcpp::IntegerVector &seqrunlens, Rcpp::IntegerVector &start,
-    Rcpp::IntegerVector &strand, Rcpp::DataFrame &mcols, Rcpp::DataFrame &coverage, double exclude_lower, double exclude_upper)
+    Rcpp::IntegerVector &strand, Rcpp::DataFrame &mcols, Rcpp::DataFrame &coverage, double exclude_lower, double exclude_upper, size_t ncores)
 {
-  return rcpp_prepare_data<0>(seqnames, seqrunlens, start, strand, mcols, coverage, exclude_lower, exclude_upper);
+  return rcpp_prepare_data<0>(seqnames, seqrunlens, start, strand, mcols, coverage, exclude_lower, exclude_upper, ncores);
 }
 
 // [[Rcpp::export]]
 Rcpp::List rcpp_prepare_data_linear (
     Rcpp::IntegerVector &seqnames, Rcpp::IntegerVector &seqrunlens, Rcpp::IntegerVector &start,
-    Rcpp::IntegerVector &strand, Rcpp::DataFrame &mcols, Rcpp::DataFrame &coverage, double exclude_lower, double exclude_upper)
+    Rcpp::IntegerVector &strand, Rcpp::DataFrame &mcols, Rcpp::DataFrame &coverage, double exclude_lower, double exclude_upper, size_t ncores)
 {
-  return rcpp_prepare_data<1>(seqnames, seqrunlens, start, strand, mcols, coverage, exclude_lower, exclude_upper);
+  return rcpp_prepare_data<1>(seqnames, seqrunlens, start, strand, mcols, coverage, exclude_lower, exclude_upper, ncores);
 }
 
 
