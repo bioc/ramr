@@ -140,17 +140,6 @@ getAMR <- function (data.ranges,
   if (combine=="comb-p")
     stop("combine=='comb-p' is not available yet")
 
-  available.cores <- rcpp_test_omp()
-  if (available.cores < 0) {
-    ncores <- 1
-  } else {
-    if (is.null(ncores)) {
-      ncores <- max(1, available.cores %/% 2)
-    } else {
-      ncores <- max(1, min(ncores, available.cores))
-    }
-  }
-
   #####################################################################################
 
   .data <- .preprocessData(

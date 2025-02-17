@@ -87,6 +87,17 @@ utils::globalVariables(c(
   if (verbose) message("Preprocessing data ", appendLF=FALSE)
   tm <- proc.time()
 
+  available.cores <- rcpp_test_omp()
+  if (available.cores < 0) {
+    ncores <- 1
+  } else {
+    if (is.null(ncores)) {
+      ncores <- max(1, available.cores %/% 2)
+    } else {
+      ncores <- max(1, min(ncores, available.cores))
+    }
+  }
+
   chunks <- .getPartitions(
     seqrunlens=S4Vectors::runLength(GenomeInfoDb::seqnames(data.ranges)),
     ncores=ncores
@@ -218,7 +229,7 @@ utils::globalVariables(c(
                               sample.names,
                               verbose)
 {
-  if (verbose) message("Simulating data", appendLF=FALSE)
+  if (verbose) message("Simulating data ", appendLF=FALSE)
   tm <- proc.time()
 
   fn.mean <- paste(
