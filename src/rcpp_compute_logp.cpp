@@ -118,7 +118,7 @@ static inline double incbeta (double a,                              /* alpha */
 //
 // TODO:
 //   [x] make it ready for 0 and 1 - now it's not aware of them
-//   [ ] OpenMP
+//   [x] OpenMP
 //   [x] skip rows where len[r]==0
 //   [?] templated for different implementations of incomplete beta:
 //       my own above, boost::math::beta, own with boost continued fractions
@@ -131,11 +131,12 @@ int rcpp_compute_logp (Rcpp::List &data)                                        
   const size_t nrow = data["nrow"];                                             // number of rows (genomic loci)
 
   // containers
-  Rcpp::XPtr<T_raw> raw((SEXP)data.attr("raw_xptr"));                           // flat vector with raw values
-  Rcpp::XPtr<T_cov> cov((SEXP)data.attr("cov_xptr"));                           // optional vector with coverage values
-  Rcpp::XPtr<T_out> out((SEXP)data.attr("out_xptr"));                           // vector to hold output values
-  Rcpp::XPtr<T_len> len((SEXP)data.attr("len_xptr"));                           // lengths of input data rows minus number of NaNs
-  Rcpp::XPtr<T_coef> coef((SEXP)data.attr("coef_xptr"));                        // vector with per-row results of rcpp_fit_beta
+  Rcpp::XPtr<T_dbl> raw((SEXP)data.attr("raw_xptr"));                           // flat vector with raw values
+  Rcpp::XPtr<T_int> cov((SEXP)data.attr("cov_xptr"));                           // optional vector with coverage values
+  Rcpp::XPtr<T_dbl> out((SEXP)data.attr("out_xptr"));                           // vector to hold output values
+  Rcpp::XPtr<T_int> len((SEXP)data.attr("len_xptr"));                           // lengths of input data rows minus number of NaNs
+  Rcpp::XPtr<T_dbl> coef((SEXP)data.attr("coef_xptr"));                         // vector with per-row results of rcpp_fit_beta
+  Rcpp::XPtr<T_int> thr((SEXP)data.attr("thr_xptr"));                           // chunks of rows for multiple threads
 
   // fast direct accessors
   const auto raw_data = raw->data();
@@ -144,11 +145,19 @@ int rcpp_compute_logp (Rcpp::List &data)                                        
   const auto len_data = len->data();
   const auto coef_data = coef->data();
 
+  // number of chunks/threads
+  const size_t nthreads = thr->size() - 1;                                      // 'thr' always starts with 0 and ends with 'nrow'
+
+#pragma omp parallel num_threads(nthreads)
+{
+  const size_t thr_num = omp_get_thread_num();                                  // thread ID
+  const size_t row_from = thr->at(thr_num);                                     // start of row chunk
+  const size_t row_to = thr->at(thr_num+1);                                     // end of row chunk
   for (size_t c=0; c<ncol; c++) {
     const auto raw_first = raw_data + c*nrow;                                   // first element of c-th column in 'raw'
     const auto cov_first = cov_data + c*nrow;                                   // first element of c-th column in 'cov'
     const auto out_first = out_data + c*nrow;                                   // first element of c-th column in 'out'
-    for (size_t r=0; r<nrow; r++) {
+    for (size_t r=row_from; r<row_to; r++) {
       const auto raw_value = raw_first[r];
       if (len_data[r] && !std::isnan(raw_value)) {                              // if row is not excluded and x is not NaN
         const auto q = coef_data + r*NCOEF;                                     // first element of 'coef' array
@@ -168,6 +177,7 @@ int rcpp_compute_logp (Rcpp::List &data)                                        
       }
     }
   }
+}
 
   return 0;
 }
