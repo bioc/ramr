@@ -62,13 +62,13 @@ int rcpp_fit_beta (Rcpp::List &data)                                            
       // beta (shape parameter q) is in q[6]
       q[6] = 0.5 + q[4] / ( 2 * (1 - q[3] - q[4]) );
 
-    } else if (method==2) {                                                     // TODO: numerical MLE
-      Rcpp::stop("not implemented");
-      // check how stats::optim works: grep -RIn "optim" src/appl/* src/include/*
-      // maybe look for a C++ solution
-      // possibly should use multi-objective optimization of the set of my
-      // two equations with digamma:
-      // https://scicomp.stackexchange.com/questions/3318/simultaneous-maximization-of-two-functions-without-available-derivatives
+    // } else if (method==2) {                                                     // TODO: numerical MLE
+    //   Rcpp::stop("not implemented");
+    //   // check how stats::optim works: grep -RIn "optim" src/appl/* src/include/*
+    //   // maybe look for a C++ solution
+    //   // possibly should use multi-objective optimization of the set of my
+    //   // two equations with digamma:
+    //   // https://scicomp.stackexchange.com/questions/3318/simultaneous-maximization-of-two-functions-without-available-derivatives
     }
 
     // logarithm of complete beta function in q[4]
@@ -93,10 +93,10 @@ int rcpp_fit_beta_amle (Rcpp::List &data)                                       
   return rcpp_fit_beta<1>(data);
 }
 
-// [[Rcpp::export]]
-int rcpp_fit_beta_nmle (Rcpp::List &data)                                       // numerical MLE
-{
-  return rcpp_fit_beta<2>(data);
-}
+// // [[Rcpp::export]]
+// int rcpp_fit_beta_nmle (Rcpp::List &data)                                       // numerical MLE
+// {
+//   return rcpp_fit_beta<2>(data);
+// }
 
 

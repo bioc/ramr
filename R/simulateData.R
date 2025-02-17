@@ -149,6 +149,9 @@ simulateData <- function (template.ranges,
   compute.estimate <- match.arg(compute.estimate)
   compute.weights <- match.arg(compute.weights)
 
+  if (compute.estimate=="nmle")
+    stop("compute.estimate=='nmle' is not available yet")
+
   #####################################################################################
 
   .data <- .preprocessData(
