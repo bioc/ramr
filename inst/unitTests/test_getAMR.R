@@ -49,7 +49,7 @@ test_getAMR <- function () {
   )
 
   amr.wbeta <- getAMR(data.ranges=ramr.data, data.samples=ramr.samples, compute="beta+binom", compute.estimate="amle", compute.weights="sqrtInvDist",
-                      combine.min.cpgs=5, combine.window=10000, combine.threshold=1e-5)
+                      combine.min.cpgs=5, combine.window=10000, combine.threshold=1e-5, ncores=-1)
   RUnit::checkEquals(
     c(sum(GenomicRanges::countOverlaps(amr.wbeta, ramr.tp.unique)), sum(GenomicRanges::countOverlaps(amr.wbeta, ramr.tp.nonunique))),
     c(6, 45)
