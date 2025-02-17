@@ -19,13 +19,13 @@ int rcpp_filter_threshold (Rcpp::List &data,                                    
   // consts
   const size_t ncol = data["ncol"];                                             // number of columns (samples)
   const size_t nrow = data["nrow"];                                             // number of rows (genomic loci)
-  
+
   // containers
-  Rcpp::XPtr<T_out> out((SEXP)data.attr("out_xptr"));                           // vector to hold intermediate output values (here: either xIQR or p-values)
-  
+  Rcpp::XPtr<T_dbl> out((SEXP)data.attr("out_xptr"));                           // vector to hold intermediate output values (here: either xIQR or p-values)
+
   // fast direct accessors
   const auto out_data = out->data();
-  
+
   for (size_t c=0; c<ncol; c++) {
     const auto out_first = out_data + c*nrow;                                   // first element of c-th column in 'out'
     for (size_t r=0; r<nrow; r++) {
@@ -36,7 +36,7 @@ int rcpp_filter_threshold (Rcpp::List &data,                                    
       }
     }
   }
-  
+
   return 0;
 }
 

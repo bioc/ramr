@@ -20,14 +20,8 @@ const size_t NCOEF = 8;                                                         
 // for beta-binomial (MoM): []
 
 // TYPEDEFS //
-typedef std::vector<unsigned int> T_chr;                                        // vector of chromosomes
-typedef std::vector<unsigned int> T_pos;                                        // vector of genomic positions
-typedef std::vector<unsigned int> T_str;                                        // vector of genomic strands
-typedef std::vector<double> T_raw;                                              // vector of raw values
-typedef std::vector<unsigned int> T_cov;                                        // optional vector of coverages
-typedef std::vector<double> T_out;                                              // vector of computed values
-typedef std::vector<unsigned int> T_len;                                        // vector of number of columns by row in data
-typedef std::vector<double> T_coef;                                             // vector to store coefficients: median, IQR, parameters of fitted distribution
+typedef std::vector<unsigned int> T_int;                                        // unsigned int vector of chromosomes, genomic positions, genomic strands, coverages, lengths (number of columns by row in data)
+typedef std::vector<double> T_dbl;                                              // double vector of raw values, computed values, coefficients  (median, IQR, parameters of fitted distribution)
 
 // MACRO //
 #define isZero(x) ((x) <= DBL_EPSILON)

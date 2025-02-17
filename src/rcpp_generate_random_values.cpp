@@ -22,8 +22,8 @@ Rcpp::NumericVector rcpp_generate_random_values (Rcpp::List &data,              
   const size_t nrow = data["nrow"];                                             // number of rows (genomic loci)
 
   // containers
-  Rcpp::XPtr<T_len> len((SEXP)data.attr("len_xptr"));                           // lengths of input data rows minus number of NaNs
-  Rcpp::XPtr<T_coef> coef((SEXP)data.attr("coef_xptr"));                        // vector to hold per-row results
+  Rcpp::XPtr<T_int> len((SEXP)data.attr("len_xptr"));                           // lengths of input data rows minus number of NaNs
+  Rcpp::XPtr<T_dbl> coef((SEXP)data.attr("coef_xptr"));                         // vector to hold per-row results
 
   // result
   std::vector<double> res(nrow*ncol, NA_REAL);                                  // instantiate with NA

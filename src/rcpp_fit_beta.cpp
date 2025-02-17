@@ -21,7 +21,7 @@ int rcpp_fit_beta (Rcpp::List &data)                                            
   const size_t nrow = data["nrow"];                                             // number of rows (genomic loci)
 
   // containers
-  Rcpp::XPtr<T_coef> coef((SEXP)data.attr("coef_xptr"));                        // vector to hold per-row results
+  Rcpp::XPtr<T_dbl> coef((SEXP)data.attr("coef_xptr"));                         // vector to hold per-row results
 
   // fast direct accessors
   const auto coef_data = coef->data();

@@ -15,8 +15,8 @@
 Rcpp::NumericVector rcpp_extract_out (Rcpp::List &data)
 {
   // containers
-  Rcpp::XPtr<T_out> out((SEXP)data.attr("out_xptr"));
-  
+  Rcpp::XPtr<T_dbl> out((SEXP)data.attr("out_xptr"));
+
   // result
   Rcpp::NumericVector res_matrix = Rcpp::wrap(*out);                            // wrap it
   Rcpp::IntegerVector dim = {(int)(data["nrow"]), (int)(data["ncol"])};         // number of rows (genomic loci) and columns (samples)
@@ -28,8 +28,8 @@ Rcpp::NumericVector rcpp_extract_out (Rcpp::List &data)
 Rcpp::NumericVector rcpp_extract_coef (Rcpp::List &data)
 {
   // containers
-  Rcpp::XPtr<T_coef> coef((SEXP)data.attr("coef_xptr"));
-  
+  Rcpp::XPtr<T_dbl> coef((SEXP)data.attr("coef_xptr"));
+
   // result
   Rcpp::NumericVector res_matrix = Rcpp::wrap(*coef);                           // wrap it
   Rcpp::IntegerVector dim = {NCOEF, (int)(data["nrow"])};                       // number of rows (coefficients) and columns (genomic loci)
@@ -44,8 +44,8 @@ Rcpp::NumericVector rcpp_extract_coef (Rcpp::List &data)
 
 
 
-// 
-// 
+//
+//
 // // [[Rcpp::export]]
 // bool wait_a_second_omp(int sec, int ncores)
 // {
@@ -63,7 +63,7 @@ Rcpp::NumericVector rcpp_extract_coef (Rcpp::List &data)
 // {
 //   // set.seed(1); paste(sample(23), collapse=", ")
 //   std::vector<double> v = {4, 7, 1, 2, 11, 14, 21, 5, 16, 10, 6, 18, 22, 9, 15, 12, 17, 19, NA_REAL, R_NaN, R_PosInf, R_NegInf, 8, 13, 20, 3, 23};
-// 
+//
 //   int n = v.size();
 //   for (int i = 0; i < n; ++i) {
 //     if (std::isnan(v[i]))
@@ -75,40 +75,40 @@ Rcpp::NumericVector rcpp_extract_coef (Rcpp::List &data)
 //     if (Rcpp::traits::is_infinite<REALSXP>(v[i]))
 //       Rprintf("v[%i] is Inf or -Inf.\n", i);
 //   }
-// 
+//
 //   struct {
 //     bool operator()(double a, double b) const {return std::isnan(b) || (a<b);}  // NaN last
 //   } customLess;
-// 
+//
 //   Rcpp::Rcout << "unsorted:\n";
 //   for (int i=0; i<n; ++i)
 //     Rcpp::Rcout << v[i] << " ";
 //   Rcpp::Rcout << "\n";
-// 
+//
 //   Rcpp::Rcout << "default nth element:\n";
 //   std::nth_element(v.begin(), v.begin() + v.size()/2, v.end());
 //   for (int i=0; i<n; ++i)
 //     Rcpp::Rcout << v[i] << " ";
 //   Rcpp::Rcout << "\n";
-// 
+//
 //   Rcpp::Rcout << "na-aware nth element:\n";
 //   std::nth_element(v.begin(), v.begin() + v.size()/2, v.end(), customLess);
 //   for (int i=0; i<n; ++i)
 //     Rcpp::Rcout << v[i] << " ";
 //   Rcpp::Rcout << "\n";
-// 
+//
 //   Rcpp::Rcout << "default sort:\n";
 //   std::sort(v.begin(), v.end());
 //   for (int i=0; i<n; ++i)
 //     Rcpp::Rcout << v[i] << " ";
 //   Rcpp::Rcout << "\n";
-// 
+//
 //   Rcpp::Rcout << "na-aware sort:\n";
 //   std::sort(v.begin(), v.end(), customLess);
 //   for (int i=0; i<n; ++i)
 //     Rcpp::Rcout << v[i] << " ";
 //   Rcpp::Rcout << "\n";
-// 
+//
 //   return(0);
 // }
 
@@ -150,7 +150,7 @@ Rcpp::NumericVector rcpp_extract_coef (Rcpp::List &data)
 // {
 //   const auto first = v.data();
 //   const size_t l = v.size();
-// 
+//
 //   // for Type 7 quantile function (R's default):
 //   //   m = 1 - p
 //   //   j = floor(np + m)
@@ -158,11 +158,11 @@ Rcpp::NumericVector rcpp_extract_coef (Rcpp::List &data)
 //   //   Q(p) = (1 - g)Xj + gX(j+1)
 //   // where p=0.25 for Q1 and p=0.75 for Q3,
 //   // and Xj and X(j+1) are j-th and j+1-th statistics (elements)
-// 
+//
 //   // corner case is when (l-1)&3==0 (i.e., 21, 25, 27, ..., 4n+1),
 //   // then gamma = 0 and only one nth_element() call per Q is therefore required
 //   // can test it by checking if g<0.1
-// 
+//
 //   //    | q1		      |  q2		     |  q3
 //   //----|-----|-------|-----|------|-----|------
 //   // n	|  j	| g	    |  j	| g	   | j	 | g
@@ -178,19 +178,19 @@ Rcpp::NumericVector rcpp_extract_coef (Rcpp::List &data)
 //   // 28	|  7	| 0,75	| 14	| 0,5	 | 21	 | 0,25
 //   // 29	|  8	| 0	    | 15	| 0	   | 22	 | 0
 //   // 30	|  8	| 0,25	| 15	| 0,5	 | 22	 | 0,75
-// 
+//
 //   double p[4] = {0.00, 0.25, 0.50, 0.75};
 //   double g[4];
 //   size_t j[4];
 //   double q[4];
-// 
+//
 //   for (size_t i=1; i<4; i++) {
 //     g[i] = (double)l * p[i] + 1 - p[i];
 //     j[i] = (size_t)g[i];
 //     g[i] -= j[i];
 //     j[i]--;                                                                     // because must be 0-based, not 1-
 //   }
-// 
+//
 //   // Q3:
 //   if (g[3]>0.1) {                                                               // ((l-1)&3)!=0, i.e., not the case of g=0
 //     std::nth_element(first, first+j[3]+1, first+l);
@@ -201,7 +201,7 @@ Rcpp::NumericVector rcpp_extract_coef (Rcpp::List &data)
 //     std::nth_element(first, first+j[3], first+l);
 //     q[3] = first[j[3]];
 //   }
-// 
+//
 //   // Q2:
 //   if (g[2]>0.1) {                                                               // (l&1)!=0, i.e., not the case of g=0
 //     std::nth_element(first, first+j[2]+1, first+j[3]);
@@ -212,7 +212,7 @@ Rcpp::NumericVector rcpp_extract_coef (Rcpp::List &data)
 //     std::nth_element(first, first+j[2], first+j[3]);
 //     q[2] = first[j[2]];
 //   }
-// 
+//
 //   // Q1:
 //   if (g[1]>0.1) {                                                               // ((l-1)&3)!=0, i.e., not the case of g=0
 //     std::nth_element(first, first+j[1]+1, first+j[2]);
@@ -223,9 +223,9 @@ Rcpp::NumericVector rcpp_extract_coef (Rcpp::List &data)
 //     std::nth_element(first, first+j[1], first+j[2]);
 //     q[1] = first[j[1]];
 //   }
-// 
+//
 //   std::vector<double> res(q+1, q+4);
-// 
+//
 //   return(res);
 // }
 

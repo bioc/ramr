@@ -26,12 +26,12 @@ Rcpp::List rcpp_create_granges (Rcpp::List &data,                               
   const size_t nrow = data["nrow"];                                             // number of rows (genomic loci)
 
   // containers
-  Rcpp::XPtr<T_chr> chr((SEXP)data.attr("chr_xptr"));                           // chromosomes (1-based)
-  Rcpp::XPtr<T_pos> pos((SEXP)data.attr("pos_xptr"));                           // genomic positions (1-based)
-  Rcpp::XPtr<T_str> str((SEXP)data.attr("str_xptr"));                           // genomic strands (1=="+", 2=="-", 3=="*")
-  Rcpp::XPtr<T_raw> raw((SEXP)data.attr("raw_xptr"));                           // flat vector with raw values
-  Rcpp::XPtr<T_out> out((SEXP)data.attr("out_xptr"));                           // vector to hold intermediate output values (here: xIQR or p-values or NaN for the ones to skip)
-  Rcpp::XPtr<T_coef> coef((SEXP)data.attr("coef_xptr"));                        // vector with per-row coefficients (need median here)
+  Rcpp::XPtr<T_int> chr((SEXP)data.attr("chr_xptr"));                           // chromosomes (1-based)
+  Rcpp::XPtr<T_int> pos((SEXP)data.attr("pos_xptr"));                           // genomic positions (1-based)
+  Rcpp::XPtr<T_int> str((SEXP)data.attr("str_xptr"));                           // genomic strands (1=="+", 2=="-", 3=="*")
+  Rcpp::XPtr<T_dbl> raw((SEXP)data.attr("raw_xptr"));                           // flat vector with raw values
+  Rcpp::XPtr<T_dbl> out((SEXP)data.attr("out_xptr"));                           // vector to hold intermediate output values (here: xIQR or p-values or NaN for the ones to skip)
+  Rcpp::XPtr<T_dbl> coef((SEXP)data.attr("coef_xptr"));                         // vector with per-row coefficients (need median here)
 
   // fast direct accessors
   const auto chr_data = chr->data();
@@ -43,15 +43,15 @@ Rcpp::List rcpp_create_granges (Rcpp::List &data,                               
 
   // output containers for AMRs
   // have to be careful with them when writing from multiple threads
-  T_chr res_chr;                                                                // chromosomes
-  T_pos res_start;                                                              // genomic start
-  T_pos res_end;                                                                // genomic end
-  T_str res_strand;                                                             // genomic strand
-  std::list<T_pos> res_revmap;                                                  // revmap
-  T_pos res_ncpg;                                                               // number of CpGs
-  T_pos res_sample;                                                             // integer sample id
-  T_raw res_dbeta;                                                              // average 'raw' minus 'median' (beta)
-  T_out res_aggr;                                                               // average 'out' (mean for xIQR, geometric mean for p-values), or comb-p combined p
+  T_int res_chr;                                                                // chromosomes
+  T_int res_start;                                                              // genomic start
+  T_int res_end;                                                                // genomic end
+  T_int res_strand;                                                             // genomic strand
+  std::list<T_int> res_revmap;                                                  // revmap
+  T_int res_ncpg;                                                               // number of CpGs
+  T_int res_sample;                                                             // integer sample id
+  T_dbl res_dbeta;                                                              // average 'raw' minus 'median' (beta)
+  T_dbl res_aggr;                                                               // average 'out' (mean for xIQR, geometric mean for p-values), or comb-p combined p
 
   // macros
 #define spit_amr {             /* save AMR when enough CpGs and wide enough */ \
@@ -83,7 +83,7 @@ Rcpp::List rcpp_create_granges (Rcpp::List &data,                               
       size_t chr;                                                               //   AMR range chromosome
       size_t start;                                                             //   AMR range start
       size_t end;                                                               //   AMR range end
-      T_pos revmap;                                                             //   vector to hold revmap
+      T_int revmap;                                                             //   vector to hold revmap
       double dbeta;                                                             //   dbeta
       double aggr;                                                              //   aggregated 'out' values
     } amr[3];

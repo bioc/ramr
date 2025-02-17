@@ -22,29 +22,29 @@ int rcpp_fit_binom (Rcpp::List &data)                                           
 {
   // consts
   const size_t nrow = data["nrow"];                                             // number of rows (genomic loci)
-  
+
   // containers
-  Rcpp::XPtr<T_len> len((SEXP)data.attr("len_xptr"));                           // lengths of input data rows minus number of NaNs
-  Rcpp::XPtr<T_coef> coef((SEXP)data.attr("coef_xptr"));                        // vector to hold per-row results
-  
+  Rcpp::XPtr<T_int> len((SEXP)data.attr("len_xptr"));                           // lengths of input data rows minus number of NaNs
+  Rcpp::XPtr<T_dbl> coef((SEXP)data.attr("coef_xptr"));                         // vector to hold per-row results
+
   // fast direct accessors
   const auto len_data = len->data();
   const auto coef_data = coef->data();
-  
+
   for (size_t r=0; r<nrow; r++) {
     const auto q = coef_data + r*NCOEF;                                         // pointer to the first element of 'coef' NCOEF-element array
     if (isZero(q[0]+q[1]) || len_data[r]==0) continue;                          // if no 0/1 or no data, skip this row
-    
+
     // mean in q[3] after 'rcpp_get_meanvar'
     const double m = q[3];
-    
+
     // log probability of 0 goes to q[3]
     q[3] = std::log(1 - m);
-          
+
     // log probability of 1 goes to q[4]
     q[4] = std::log(m);
   }
-  
+
   return 0;
 }
 

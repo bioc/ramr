@@ -57,31 +57,18 @@ utils::globalVariables(c(
 # descr: partitions SeqRunLengths for parallel processing
 # value: integer vector
 
-.getPartitions <- function (runlengths,
+.getPartitions <- function (seqrunlens,
                             ncores)
 {
-  # need a warning if too many runlengths
+  # need a warning if too many runlengths...
+  # kept it as a separate function to be able to switch to some other type of
+  # partitioning later (e.g., having same seqnames on the same thread)
 
-  ncores <- 6
-  chunks <- integer(ncores)
-  lim <- sum(sl) %/% ncores
-  i <- 1
-  j <- 1
-  cs <- 0
-  while (i<=length(sl)) {
-    cs <- cs + sl[i]
-    if (cs>=lim) {
-      chunks[j] <- cs
-      j <- j+1
-      cs <- 0
-    }
-    i <- i+1
-  }
-  if (cs>0) chunks[j] <- cs
-  print(chunks)
-  print(sum(chunks))
+  total <- sum(seqrunlens)
+  chunks <- rep(total %/% ncores, ncores)
+  chunks[ncores] <- chunks[ncores] + total %% ncores
 
-  return(chunks)
+  return(cumsum(c(0, chunks)))
 }
 
 ################################################################################
@@ -100,6 +87,11 @@ utils::globalVariables(c(
   if (verbose) message("Preprocessing data ", appendLF=FALSE)
   tm <- proc.time()
 
+  chunks <- .getPartitions(
+    seqrunlens=S4Vectors::runLength(GenomeInfoDb::seqnames(data.ranges)),
+    ncores=ncores
+  )
+
   fn <- paste("rcpp_prepare_data", transform, sep="_")
   data.object <- do.call(what=fn, args=list(
     seqnames=S4Vectors::runValue(GenomeInfoDb::seqnames(data.ranges)),
@@ -110,7 +102,7 @@ utils::globalVariables(c(
     coverage=data.coverage,
     exclude_lower=exclude.range[1],
     exclude_upper=exclude.range[2],
-    ncores=ncores
+    chunks=chunks
   ))
 
   if (verbose) message(sprintf("[%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)

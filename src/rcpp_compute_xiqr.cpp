@@ -20,17 +20,17 @@ int rcpp_compute_xiqr (Rcpp::List &data)                                        
   // consts
   const size_t ncol = data["ncol"];                                             // number of columns (samples)
   const size_t nrow = data["nrow"];                                             // number of rows (genomic loci)
-  
+
   // containers
-  Rcpp::XPtr<T_raw> raw((SEXP)data.attr("raw_xptr"));                           // flat vector with raw values
-  Rcpp::XPtr<T_out> out((SEXP)data.attr("out_xptr"));                           // vector to hold intermediate output values (here: xIQR)
-  Rcpp::XPtr<T_coef> coef((SEXP)data.attr("coef_xptr"));                        // vector with per-row results of rcpp_get_iqr ([0]median, [1]Q3, [2]Q1, [3]IQR)
-  
+  Rcpp::XPtr<T_dbl> raw((SEXP)data.attr("raw_xptr"));                           // flat vector with raw values
+  Rcpp::XPtr<T_dbl> out((SEXP)data.attr("out_xptr"));                           // vector to hold intermediate output values (here: xIQR)
+  Rcpp::XPtr<T_dbl> coef((SEXP)data.attr("coef_xptr"));                         // vector with per-row results of rcpp_get_iqr ([0]median, [1]Q3, [2]Q1, [3]IQR)
+
   // fast direct accessors
   const auto raw_data = raw->data();
   const auto out_data = out->data();
   const auto coef_data = coef->data();
-  
+
   for (size_t c=0; c<ncol; c++) {
     const auto raw_first = raw_data + c*nrow;                                   // first element of c-th column in 'raw'
     const auto out_first = out_data + c*nrow;                                   // first element of c-th column in 'out'
@@ -39,7 +39,7 @@ int rcpp_compute_xiqr (Rcpp::List &data)                                        
       out_first[r] = (raw_first[r] - coef_first[2]) / coef_first[5];            // (value-median)/IQR
     }
   }
-  
+
   return 0;
 }
 

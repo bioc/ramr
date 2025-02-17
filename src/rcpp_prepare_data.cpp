@@ -30,21 +30,22 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
                               Rcpp::DataFrame &coverage,                        // optional DataFrame with coverage data for binomial modelling of extremes {0;1}
                               double exclude_lower,                             // lower bound of range to exclude
                               double exclude_upper,                             // upper bound of range to exclude
-                              size_t ncores)                                    // cores to use == split data in that many chunks
+                              Rcpp::IntegerVector &chunks)                      // start/end rows of chunks for parallel processing
 {
   // consts
   const size_t ncol = mcols.ncol();                                             // number of columns (samples)
   const size_t nrow = mcols.nrow();                                             // number of rows (genomic loci)
 
   // containers
-  T_chr* chr = new T_chr;                                                       // chromosomes
-  T_pos* pos = new T_pos(start.begin(), start.end());                           // genomic positions
-  T_str* str = new T_str(strand.begin(), strand.end());                         // genomic strands
-  T_raw* raw = new T_raw;                                                       // flat vector with raw values from &mcols
-  T_cov* cov = new T_cov;                                                       // optional flat vector with coverage values from &coverage
-  T_out* out = new T_out;                                                       // vector to hold intermediate output values (e.g., transposed)
-  T_len* len = new T_len;                                                       // lengths of &mcols rows minus number of NaNs
-  T_coef* coef = new T_coef;                                                    // vector to hold per-row results (e.g., median, Q1, Q3, parameters of fitted distribution)
+  T_int* chr = new T_int;                                                       // chromosomes
+  T_int* pos = new T_int(start.begin(), start.end());                           // genomic positions
+  T_int* str = new T_int(strand.begin(), strand.end());                         // genomic strands
+  T_dbl* raw = new T_dbl;                                                       // flat vector with raw values from &mcols
+  T_int* cov = new T_int;                                                       // optional flat vector with coverage values from &coverage
+  T_dbl* out = new T_dbl;                                                       // vector to hold intermediate output values (e.g., transposed)
+  T_int* len = new T_int;                                                       // lengths of &mcols rows minus number of NaNs
+  T_dbl* coef = new T_dbl;                                                      // vector to hold per-row results (e.g., median, Q1, Q3, parameters of fitted distribution)
+  T_int* thr = new T_int(chunks.begin(), chunks.end());                         // chunks of rows for multiple threads
 
   // fill 'chr' vector with seqname ids
   chr->reserve(nrow);                                                           // reserve space as required
@@ -131,14 +132,15 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
   res.attr("strandlevels") = strand.attr("levels");                             // strand levels
 
   // pointers to containers
-  Rcpp::XPtr<T_chr> chr_xptr(chr, true);
-  Rcpp::XPtr<T_pos> pos_xptr(pos, true);
-  Rcpp::XPtr<T_str> str_xptr(str, true);
-  Rcpp::XPtr<T_raw> raw_xptr(raw, true);
-  Rcpp::XPtr<T_cov> cov_xptr(cov, true);
-  Rcpp::XPtr<T_out> out_xptr(out, true);
-  Rcpp::XPtr<T_len> len_xptr(len, true);
-  Rcpp::XPtr<T_coef> coef_xptr(coef, true);
+  Rcpp::XPtr<T_int> chr_xptr(chr, true);
+  Rcpp::XPtr<T_int> pos_xptr(pos, true);
+  Rcpp::XPtr<T_int> str_xptr(str, true);
+  Rcpp::XPtr<T_dbl> raw_xptr(raw, true);
+  Rcpp::XPtr<T_int> cov_xptr(cov, true);
+  Rcpp::XPtr<T_dbl> out_xptr(out, true);
+  Rcpp::XPtr<T_int> len_xptr(len, true);
+  Rcpp::XPtr<T_dbl> coef_xptr(coef, true);
+  Rcpp::XPtr<T_int> thr_xptr(thr, true);
   res.attr("chr_xptr") = chr_xptr;
   res.attr("pos_xptr") = pos_xptr;
   res.attr("str_xptr") = str_xptr;
@@ -147,24 +149,25 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
   res.attr("out_xptr") = out_xptr;
   res.attr("len_xptr") = len_xptr;
   res.attr("coef_xptr") = coef_xptr;
+  res.attr("thr_xptr") = thr_xptr;
 
   return(res);
 }
 
 // [[Rcpp::export]]
 Rcpp::List rcpp_prepare_data_identity (
-    Rcpp::IntegerVector &seqnames, Rcpp::IntegerVector &seqrunlens, Rcpp::IntegerVector &start,
-    Rcpp::IntegerVector &strand, Rcpp::DataFrame &mcols, Rcpp::DataFrame &coverage, double exclude_lower, double exclude_upper, size_t ncores)
+    Rcpp::IntegerVector &seqnames, Rcpp::IntegerVector &seqrunlens, Rcpp::IntegerVector &start, Rcpp::IntegerVector &strand,
+    Rcpp::DataFrame &mcols, Rcpp::DataFrame &coverage, double exclude_lower, double exclude_upper, Rcpp::IntegerVector &chunks)
 {
-  return rcpp_prepare_data<0>(seqnames, seqrunlens, start, strand, mcols, coverage, exclude_lower, exclude_upper, ncores);
+  return rcpp_prepare_data<0>(seqnames, seqrunlens, start, strand, mcols, coverage, exclude_lower, exclude_upper, chunks);
 }
 
 // [[Rcpp::export]]
 Rcpp::List rcpp_prepare_data_linear (
-    Rcpp::IntegerVector &seqnames, Rcpp::IntegerVector &seqrunlens, Rcpp::IntegerVector &start,
-    Rcpp::IntegerVector &strand, Rcpp::DataFrame &mcols, Rcpp::DataFrame &coverage, double exclude_lower, double exclude_upper, size_t ncores)
+    Rcpp::IntegerVector &seqnames, Rcpp::IntegerVector &seqrunlens, Rcpp::IntegerVector &start, Rcpp::IntegerVector &strand,
+    Rcpp::DataFrame &mcols, Rcpp::DataFrame &coverage, double exclude_lower, double exclude_upper, Rcpp::IntegerVector &chunks)
 {
-  return rcpp_prepare_data<1>(seqnames, seqrunlens, start, strand, mcols, coverage, exclude_lower, exclude_upper, ncores);
+  return rcpp_prepare_data<1>(seqnames, seqrunlens, start, strand, mcols, coverage, exclude_lower, exclude_upper, chunks);
 }
 
 
