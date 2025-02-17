@@ -100,26 +100,26 @@ BEGIN_RCPP
 END_RCPP
 }
 // rcpp_filter_threshold_xiqr
-int rcpp_filter_threshold_xiqr(Rcpp::List& data, double thr);
-RcppExport SEXP _ramr_rcpp_filter_threshold_xiqr(SEXP dataSEXP, SEXP thrSEXP) {
+int rcpp_filter_threshold_xiqr(Rcpp::List& data, double thrshld);
+RcppExport SEXP _ramr_rcpp_filter_threshold_xiqr(SEXP dataSEXP, SEXP thrshldSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
-    Rcpp::traits::input_parameter< double >::type thr(thrSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_filter_threshold_xiqr(data, thr));
+    Rcpp::traits::input_parameter< double >::type thrshld(thrshldSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_filter_threshold_xiqr(data, thrshld));
     return rcpp_result_gen;
 END_RCPP
 }
 // rcpp_filter_threshold_logp
-int rcpp_filter_threshold_logp(Rcpp::List& data, double thr);
-RcppExport SEXP _ramr_rcpp_filter_threshold_logp(SEXP dataSEXP, SEXP thrSEXP) {
+int rcpp_filter_threshold_logp(Rcpp::List& data, double thrshld);
+RcppExport SEXP _ramr_rcpp_filter_threshold_logp(SEXP dataSEXP, SEXP thrshldSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::List& >::type data(dataSEXP);
-    Rcpp::traits::input_parameter< double >::type thr(thrSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_filter_threshold_logp(data, thr));
+    Rcpp::traits::input_parameter< double >::type thrshld(thrshldSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_filter_threshold_logp(data, thrshld));
     return rcpp_result_gen;
 END_RCPP
 }

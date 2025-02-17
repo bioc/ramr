@@ -29,12 +29,12 @@ rcpp_create_granges_unstranded_logp <- function(data, window, min_ncpg, min_widt
     .Call(`_ramr_rcpp_create_granges_unstranded_logp`, data, window, min_ncpg, min_width)
 }
 
-rcpp_filter_threshold_xiqr <- function(data, thr) {
-    .Call(`_ramr_rcpp_filter_threshold_xiqr`, data, thr)
+rcpp_filter_threshold_xiqr <- function(data, thrshld) {
+    .Call(`_ramr_rcpp_filter_threshold_xiqr`, data, thrshld)
 }
 
-rcpp_filter_threshold_logp <- function(data, thr) {
-    .Call(`_ramr_rcpp_filter_threshold_logp`, data, thr)
+rcpp_filter_threshold_logp <- function(data, thrshld) {
+    .Call(`_ramr_rcpp_filter_threshold_logp`, data, thrshld)
 }
 
 rcpp_fit_beta_mom <- function(data) {

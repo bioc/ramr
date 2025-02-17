@@ -20,7 +20,7 @@
 
 // TODO:
 //   [x] make it ready for 0 and 1 - now it is not aware of them
-//   [ ] OpenMP
+//   [x] OpenMP
 //   [ ] ...
 
 // MACRO //
@@ -46,19 +46,28 @@ int rcpp_get_meanvar (Rcpp::List &data)                                         
 {
   // consts
   const size_t ncol = data["ncol"];                                             // number of columns (samples)
-  const size_t nrow = data["nrow"];                                             // number of rows (genomic loci)
 
   // containers
   Rcpp::XPtr<T_dbl> out((SEXP)data.attr("out_xptr"));                           // vector with intermediate output values (here: transposed 'raw')
   Rcpp::XPtr<T_int> len((SEXP)data.attr("len_xptr"));                           // lengths of input data rows minus number of NaNs
   Rcpp::XPtr<T_dbl> coef((SEXP)data.attr("coef_xptr"));                         // vector to hold per-row results
+  Rcpp::XPtr<T_int> thr((SEXP)data.attr("thr_xptr"));                           // chunks of rows for multiple threads
 
   // fast direct accessors
   const auto out_data = out->data();
   const auto len_data = len->data();
   const auto coef_data = coef->data();
 
-  for (size_t r=0; r<nrow; r++) {
+  // number of chunks/threads
+  const size_t nthreads = thr->size() - 1;                                      // 'thr' always starts with 0 and ends with 'nrow'
+
+#pragma omp parallel num_threads(nthreads)
+{
+  const size_t thr_num = omp_get_thread_num();                                  // thread ID
+  const size_t row_from = thr->at(thr_num);                                     // start of row chunk
+  const size_t row_to = thr->at(thr_num+1);                                     // end of row chunk
+
+  for (size_t r=row_from; r<row_to; r++) {
     const auto first = out_data + r*ncol;                                       // first element
     const auto q = coef_data + r*NCOEF;                                         // pointer to the first element of 'coef' NCOEF-element array
     const size_t l = len_data[r];                                               // length = ncol - nNaNs
@@ -108,6 +117,7 @@ int rcpp_get_meanvar (Rcpp::List &data)                                         
       q[4] = exp(q[4] / sumweights);
     }
   }
+}
 
   return 0;
 }

@@ -17,7 +17,7 @@
 //
 // TODO:
 //   [ ] more efficient access to S4Vectors with raw values
-//   [ ] OpenMP
+//   [x] OpenMP
 //   [ ] cache-friendly (845 samples seriously suck on Mac)
 //   [ ] ...
 
@@ -83,12 +83,20 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
   const double a = ((double)ncol - 1) / ncol;                                   // coefficient for linear transformation
   const double b = 0.5 / ncol;                                                  // coefficient for linear transformation
 
+  // number of chunks/threads
+  const size_t nthreads = thr->size() - 1;                                      // 'thr' always starts with 0 and ends with 'nrow'
+
+#pragma omp parallel num_threads(nthreads)
+{
+  const size_t thr_num = omp_get_thread_num();                                  // thread ID
+  const size_t row_from = thr->at(thr_num);                                     // start of row chunk
+  const size_t row_to = thr->at(thr_num+1);                                     // end of row chunk
 
   // transpose 'raw' to 'out', counting 0/1, skipping NaNs; adjust 'len'
   // should be more computationally efficient and parallelizable
   // have to rewrite this to become cache-friendly, 845 samples seriously suck on Mac
   double *buf  = (double*) malloc(ncol * sizeof(double));                       // buffer to gather values from each column (mcols[r,])
-  for (size_t r=0; r<nrow; r++) {
+  for (size_t r=row_from; r<row_to; r++) {
     const auto q = coef_data + r*NCOEF;                                         // pointer to coef NCOEF-element array
     size_t l = 0;                                                               // number of elements actually copied
     for (size_t c=0; c<ncol; c++) {                                             // column by column
@@ -120,6 +128,7 @@ Rcpp::List rcpp_prepare_data (Rcpp::IntegerVector &seqnames,                    
     }
   }
   free(buf);
+}
 
   // wrap and return the results
   Rcpp::List res = Rcpp::List::create(                                          // final List

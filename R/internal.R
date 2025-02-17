@@ -123,7 +123,7 @@ utils::globalVariables(c(
 
   rcpp_get_iqr(data=data.list)
   rcpp_compute_xiqr(data=data.list)
-  rcpp_filter_threshold_xiqr(data=data.list, thr=threshold)
+  rcpp_filter_threshold_xiqr(data=data.list, thrshld=threshold)
 
   if (verbose) message(sprintf("[%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
 }
@@ -160,7 +160,7 @@ utils::globalVariables(c(
   fn.logp <- paste0("rcpp_compute_logp_beta", if (coverage) "_binom")
   do.call(what=fn.logp, args=list(data=data.list))
 
-  rcpp_filter_threshold_logp(data=data.list, thr=threshold)
+  rcpp_filter_threshold_logp(data=data.list, thrshld=threshold)
 
   if (verbose) message(sprintf("[%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
 }

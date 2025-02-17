@@ -153,6 +153,7 @@ int rcpp_compute_logp (Rcpp::List &data)                                        
   const size_t thr_num = omp_get_thread_num();                                  // thread ID
   const size_t row_from = thr->at(thr_num);                                     // start of row chunk
   const size_t row_to = thr->at(thr_num+1);                                     // end of row chunk
+
   for (size_t c=0; c<ncol; c++) {
     const auto raw_first = raw_data + c*nrow;                                   // first element of c-th column in 'raw'
     const auto cov_first = cov_data + c*nrow;                                   // first element of c-th column in 'cov'
@@ -177,6 +178,7 @@ int rcpp_compute_logp (Rcpp::List &data)                                        
       }
     }
   }
+
 }
 
   return 0;
