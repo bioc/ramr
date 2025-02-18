@@ -1,14 +1,18 @@
 #' Search for aberrantly methylated regions
 #'
 #' @description
-#' `getAMR` returns a `GRanges` object with all the aberrantly methylated
-#' regions (AMRs or epimutations) for all samples in a data set.
+#' `getAMR` returns a `GRanges` object with aberrantly methylated
+#' regions (AMRs / epimutations) for all samples in a data set.
 #'
 #' @details
-#' In the provided data set, `getAMR` compares methylation beta values of each
-#' sample with other samples to identify rare long-range methylation
-#' aberrations (epimutations).
-#' For `ramr.method=="IQR"`: for every genomic location (CpG) in
+#' In the provided data set, `getAMR` finds stretches of outlier beta values
+#' to identify rare long-range methylation
+#' aberrations (epimutations) in one or several samples. Other methods for
+#' differential methylation analysis rely on between-group comparisons ---
+#' `getAMR` performs this comparison within-sample, which is not only faster,
+#' but also more sensitive. The logic of computations is described below.
+#'
+#' For `compute=="IQR"`: for every genomic location (CpG) in
 #' `data.ranges` the IQR-normalized deviation from the median value is
 #' calculated, and all CpGs with such normalized deviation not smaller than the
 #' `iqr.cutoff` are retained. For
