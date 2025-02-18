@@ -88,14 +88,10 @@ utils::globalVariables(c(
   tm <- proc.time()
 
   available.cores <- rcpp_test_omp()
-  if (available.cores < 0) {
-    ncores <- 1
+  if (is.null(ncores)) {
+    ncores <- max(1, available.cores %/% 2)
   } else {
-    if (is.null(ncores)) {
-      ncores <- max(1, available.cores %/% 2)
-    } else {
-      ncores <- max(1, min(ncores, available.cores))
-    }
+    ncores <- max(1, min(ncores, available.cores))
   }
 
   chunks <- .getPartitions(
