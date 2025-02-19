@@ -12,7 +12,8 @@
 #' `getAMR` performs this comparison within-sample, which is not only faster,
 #' but also more sensitive. The logic of computations is described below.
 #'
-#' For `compute=="IQR"`: for every genomic location (CpG) in
+#' \subsection{Compute}{
+#' When `compute=="IQR"`, for every genomic location (CpG) in
 #' `data.ranges` the IQR-normalized deviation from the median value is
 #' calculated, and all CpGs with such normalized deviation not smaller than the
 #' `iqr.cutoff` are retained. For
@@ -26,6 +27,11 @@
 #' `exclude.range`. Next, the retained (significant) CpGs are merged within
 #' the window of `merge.window`, and final filtering is applied to AMR genomic
 #' ranges (by `min.cpgs` and `min.width`).
+#' }
+#'
+#' \subsection{Combine}{
+#' this and that
+#' }
 #'
 #' @param data.ranges A `GRanges` object with genomic locations and
 #' corresponding beta values included as metadata.
