@@ -13,10 +13,23 @@
 #' but also more sensitive. The logic of computations is described below.
 #'
 #' \subsection{Compute}{
-#' When `compute=="IQR"`, for every genomic location (CpG) in
-#' `data.ranges` the IQR-normalized deviation from the median value is
-#' calculated, and all CpGs with such normalized deviation not smaller than the
-#' `iqr.cutoff` are retained. For
+#' Currently, only two methods are supported: ... ...
+#' \subsection{IQR}{
+#' here's IQR
+#' }
+#'
+#' or
+#'
+#' \describe{
+#'   \item{IQR}{
+#'     When `compute=="IQR"`, for every genomic location (CpG) in
+#'     `data.ranges` the IQR-normalized deviation from the median value is
+#'     calculated, and all CpGs with such normalized deviation not smaller
+#'     than the `iqr.cutoff` are retained.
+#'   }
+#' }
+#'
+#'  For
 #' `ramr.method %in% c("beta", "wbeta", "beinf")`: parameters of beta
 #' distribution are estimated by means of `EnvStats::ebeta` (beta distribution),
 #' `ExtDist::eBeta` (weighted beta destribution), or `gamlss.dist::BEINF` (zero
