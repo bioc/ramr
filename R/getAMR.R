@@ -9,25 +9,76 @@
 #' to identify rare long-range methylation
 #' aberrations (epimutations) in one or several samples. Other methods for
 #' differential methylation analysis rely on between-group comparisons ---
-#' `getAMR` performs this comparison within-sample, which is not only faster,
+#' `getAMR` performs this comparison within-group, which is not only faster,
 #' but also more sensitive. The logic of computations is described below.
 #'
 #' \subsection{Compute}{
-#' Currently, only two methods are supported: ... ...
-#' \subsection{IQR}{
-#' here's IQR
-#' }
-#'
-#' or
+#' There are only two outlier detection methods that are supported at the
+#' moment:
 #'
 #' \describe{
-#'   \item{IQR}{
+#'   \item{"IQR"}{
 #'     When `compute=="IQR"`, for every genomic location (CpG) in
 #'     `data.ranges` the IQR-normalized deviation from the median value is
-#'     calculated, and all CpGs with such normalized deviation not smaller
-#'     than the `iqr.cutoff` are retained.
+#'     calculated using the following formula:
+#'     \deqn{xIQR_i=\frac{x_i-M}{IQR}}
+#'     where \eqn{x_i} is a beta value for i-th sample,
+#'     \eqn{M} and \eqn{IQR} are a median and an interquartile range
+#'     of all beta values at this genomic location, respectively.
+#'   }
+#'   \item{"beta+binom"}{
+#'     When `compute=="beta+binom"`, for every genomic location (CpG),
+#'     `getAMR` will estimate the probability of each beta value to occur.
+#'     For all beta values inside the open \eqn{(0,1)} interval, beta
+#'     distribution is used. For all \eqn{\{0;1\}} endpoint (extreme) values
+#'     where beta distribution is not defined, binomial probability is
+#'     calculated using coverage data (supplied using `data.coverage`
+#'     parameter).
+#'
+#'     Alpha \eqn{{\alpha}} and beta \eqn{{\beta}} parameters of beta
+#'     distribution can be estimated using one of the following methods:
+#'
+#'     \enumerate{
+#'       \item{
+#'         Method of moments (`compute.estimate="mom"`) based on
+#'         (both optionally weighted) mean and unbiased variance
+#'         \deqn{\text{sample mean} = \bar{x} = \frac{ \sum\limits_{i=1}^n w_i x_i}{\sum\limits_{i=1}^n w_i}}
+#'         \deqn{\text{unbiased variance} =\bar{v} = \frac {\sum\limits_{i=1}^N w_i (x_i - \bar{x})^2} {\sum_{i=1}^N w_i - (\sum_{i=1}^N w_i^2 / \sum_{i=1}^N w_i)} }
+#'         where \eqn{x_i} and \eqn{w_i} are a beta value and its reliability
+#'         weight for i-th sample.
+#'         \deqn{\hat{\alpha} = \bar{x} \left(\frac{\bar{x} (1 - \bar{x})}{\bar{v}} - 1 \right)}
+#'         \deqn{\hat{\beta} = (1-\bar{x}) \left(\frac{\bar{x} (1 - \bar{x})}{\bar{v}} - 1 \right)}
+#'         For more details, visit
+#'         \href{https://en.wikipedia.org/wiki/Weighted_arithmetic_mean#Mathematical_definition}{Weighted arithmetic mean},
+#'         \href{https://en.wikipedia.org/wiki/Weighted_arithmetic_mean#Reliability_weights}{Weighted variance with reliability weights},
+#'         and \href{https://en.wikipedia.org/wiki/Beta_distribution#Method_of_moments}{Method of moments for beta distribution}
+#'       }
+#'       \item{
+#'         Approximate maximum likelihood (`compute.estimate="amle"`) based on
+#'         (both optionally weighted) geometric means of \eqn{x} and \eqn{(1-x)}
+#'         \deqn{ \hat{G}_x = \left(\prod_{i=1}^n x_i^{w_i}\right)^{1 / \sum_{i=1}^n w_i} }
+#'         \deqn{ \hat{G}_{(1-x)} = \left(\prod_{i=1}^n {(1-x_i)}^{w_i}\right)^{1 / \sum_{i=1}^n w_i} }
+#'         where \eqn{x_i} and \eqn{w_i} are a beta value and its reliability
+#'         weight for i-th sample.
+#'         \deqn{ \hat{\alpha}\approx \tfrac{1}{2} + \frac{\hat{G}_{x}}{2(1-\hat{G}_x-\hat{G}_{(1-x)})} }
+#'         \deqn{ \hat{\beta}\approx \tfrac{1}{2} + \frac{\hat{G}_{(1-x)}}{2(1-\hat{G}_x-\hat{G}_{(1-x)})} }
+#'         For more details, visit
+#'         \href{https://en.wikipedia.org/wiki/Weighted_geometric_mean}{Weighted geometric mean},
+#'         and \href{https://en.wikipedia.org/wiki/Beta_distribution#Two_unknown_parameters_2}{Maximum likelihood for beta distribution}
+#'       }
+#'       \item{
+#'         And a numerical maximum likelihood (`compute.estimate="nmle"`) which
+#'         is yet to be implemented.
+#'       }
+#'     }
+#'
+#'
+#'
 #'   }
 #' }
+#'
+#' , and all CpGs with such normalized deviation not smaller
+#'     than the `iqr.cutoff` are retained.
 #'
 #'  For
 #' `ramr.method %in% c("beta", "wbeta", "beinf")`: parameters of beta
@@ -53,9 +104,9 @@
 #' columns) are included in the analysis.
 #' @param data.coverage description
 #' @param transform description
-#' @param exclude.range A numeric vector of length two. If not `NULL` (the
-#' default), all `data.ranges` genomic locations with their median methylation
-#' beta value within the `exclude.range` interval are filtered out.
+#' @param exclude.range A numeric vector of length two. If \emph{not} `NULL`
+#' (the default), all `data.ranges` genomic locations with their median
+#' methylation beta value within the `exclude.range` interval are filtered out.
 #' @param compute A character scalar: when ramr.method is "IQR" (the
 #' default), the filtering based on interquantile range is used (`iqr.cutoff`
 #' value is then used as a threshold). When "beta", "wbeta" or "beinf" -
@@ -67,7 +118,28 @@
 #' the distances from the median value, thus narrowing the estimated
 #' distribution and emphasizing outliers.
 #' @param compute.estimate description
-#' @param compute.weights description
+#' @param compute.weights A single string for the weights assigned to individual
+#' observations (beta values) and used to compute weighted
+#' means and variance as described in "Compute" section below. Four available
+#' weighing schemes result in different sensitivity of outlier detection and
+#' rate of false positive (FP) findings: "equal" (the default) is the least
+#' sensitive and gives least number of FPs, while "invDist" is the most
+#' sensitive but may result in a very high number of FPs especially when
+#' `combine.threshold` is too high (1e-3 or higher).
+#' "logInvDist" is recommended when one desires a balance between relatively
+#' low type I error rate and higher
+#' detection sensitivity for both unique and non-unique AMRs.
+#'
+#' If "equal", all weights are equal to 1 (\eqn{w_i=1}).
+#' Otherwise, weights of observations inversely depend on their distance from
+#' the median (thus emphasizing outliers) and are calculated using the
+#' following formulas:
+#' \deqn{\text{"logInvDist": } w_i = \log{\frac{1}{|M-x_i|+\epsilon}}}
+#' \deqn{\text{"sqrtInvDist": } w_i = \sqrt{\frac{1}{|M-x_i|+\epsilon}}}
+#' \deqn{\text{"invDist": } w_i = \frac{1}{|M-x_i|+\epsilon}}
+#' where \eqn{x_i} is a beta value for i-th sample, \eqn{M} is a median of
+#' all beta values at this genomic location, and \eqn{\epsilon} is a very
+#' small number (= FLT_EPSILON \eqn{\approx} 1.192093e-07).
 #' @param combine description
 #' @param combine.threshold A single integer >= 1. Methylation beta values differing
 #' from the median value by more than `iqr.cutoff` interquartile ranges are
