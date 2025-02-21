@@ -136,8 +136,9 @@ differential methylation analysis rely on between-group comparisons ---
 but also more sensitive. The logic of computations is described below.
 
 \subsection{Compute}{
-There are only two outlier detection methods that are supported at the
-moment:
+This section describes computations that are performed in order to identify
+individual outlier beta values --- but before values are deemed as outliers.
+At the moment, two of the supported methods are:
 
 \describe{
   \item{"IQR"}{
@@ -171,7 +172,9 @@ moment:
         weight for i-th sample.
         \deqn{\hat{\alpha} = \bar{x} \left(\frac{\bar{x} (1 - \bar{x})}{\bar{v}} - 1 \right)}
         \deqn{\hat{\beta} = (1-\bar{x}) \left(\frac{\bar{x} (1 - \bar{x})}{\bar{v}} - 1 \right)}
-        For more details, visit
+        Note: all beta values from the closed \eqn{[0,1]} interval are used
+        for calculation of arithmetic mean value.
+        For more details on used formulas, visit
         \href{https://en.wikipedia.org/wiki/Weighted_arithmetic_mean#Mathematical_definition}{Weighted arithmetic mean},
         \href{https://en.wikipedia.org/wiki/Weighted_arithmetic_mean#Reliability_weights}{Weighted variance with reliability weights},
         and \href{https://en.wikipedia.org/wiki/Beta_distribution#Method_of_moments}{Method of moments for beta distribution}
@@ -185,6 +188,8 @@ moment:
         weight for i-th sample.
         \deqn{ \hat{\alpha}\approx \tfrac{1}{2} + \frac{\hat{G}_{x}}{2(1-\hat{G}_x-\hat{G}_{(1-x)})} }
         \deqn{ \hat{\beta}\approx \tfrac{1}{2} + \frac{\hat{G}_{(1-x)}}{2(1-\hat{G}_x-\hat{G}_{(1-x)})} }
+        Note: only beta values from the open \eqn{(0,1)} interval are used
+        for calculation of geometric means.
         For more details, visit
         \href{https://en.wikipedia.org/wiki/Weighted_geometric_mean}{Weighted geometric mean},
         and \href{https://en.wikipedia.org/wiki/Beta_distribution#Two_unknown_parameters_2}{Maximum likelihood for beta distribution}
@@ -195,29 +200,76 @@ moment:
       }
     }
 
+    After estimating parameters of beta distribution,
+    probabilities of observed beta values from the open \eqn{(0,1)} interval
+    are computed using regularized incomplete beta function
+    \eqn{I_x(\alpha, \beta)}. For more details, visit
+    \href{https://en.wikipedia.org/wiki/Beta_distribution#Cumulative_distribution_function}{Cumulative distribution function for beta distribution}.
 
-
+    Probabilities of \eqn{\{0;1\}} endpoint values are computed using
+    mean value (either arithmetic for `compute.estimate="mom"` or geometric
+    for `compute.estimate="*mle"`) using the following formulas:
+    \deqn{p_0=(1-\bar{x})^k}
+    \deqn{p_1=\bar{x}^k}
+    where \eqn{\bar{x}} is a mean of all beta values for this genomic
+    position, \eqn{k} is a coverage of this genomic
+    position for i-th sample,  and \eqn{p_0} and
+    \eqn{p_1} are probabilities of observing 0 or 1, respectively.
   }
 }
 
-, and all CpGs with such normalized deviation not smaller
-    than the `iqr.cutoff` are retained.
 
- For
-`ramr.method %in% c("beta", "wbeta", "beinf")`: parameters of beta
-distribution are estimated by means of `EnvStats::ebeta` (beta distribution),
-`ExtDist::eBeta` (weighted beta destribution), or `gamlss.dist::BEINF` (zero
-and one inflated beta distribution) functions, respectively. These
-parameters are then used to calculate the probability values, followed by the
-filtering when all CpGs with p-values not greater than `qval.cutoff` are
-retained. Another filtering is then performed to exclude all CpGs within
-`exclude.range`. Next, the retained (significant) CpGs are merged within
-the window of `merge.window`, and final filtering is applied to AMR genomic
-ranges (by `min.cpgs` and `min.width`).
 }
 
 \subsection{Combine}{
-this and that
+This section describes how individual beta values are deemed as outliers
+and how these outliers are combined into extended genomic regions
+(aberrantly methylated regions, AMRs, or epimutations).
+The only method supported at the moment is thresholding as
+described below.
+
+\describe{
+  \item{"threshold"}{
+    This method applies a fixed threshold (specified using
+    `combine.threshold` parameter) to all `xIQR` or probability
+    values computed at the previous step. All observed beta values that
+    are passing this threshold (above or equal to the threshold for `xIQR`;
+    below or equal in case of probability values) are considered to be
+    outliers and therefore retained.
+
+    Next, for all outlier beta values per sample, corresponding genomic
+    positions are merged into genomic ranges using the window of
+    `combine.window` and keeping the strand information unless
+    `combine.ignore.strand` is TRUE.
+
+    Additionally, only the regions containing at least `combine.min.cpgs`
+    outliers and which are no narrower than `combine.min.width` are
+    reported back.
+
+    As a final step, the following average values are computed for every
+    aberrantly methylated region:
+    \enumerate{
+      \item{
+        arithmetic mean of distances of all outlier beta values to
+        a median beta value (`dbeta`)
+      }
+      \item{
+        if `compute=="IQR"`, arithmetic mean of xIQR values of all outlier
+        genomic position (`xiqr`) OR
+      }
+      \item{
+        if `compute=="beta+binom"`, geometric mean of probability values
+        of all outlier genomic position (`pval`)
+      }
+    }
+
+  }
+  \item{"comb-p"}{
+    This method of combining outliers into genomic ranges is yet to be
+    implemented.
+  }
+}
+
 }
 }
 \examples{
