@@ -29,9 +29,7 @@ Imports:
   S4Vectors,
   Rcpp
 LinkingTo:
-  Rcpp,
-  BH,
-  S4Vectors
+  Rcpp
 Suggests:
   RUnit,
   knitr,
