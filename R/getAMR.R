@@ -7,15 +7,16 @@
 #' @details
 #' In the provided data set, `getAMR` finds stretches of outlier beta values
 #' to identify rare long-range methylation
-#' aberrations (epimutations) in one or several samples. Other methods for
+#' aberrations (epimutations) in one or several samples. As a rule, methods for
 #' differential methylation analysis rely on between-group comparisons ---
 #' `getAMR` performs this comparison within-group, which is not only faster,
 #' but also more sensitive. The logic of computations is described below.
 #'
 #' \subsection{Compute}{
 #' This section describes computations that are performed in order to identify
-#' individual outlier beta values --- but before values are deemed as outliers.
-#' At the moment, two of the supported methods are:
+#' individual outlier beta values --- but
+#' \bold{before values are deemed as outliers}.
+#' At the moment, the two supported methods are:
 #'
 #' \describe{
 #'   \item{"IQR"}{
@@ -86,12 +87,13 @@
 #'     Probabilities of \eqn{\{0;1\}} endpoint values are computed using
 #'     mean value (either arithmetic for `compute.estimate="mom"` or geometric
 #'     for `compute.estimate="*mle"`) using the following formulas:
-#'     \deqn{p_0=(1-\bar{x})^k}
-#'     \deqn{p_1=\bar{x}^k}
-#'     where \eqn{\bar{x}} is a mean of all beta values for this genomic
-#'     position, \eqn{k} is a coverage of this genomic
-#'     position for i-th sample,  and \eqn{p_0} and
-#'     \eqn{p_1} are probabilities of observing 0 or 1, respectively.
+#'     \deqn{{p^0}_i=(1-\bar{x})^k}
+#'     \deqn{{p^1}_i=\bar{x}^k}
+#'     where \eqn{{p^0}_i} and \eqn{{p^1}_i} are probabilities of
+#'     observing 0 or 1 for i-th sample, respectively,
+#'     \eqn{\bar{x}} is a mean of all beta values for this genomic
+#'     position, and \eqn{k} is a sequencing coverage of this genomic
+#'     position for i-th sample.
 #'   }
 #' }
 #'
@@ -115,35 +117,35 @@
 #'     outliers and therefore retained.
 #'
 #'     Next, for all outlier beta values per sample, corresponding genomic
-#'     positions are merged into genomic ranges using the window of
+#'     positions are merged into genomic intervals using the window of
 #'     `combine.window` and keeping the strand information unless
 #'     `combine.ignore.strand` is TRUE.
-#'
-#'     Additionally, only the regions containing at least `combine.min.cpgs`
-#'     outliers and which are no narrower than `combine.min.width` are
-#'     reported back.
-#'
-#'     As a final step, the following average values are computed for every
-#'     aberrantly methylated region:
-#'     \enumerate{
-#'       \item{
-#'         arithmetic mean of distances of all outlier beta values to
-#'         a median beta value (`dbeta`)
-#'       }
-#'       \item{
-#'         if `compute=="IQR"`, arithmetic mean of xIQR values of all outlier
-#'         genomic position (`xiqr`) OR
-#'       }
-#'       \item{
-#'         if `compute=="beta+binom"`, geometric mean of probability values
-#'         of all outlier genomic position (`pval`)
-#'       }
-#'     }
-#'
 #'   }
 #'   \item{"comb-p"}{
 #'     This method of combining outliers into genomic ranges is yet to be
 #'     implemented.
+#'   }
+#' }
+#'
+#' Resulting genomic intervals are filtered:
+#' only the regions containing at least `combine.min.cpgs`
+#' outliers and which are at leas as wide as `combine.min.width` are
+#' reported back.
+#'
+#' As a final step, the following average values are computed for every
+#' aberrantly methylated region:
+#' \enumerate{
+#'   \item{
+#'     arithmetic mean of distances of all outlier beta values to
+#'     a median beta value (`dbeta`)
+#'   }
+#'   \item{
+#'     if `compute=="IQR"`, arithmetic mean of xIQR values of all outlier
+#'     genomic position (`xiqr`) OR
+#'   }
+#'   \item{
+#'     if `compute=="beta+binom"`, geometric mean of probability values
+#'     of all outlier genomic position (`pval`)
 #'   }
 #' }
 #'
@@ -155,7 +157,8 @@
 #' @param data.samples A character vector with sample names (a subset of
 #' metadata column names). If `NULL` (the default), then all samples (metadata
 #' columns) are included in the analysis.
-#' @param data.coverage description
+#' @param data.coverage An optional `data.frame` object with coverage data. If
+#' provided, its dimensions must be the same as the dimensions of
 #' @param transform description
 #' @param exclude.range A numeric vector of length two. If \emph{not} `NULL`
 #' (the default), all `data.ranges` genomic locations with their median
@@ -217,8 +220,8 @@
 #' are fully reproducible when the same seed is used (thanks to doRNG).
 #' @param verbose Boolean to report progress and timings (default: TRUE).
 #' @return The output is a `GRanges` object that contains all the aberrantly
-#' methylated regions (AMRs) for all `data.samples` samples in `data.ranges`
-#' object. The following metadata columns may be present:
+#' methylated regions (AMRs / epimutations) for all `data.samples` samples in
+#' `data.ranges` object. The following metadata columns may be present:
 #' \itemize{
 #'   \item `revmap` -- integer list of significant CpGs (`data.ranges` genomic
 #'   locations) that are included in this AMR region
