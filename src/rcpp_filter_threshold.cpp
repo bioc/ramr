@@ -3,6 +3,7 @@
 #include "ramr.h"
 
 // [[Rcpp::plugins(cpp20)]]
+// [[Rcpp::plugins(openmp)]]
 
 // To be called after rcpp_compute_*
 //

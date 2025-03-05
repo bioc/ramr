@@ -3,7 +3,7 @@
 #include "ramr.h"
 
 // [[Rcpp::plugins(cpp20)]]
-// [[Rcpp::depends(BH)]]
+// [[Rcpp::plugins(openmp)]]
 
 // Function estimates log probability of zeros and ones and stores them
 // in the vector of coefficients as {[3] log(p(0)), [4] log(p(1))}

@@ -3,7 +3,7 @@
 #include "ramr.h"
 
 // [[Rcpp::plugins(cpp20)]]
-// [[Rcpp::depends(BH)]]
+// [[Rcpp::plugins(openmp)]]
 
 // Function estimates parameters of (optionally, weighted) beta distribution
 // and stores them in the vector of coefficients as

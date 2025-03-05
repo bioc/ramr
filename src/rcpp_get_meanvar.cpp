@@ -3,7 +3,7 @@
 #include "ramr.h"
 
 // [[Rcpp::plugins(cpp20)]]
-// [[Rcpp::depends(BH)]]
+// [[Rcpp::plugins(openmp)]]
 
 // Function computes mean and variance, and stores them
 // in the vector of coefficients as one of the following:

@@ -7,7 +7,6 @@
 // #include <omp.h>
 
 // [[Rcpp::plugins(cpp20)]]
-// [[Rcpp::depends(BH)]]
 // [[Rcpp::plugins(openmp)]]
 
 

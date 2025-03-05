@@ -4,6 +4,7 @@
 #include "ramr.h"
 
 // [[Rcpp::plugins(cpp20)]]
+// [[Rcpp::plugins(openmp)]]
 
 // Function computes xIQR values using R's default quantile function (type 7):
 //   1) computes Q3 and Q1

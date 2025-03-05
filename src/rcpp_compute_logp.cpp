@@ -4,6 +4,7 @@
 // #include <boost/math/special_functions/beta.hpp>
 
 // [[Rcpp::plugins(cpp20)]]
+// [[Rcpp::plugins(openmp)]]
 
 ////////////////////////////////////////////////////////////////////////////////
 

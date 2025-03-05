@@ -3,7 +3,6 @@
 #include "ramr.h"
 
 // [[Rcpp::plugins(cpp20)]]
-// [[Rcpp::depends(BH)]]
 
 // Function generates random values using estimated probability (inferred from
 // observed counts) of zeros (in [0]) and ones (in [1]), and estimated
