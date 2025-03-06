@@ -90,9 +90,8 @@
 #' \code{\link{getAMR}} method description.
 #' @param ncores A single integer >= 1 for the number of processes for parallel
 #' computation. By default (NULL), function will use half of available cores.
-#' Results of this function are identical (reproducible)
-#' \strong{only when random seed is set} by `set.seed` function
-#' \strong{and a single core is used}.
+#' Results of this function are always identical (reproducible) even when more
+#' than one core is used (at a cost of serial random number generation).
 #' @param verbose boolean to report progress and timings (default: TRUE).
 #' @return The output is a `GRanges` object with genomic ranges that are equal
 #' to the genomic ranges of the provided template and metadata columns

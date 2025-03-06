@@ -71,9 +71,8 @@ detection. More details on weighted parameter estimation are given in
 
 \item{ncores}{A single integer >= 1 for the number of processes for parallel
 computation. By default (NULL), function will use half of available cores.
-Results of this function are identical (reproducible)
-\strong{only when random seed is set} by `set.seed` function
-\strong{and a single core is used}.}
+Results of this function are always identical (reproducible) even when more
+than one core is used (at a cost of serial random number generation).}
 
 \item{verbose}{boolean to report progress and timings (default: TRUE).}
 }

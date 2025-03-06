@@ -55,4 +55,16 @@ test_simulateData <- function () {
     simulateData(mod.data, nsamples=100, compute="beta+binom", compute.estimate="nmle", compute.weights="logInvDist")
   )
 
+  # parallel reproducibility
+  set.seed(1)
+  rnd1 <- simulateData(mod.data, nsamples=100, compute="beta+binom", compute.estimate="amle", compute.weights="logInvDist", ncores=1)
+  set.seed(1)
+  rnd2 <- simulateData(mod.data, nsamples=100, compute="beta+binom", compute.estimate="amle", compute.weights="logInvDist", ncores=2)
+  RUnit::checkTrue(
+    identical(rnd1, rnd2)
+  )
+  rnd3 <- simulateData(mod.data, nsamples=100, compute="beta+binom", compute.estimate="amle", compute.weights="logInvDist", ncores=1)
+  RUnit::checkTrue(
+    !identical(rnd1, rnd3)
+  )
 }
