@@ -36,9 +36,9 @@ Changes in version 1.1.2 (2021-05-28)
 + doRNG is used to ensure reproducibility during parallel computing
 + a couple of new defaults for previously required parameters for easy usage
 
-Changes in version 1.5.1 (2024-12-17)
+Changes in version 1.15.1 (2024-12-17)
 + zero-and-one inflated beta distribution by gamlss.dist::BEINF
 + cleaner plots
 
-Changes in version 1.5.2 (2025-03-06)
+Changes in version 1.15.2 (2025-03-06)
 + complete rewrite of getAMR and simulateData for speed and robustness
