@@ -4,7 +4,7 @@ author: "Oleksii Nikolaienko"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 abstract: |
   A comprehensive guide to using the ramr package for detection
-  of rare aberrantly methylated regions.
+  of rare aberrantly methylated regions (epimutations).
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{ramr}
@@ -19,29 +19,32 @@ knitr::opts_chunk$set(
   width = 100
 )
 options(width=100)
-# devtools::load_all(".")   # delete later
 ```
 
 # Introduction
 
-*`ramr`* is an R package for detection of low-frequency aberrant methylation events (epimutations) in large data sets
-obtained by methylation profiling using array or high-throughput bisulfite sequencing. In addition, package provides
-functions to visualize found aberrantly methylated regions (AMRs), to generate sets of all possible regions to be used
-as reference sets for enrichment analysis, and to generate biologically relevant test data sets for
-performance evaluation of AMR/DMR search algorithms.
+`ramr` is an R package for detection of low-frequency aberrant methylation events (epimutations) in large data sets obtained by methylation profiling using array or high-throughput methylation sequencing. In addition, package provides functions to visualize found aberrantly methylated regions (AMRs), to generate sets of all possible regions to be used as reference sets for enrichment analysis, and to generate biologically relevant test data sets for performance evaluation of AMR/DMR search algorithms.
 
-## Current Features
+### Current Features
 
- * Identification of aberrantly methylated regions (AMRs)
- * AMR visualization
- * Generation of reference sets for third-party analyses (e.g. enrichment)
- * Generation of test data sets for performance evaluation of algorithms for search of differentially (DMR) or aberrantly (AMR) methylated regions
+-   Identification of aberrantly methylated regions (AMRs, i.e., epimutations)
+-   AMR visualization
+-   Generation of reference sets for third-party analyses (e.g., enrichment)
+-   Generation of test data sets for performance evaluation of algorithms for search of differentially (DMR) or aberrantly (AMR) methylated regions
+
+### Major improvements
+
+##### v1.16 [BioC 3.21]
+
+-   Major rewrite of `getAMR` and `simulateData` functions, which are now much faster (C/C++, OpenMP threads) and more robust (correctly deal with methylation sequencing data that often contains 0 and 1 values).
+-   Old functions `getAMR` and `simulateData` as they were described in the `ramr` paper are now obsolete, but kept under different names (`getAMR.obsolete` and `simulateData.obsolete`, respectively) for consistency.
+-   Cleaner and more robust AMR plotting.
 
 # Reading data
 
-*`ramr`* methods operate on objects of the class *`GRanges`*. The input object for AMR search must in addition contain metadata columns with sample beta values. A typical input object looks like this:
+`ramr` methods operate on objects of the class `GRanges`. The input object for AMR search must in addition contain metadata columns with sample beta values. A typical input object looks like this:
 
-```
+```         
 GRanges object with 383788 ranges and 845 metadata columns:
              seqnames    ranges strand |         GSM1235534         GSM1235535         GSM1235536 ...
                 <Rle> <IRanges>  <Rle> |          <numeric>          <numeric>          <numeric> ...
@@ -56,10 +59,9 @@ GRanges object with 383788 ranges and 845 metadata columns:
   cg08423507    chr22  51177982      * |  0.886406345093286  0.882430879852752  0.887241923657461 ...
   cg19565306    chr22  51222011      * | 0.0719084295670266 0.0845209871264646 0.0689074604483659 ...
   cg09226288    chr22  51225561      * |  0.724145303755024  0.696281176451351  0.711459675603635 ...
-
 ```
 
-*`ramr`* package is supplied with a sample data, which was simulated using GSE51032 data set as described in the *`ramr`* reference paper. Sample data set *`ramr.data`* contains beta values for 10000 CpGs and 100 samples (*`ramr.samples`*), and carries 6 unique (*`ramr.tp.unique`*) and 15 non-unique (*`ramr.tp.nonunique`*) true positive AMRs containing at least 10 CpGs with their beta values increased/decreased by 0.5
+`ramr` package is supplied with a sample data, which was simulated using GSE51032 data set as described in the `ramr` reference paper. Sample data set `ramr.data` contains beta values for 10000 CpGs and 100 samples (`ramr.samples`), and carries 6 unique (`ramr.tp.unique`) and 15 non-unique (`ramr.tp.nonunique`) true positive AMRs containing at least 10 CpGs with their beta values increased/decreased by 0.5
 
 ```{r, fig.width=10, fig.height=4, out.width="100%", out.height="100%"}
 library(GenomicRanges)
@@ -73,14 +75,13 @@ plotAMR(data.ranges=ramr.data, amr.ranges=ramr.tp.unique[1])
 plotAMR(data.ranges=ramr.data, amr.ranges=ramr.tp.nonunique[c(1,6,11)])
 ```
 
-
 The input (or template) object may be obtained using data from various sources. Here we provide two examples:
 
 ### Using data from NCBI GEO
 
-The following code pulls (NB: very large) raw files from NCBI GEO database, performes normalization and creates *`GRanges`* object for further analysis using *`ramr`* (system requirements: 22GB of disk space, 64GB of RAM)
+The following code pulls (NB: very large) raw files from NCBI GEO database, performes normalization and creates `GRanges` object for further analysis using `ramr` (system requirements: 22GB of disk space, 64GB of RAM)
 
-```
+```         
 library(minfi)
 library(GEOquery)
 library(GenomicRanges)
@@ -113,7 +114,7 @@ mcols(data.ranges) <- data.betas
 
 ### Using Bismark cytosine report files
 
-```
+```         
 library(methylKit)
 library(GenomicRanges)
 
@@ -149,7 +150,7 @@ mcols(data.ranges) <- data.betas
 
 # Simulating data
 
-*`ramr`* provides methods to create sets of random AMRs and to generate biologically relevant methylation beta values using real data sets as templates. The following code provides an example, however it is recommended to use a real experimental data (e.g. GSE51032) to create a test data set for assessing the performance of *`ramr`* or other AMR/DMR search engines. The results of parallel data generation are fully reproducible when the same seed has been set (thanks to doRNG::%dorng%).
+`ramr` provides methods to create sets of random AMRs and to generate biologically relevant methylation beta values using real data sets as templates. The following code provides an example, however it is recommended to use a real experimental data (e.g. GSE51032) to create a test data set for assessing the performance of `ramr` or other AMR/DMR search engines. The results of data simulation are fully reproducible when the same seed has been set (at a cost of serial random number generation).
 
 ```{r, fig.width=10, fig.height=6, out.width="100%", out.height="100%"}
 # set the seed if reproducible results required
@@ -221,7 +222,7 @@ mcols(data.ranges) <- data.betas
 
 # AMR identification
 
-This code shows how to do basic analysis with *`ramr`* using provided data files:
+This code shows how to do basic analysis with `ramr` using provided data files:
 
 ```{r, fig.width=10, fig.height=6, out.width="100%", out.height="100%"}
 # identify AMRs
@@ -236,11 +237,15 @@ sort(amrs)
 do.call("grid.arrange", c(plotAMR(data.ranges=ramr.data, amr.ranges=amrs[1:10]), ncol=2))
 ```
 
-Again, the results of parallel processing are fully reproducible if the same seed has been set.
+The results of parallel AMR search are fully reproducible (do not depend on the seed).
 
 # AMR annotation and enrichment analysis
 
-If necessary, AMRs can be annotated to known genomic elements using R library *`annotatr`* [^1] or tested for potential enrichment in epigenetic or other marks using R library *`LOLA`* [^2]
+If necessary, AMRs can be annotated to known genomic elements using R library `annotatr` [^1] or tested for potential enrichment in epigenetic or other marks using R library `LOLA` [^2]
+
+[^1]: Raymond G Cavalcante, Maureen A Sartor, annotatr: genomic regions in context, Bioinformatics, Volume 33, Issue 15, 01 August 2017, Pages 2381–2383, <https://doi.org/10.1093/bioinformatics/btx183>
+
+[^2]: Nathan C. Sheffield, Christoph Bock, LOLA: enrichment analysis for genomic region sets and regulatory elements in R and Bioconductor, Bioinformatics, Volume 32, Issue 4, 15 February 2016, Pages 587–589, <https://doi.org/10.1093/bioinformatics/btv612>
 
 ```{r}
 # annotating AMRs using R library annotatr
@@ -253,7 +258,7 @@ amrs.annots <- annotate_regions(regions=amrs, annotations=annotations, ignore.st
 summarize_annotations(annotated_regions=amrs.annots, quiet=FALSE)
 ```
 
-```
+```         
 # generate the set of all possible genomic regions using sample data set and
 # the same parameters as for AMR search
 universe <- getUniverse(ramr.data, min.cpgs=5, merge.window=1000)
@@ -267,23 +272,18 @@ hg19.coredb <- loadRegionDB(system.file("LOLACore", "hg19", package="LOLA"))
 runLOLA(amrs, universe, hg19.coredb, cores=1, redefineUserSets=TRUE)
 ```
 
+# Other information
 
+### Citing the `ramr` package
 
+Oleksii Nikolaienko, Per Eystein Lønning, Stian Knappskog, *ramr*: an R/Bioconductor package for detection of rare aberrantly methylated regions, Bioinformatics, 2021;, btab586, <https://doi.org/10.1093/bioinformatics/btab586>
 
-## Citing the *`ramr`* package
-Oleksii Nikolaienko, Per Eystein Lønning, Stian Knappskog, *ramr*: an R/Bioconductor package for detection of rare aberrantly methylated regions, Bioinformatics, 2021;, btab586, [https://doi.org/10.1093/bioinformatics/btab586](https://doi.org/10.1093/bioinformatics/btab586)
+### The data underlying `ramr` manuscript
 
-## The data underlying *`ramr`* manuscript
-Replication Data for: "ramr: an R package for detection of rare aberrantly methylated regions, [https://doi.org/10.18710/ED8HSD](https://doi.org/10.18710/ED8HSD)
+Replication Data for: "ramr: an R package for detection of rare aberrantly methylated regions, <https://doi.org/10.18710/ED8HSD>
 
-## Session Info
+### Session Info
 
 ```{r session}
 sessionInfo()
 ```
-
-# References
-[^1]: Raymond G Cavalcante, Maureen A Sartor, annotatr: genomic regions in context, Bioinformatics, Volume 33, Issue 15, 01 August 2017, Pages 2381–2383, https://doi.org/10.1093/bioinformatics/btx183
-[^2]: Nathan C. Sheffield, Christoph Bock, LOLA: enrichment analysis for genomic region sets and regulatory elements in R and Bioconductor, Bioinformatics, Volume 32, Issue 4, 15 February 2016, Pages 587–589, https://doi.org/10.1093/bioinformatics/btv612
-
-

@@ -68,6 +68,7 @@
 #' usage and sample data.
 #' @examples
 #'   data(ramr)
+#'   set.seed(1)
 #'   amrs.unique <-
 #'     simulateAMR(ramr.data, nsamples=4, regions.per.sample=2,
 #'                 min.cpgs=5, merge.window=1000, dbeta=0.2)
