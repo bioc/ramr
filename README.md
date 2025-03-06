@@ -8,6 +8,8 @@
 
 This readme contains condensed info on `ramr` usage. For more, please check function-specific help pages and vignettes within the R environment or at [GitHub pages](https://bbcg.github.io/ramr/articles/ramr.html).
 
+![](./vignettes/amrs.png)
+
 ### Current Features
 
 -   Identification of aberrantly methylated regions (AMRs, i.e., epimutations)
