@@ -90,9 +90,9 @@
 #' \code{\link{getAMR}} method description.
 #' @param ncores A single integer >= 1 for the number of OpenMP threads for
 #' parallel computation. By default (NULL), function will use half of available
-#' cores. Results of this function are always identical (reproducible) even
-#' when more than one core is used (at a cost of serial random number
-#' generation).
+#' cores. When the same random seed is set, results of this function are always
+#' identical (reproducible), even when more than one core is used (at a cost
+#' of serial random number generation).
 #' @param verbose boolean to report progress and timings (default: TRUE).
 #' @return The output is a `GRanges` object with genomic ranges that are equal
 #' to the genomic ranges of the provided template and metadata columns
@@ -106,6 +106,7 @@
 #' usage and sample data.
 #' @examples
 #'   data(ramr)
+#'   set.seed(1)
 #'   amrs <-
 #'     simulateAMR(ramr.data, nsamples=10, regions.per.sample=3,
 #'                 samples.per.region=1, min.cpgs=5, merge.window=1000)
