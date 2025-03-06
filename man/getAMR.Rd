@@ -31,7 +31,8 @@ corresponding beta values included as metadata.}
 metadata column names). If `NULL` (the default), then all samples (metadata
 columns) are included in the analysis.}
 
-\item{data.coverage}{description}
+\item{data.coverage}{An optional `data.frame` object with coverage data. If
+provided, its dimensions must be the same as the dimensions of}
 
 \item{transform}{description}
 

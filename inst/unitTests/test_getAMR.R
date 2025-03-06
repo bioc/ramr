@@ -28,6 +28,10 @@ test_getAMR <- function () {
 
   test.coverage <- as.data.frame(matrix(data=rbinom(n=3000*100, 100, 1:100/100), ncol=100))
   RUnit::checkException(
+    getAMR(data.ranges=ramr.data, data.coverage=test.coverage)
+  )
+  colnames(test.coverage) <- ramr.samples
+  RUnit::checkException(
     getAMR(data.ranges=ramr.data, data.coverage=test.coverage[-1,])
   )
 
@@ -61,6 +65,15 @@ test_getAMR <- function () {
     c(2, 18)
   )
 
+  # subsetting
+  amr.all <- getAMR(data.ranges=ramr.data, data.coverage=test.coverage, combine.window=1000, combine.min.cpgs=5, combine.threshold=3)
+  amr.half <- getAMR(data.ranges=ramr.data, data.coverage=test.coverage, combine.window=1000, combine.min.cpgs=5, combine.threshold=3, data.samples=ramr.samples[1:50])
+  RUnit::checkTrue(
+    !identical(amr.all, amr.half)
+  )
+  RUnit::checkTrue(
+    all(amr.half$sample %in% ramr.samples[1:50])
+  )
 
   ### tests to cover 0/1/NA values during fitting
 
@@ -74,6 +87,7 @@ test_getAMR <- function () {
   GenomicRanges::strand(mod.data) <- c("+", "-")
   GenomicRanges::mcols(mod.data) <- data.mcols
   mod.coverage <- as.data.frame(matrix(data=rbinom(n=nrow(data.mcols)*ncol(data.mcols), ncol(data.mcols), 1:100/100), ncol=ncol(data.mcols)))
+  colnames(mod.coverage) <- colnames(data.mcols)
 
   getAMR(data.ranges=mod.data, data.coverage=mod.coverage, compute="beta+binom", combine.min.cpgs=5, combine.window=10000, combine.threshold=1e-3, combine.ignore.strand=TRUE)
   getAMR(data.ranges=mod.data, compute="IQR", combine.min.cpgs=5, combine.window=10000, combine.threshold=3, combine.ignore.strand=TRUE)

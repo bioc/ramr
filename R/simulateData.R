@@ -146,6 +146,7 @@ simulateData <- function (template.ranges,
 
   template.mcols <- GenomicRanges::mcols(template.ranges)
   template.samples <- colnames(template.mcols)
+  template.coverage <- as.data.frame( sapply(template.samples, function (s) integer(0)) )
   compute.estimate <- match.arg(compute.estimate)
   compute.weights <- match.arg(compute.weights)
 
@@ -156,7 +157,7 @@ simulateData <- function (template.ranges,
 
   .data <- .preprocessData(
     data.ranges=template.ranges, data.samples=template.samples,
-    data.coverage=data.frame(), transform="identity",
+    data.coverage=template.coverage, transform="identity",
     exclude.range=c(2,0), ncores=ncores, verbose=verbose
   )
 

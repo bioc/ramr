@@ -264,22 +264,36 @@ getAMR <- function (data.ranges,
   if (!methods::is(data.ranges,"GRanges"))
     stop("'data.ranges' must be a GRanges object")
   data.mcols <- GenomicRanges::mcols(data.ranges)
-  if (is.null(data.samples))
+
+  if (is.null(data.samples)) {
     data.samples <- colnames(data.mcols)
-  if (!all(data.samples %in% colnames(data.mcols)))
-    stop("'data.ranges' metadata must include 'data.samples'")
-  if (!is.null(data.coverage) &
-      (!methods::is(data.coverage,"data.frame") |
-       !identical(dim(data.mcols), dim(data.coverage))))
-    stop("When provided, 'data.coverage' must be a 'data.frame' object",
-         " of the same dimensions as 'data.ranges' metadata")
+  } else {
+    if (!all(data.samples %in% colnames(data.mcols)))
+      stop("'data.ranges' metadata must include 'data.samples'")
+  }
   if (length(data.samples)<3)
     stop("at least three 'data.samples' must be provided")
 
-  if (is.null(data.coverage))
-    data.coverage <- data.frame()
+  if (is.null(data.coverage)) {
+    data.coverage <- as.data.frame(
+      sapply(data.samples, function (s) integer(0))
+    )
+    is.coverage <- FALSE
+  } else {
+    if (!methods::is(data.coverage, "data.frame") |
+        !identical(dim(data.mcols), dim(data.coverage)) |
+        !identical(colnames(data.mcols), colnames(data.coverage)) |
+        !all(apply(data.coverage, 2, is.integer)))
+      stop("When provided, 'data.coverage' must be",
+           " an all-integer 'data.frame' object",
+           " of the same dimensions as, and with the colnames identical to",
+           " 'data.ranges' metadata")
+    is.coverage <- TRUE
+  }
+
   if (is.null(exclude.range))
-    exclude.range <- c(2,0) # // <= than 2 and >= than 0
+    exclude.range <- c(2,0) # // exclude those that are >= than 2 and <= than 0
+
   transform <- match.arg(transform)
   compute <- match.arg(compute)
   compute.estimate <- match.arg(compute.estimate)
@@ -308,7 +322,7 @@ getAMR <- function (data.ranges,
       data.list=.data,
       estimate=compute.estimate,
       weights=compute.weights,
-      coverage=identical(dim(data.mcols), dim(data.coverage)),
+      coverage=is.coverage,
       threshold=log(combine.threshold),
       verbose=verbose
     )

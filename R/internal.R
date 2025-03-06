@@ -105,8 +105,8 @@ utils::globalVariables(c(
     seqrunlens=S4Vectors::runLength(GenomeInfoDb::seqnames(data.ranges)),
     start=BiocGenerics::start(data.ranges),
     strand=S4Vectors::as.factor(BiocGenerics::strand(data.ranges)),
-    mcols=as.data.frame(GenomicRanges::mcols(data.ranges), optional=TRUE),
-    coverage=data.coverage,
+    mcols=as.data.frame(GenomicRanges::mcols(data.ranges), optional=TRUE)[, data.samples],
+    coverage=as.data.frame(data.coverage, optional=TRUE)[, data.samples],
     exclude_lower=exclude.range[1],
     exclude_upper=exclude.range[2],
     chunks=chunks
