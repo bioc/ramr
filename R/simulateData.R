@@ -88,10 +88,11 @@
 #' weighted parameter estimation allows to increase sensitivity of outlier
 #' detection. More details on weighted parameter estimation are given in
 #' \code{\link{getAMR}} method description.
-#' @param ncores A single integer >= 1 for the number of processes for parallel
-#' computation. By default (NULL), function will use half of available cores.
-#' Results of this function are always identical (reproducible) even when more
-#' than one core is used (at a cost of serial random number generation).
+#' @param ncores A single integer >= 1 for the number of OpenMP threads for
+#' parallel computation. By default (NULL), function will use half of available
+#' cores. Results of this function are always identical (reproducible) even
+#' when more than one core is used (at a cost of serial random number
+#' generation).
 #' @param verbose boolean to report progress and timings (default: TRUE).
 #' @return The output is a `GRanges` object with genomic ranges that are equal
 #' to the genomic ranges of the provided template and metadata columns

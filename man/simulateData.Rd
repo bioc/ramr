@@ -69,10 +69,11 @@ weighted parameter estimation allows to increase sensitivity of outlier
 detection. More details on weighted parameter estimation are given in
 \code{\link{getAMR}} method description.}
 
-\item{ncores}{A single integer >= 1 for the number of processes for parallel
-computation. By default (NULL), function will use half of available cores.
-Results of this function are always identical (reproducible) even when more
-than one core is used (at a cost of serial random number generation).}
+\item{ncores}{A single integer >= 1 for the number of OpenMP threads for
+parallel computation. By default (NULL), function will use half of available
+cores. Results of this function are always identical (reproducible) even
+when more than one core is used (at a cost of serial random number
+generation).}
 
 \item{verbose}{boolean to report progress and timings (default: TRUE).}
 }

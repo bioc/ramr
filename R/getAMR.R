@@ -127,7 +127,7 @@
 #'   }
 #' }
 #'
-#' Resulting genomic intervals are filtered:
+#' Resulting genomic intervals are then filtered:
 #' only the regions containing at least `combine.min.cpgs`
 #' outliers and which are at leas as wide as `combine.min.width` are
 #' reported back.
@@ -151,7 +151,7 @@
 #'
 #' }
 #'
-#' #' @note
+#' @note
 #' NA values within metadata columns of `data.ranges` are silently dropped
 #' in all computations.
 #'
