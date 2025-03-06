@@ -10,12 +10,21 @@
 #'
 #' @details
 #' For every genomic location in the template data set (`GRanges` object with
-#' genomic locations and corresponding beta values included as metadata)
-#' `simulateData` estimates the parameters of beta distribution by means of
-#' `EnvStats::ebeta` function, and then uses estimated parameters to generate
-#' `nsamples` random beta values by means of `stats::rbeta` function. This
-#' results in "smoothed" data set that has biologically relevant distribution
-#' of beta values at every genomic location, but does not contain methylation
+#' genomic locations and corresponding methylation beta values included as
+#' metadata) `simulateData` does the following:
+#' \itemize{
+#'   \item estimates parameters of beta distribution
+#'   \item in the same input, calculates frequencies of zero and one values
+#'   (endpoints; whenever present)
+#'   \item uses estimated parameters of beta distribution and probabilities
+#'   (observed frequencies) of \{0;1\} values to generate `nsamples` random
+#'   values by means of `stats::rbeta` function (for beta values) and/or
+#'   `stats::rbinom` function (for \{0;1\} endpoint values, according to their
+#'   frequencies and therefore probabilities).
+#' }
+#' This results in "smoothed" data set that has biologically relevant
+#' distribution of methylation values at every genomic location,
+#' but does not contain methylation
 #' aberrations. If the `amr.ranges` parameter points to a `GRanges` object with
 #' aberrations, every AMR is then introduced into the "smoothed" data set as
 #' following: if mean methylation beta value for AMR region across all samples
@@ -27,13 +36,20 @@
 #' of algorithms for search of differentially (DMR) or aberrantly (AMR)
 #' methylated regions.
 #'
+#' @note
+#' NA values within metadata columns of `template.ranges` are silently dropped
+#' in all computations. NA values will also not appear in the result of
+#' this function, unless parameters of beta distribution and/or probabilities
+#' of zeros or ones cannot be estimated (e.g., due to too many NA values in
+#' `template.ranges` metadata).
+#'
 #' @param template.ranges A `GRanges` object with genomic locations and
-#' corresponding beta values included as metadata (same object
+#' corresponding methylation beta values included as metadata (the same object
 #' must be supplied to this and to the `simulateAMR` functions).
 #' @param nsamples A single integer >= 1 indicating the number of samples to
 #' generate.
-#' @param amr.ranges A `GRanges` object with genomic locations of (rare)
-#' methylation aberrations. If `NULL` (the default), no aberrations is
+#' @param amr.ranges A `GRanges` object with genomic locations of methylation
+#' aberrations (epimutations). If `NULL` (the default), no aberrations is
 #' introduced, and function will return "smoothed" data set. If supplied,
 #' `GRanges` object must contain the following metadata columns:
 #' \itemize{
@@ -42,24 +58,41 @@
 #'   \item `sample` -- an identifier of a sample to which corresponding AMR
 #'   belongs. Must be among the supplied or auto generated `sample.names`
 #'   \item `dbeta` -- absolute deviation to be introduced. Must be numeric
-#'   within the range c(0,1) or NA. When NA - the resulting beta value for
-#'   the corresponding genomic position will also be NA
+#'   within the closed interval [0,1] or NA. When NA - the resulting beta value
+#'   for the corresponding genomic position will also be NA
 #' }
 #' Such an object can be obtained using \code{\link{simulateAMR}} method or
 #' manually.
 #' @param sample.names A character vector with sample names. If `NULL` (the
-#' default), sample names will be computed as
-#' `paste0("sample", seq_len(nsamples))`. When specified, the length of the
-#' `sample.names` vector must be equal to the value of `nsamples`.
-#' @param min.beta A single numeric within the range c(0,1). All beta values
-#' in the generated data set below this value will be assigned this value.
-#' The default: 0.001.
-#' @param max.beta A single numeric within the range c(0,1). All beta values
-#' in the generated data set above this value will be assigned this value.
-#' The default: 0.999.
-#' @param cores A single integer >= 1. Number of processes for parallel
-#' computation (the default: all but one cores). Results of parallel processing
-#' are fully reproducible when the same seed is used (thanks to doRNG).
+#' default), sample names will be auto generated. When specified, the length
+#' of the `sample.names` vector must be equal to the value of `nsamples`.
+#' @param compute A single string for the distribution to fit to the data.
+#' Currently accepts "beta+binom" (the default) only, which stands for
+#' endpoint-inflated beta distribution. See Details section
+#' and \code{\link{getAMR}} method description for additional explanations.
+#' @param compute.estimate A single string for the method of parameter
+#' estimation of beta distribution. The default ("mom") stands for the method
+#' of moments based on the unbiased estimator of variance and includes \{0;1\}
+#' endpoints in calculation of moments (mean, unbiased variance).
+#' Other options are "amle" (approximation of maximum likelihood estimation)
+#' and "nmle" (numeric maximum likelihood estimation) - both ignore \{0;1\}
+#' endpoints in calculations. More details on these methods are given in
+#' \code{\link{getAMR}} method description.
+#' @param compute.weights A single string for the method to compute optional
+#' sample weights that are used during estimation of beta distribution
+#' parameters. If default ("equal"), all weights are equal. Otherwise, weight of
+#' a value equals to a natural logarithm of inverse absolute distance of this
+#' value to the sample median ("logInvDist"), a square root of inverse absolute
+#' distance of this value to the sample median ("sqrtInvDist"), or an inverse
+#' absolute distance of this value to the sample median ("invDist"). Using
+#' weighted parameter estimation allows to increase sensitivity of outlier
+#' detection. More details on weighted parameter estimation are given in
+#' \code{\link{getAMR}} method description.
+#' @param ncores A single integer >= 1 for the number of OpenMP threads for
+#' parallel computation. By default (NULL), function will use half of available
+#' cores. Results of this function are always identical (reproducible) even
+#' when more than one core is used (at a cost of serial random number
+#' generation).
 #' @param verbose boolean to report progress and timings (default: TRUE).
 #' @return The output is a `GRanges` object with genomic ranges that are equal
 #' to the genomic ranges of the provided template and metadata columns
@@ -80,16 +113,17 @@
 #'     simulateAMR(ramr.data, nsamples=10, regions.per.sample=20,
 #'                 exclude.ranges=amrs, min.cpgs=1, max.cpgs=1, merge.window=1)
 #'   noisy.data <-
-#'     simulateData(ramr.data, nsamples=10, amr.ranges=c(amrs,noise), cores=2)
-#'   plotAMR(noisy.data, amr.ranges=amrs[1])
+#'     simulateData(template.ranges=ramr.data, nsamples=10, amr.ranges=c(amrs,noise))
+#'   plotAMR(data.ranges=noisy.data, amr.ranges=amrs[1])
 #' @export
 simulateData <- function (template.ranges,
                           nsamples,
                           amr.ranges=NULL,
                           sample.names=NULL,
-                          min.beta=0.001,
-                          max.beta=0.999,
-                          cores=max(1,parallel::detectCores()-1),
+                          compute="beta+binom",
+                          compute.estimate=c("mom", "amle", "nmle"),
+                          compute.weights=c("equal", "logInvDist", "sqrtInvDist", "invDist"),
+                          ncores=NULL,
                           verbose=TRUE)
 {
   if (!methods::is(template.ranges,"GRanges"))
@@ -98,7 +132,7 @@ simulateData <- function (template.ranges,
     stop("'sample.names' length must be equal to 'nsamples'")
 
   if (is.null(sample.names))
-    sample.names <- paste0("sample", seq_len(nsamples))
+    sample.names <- sprintf(paste0("sample%0", nchar(as.character(nsamples)), "i"), seq_len(nsamples))
   if (!is.null(amr.ranges)) {
     if(!methods::is(amr.ranges,"GRanges"))
       stop("'amr.ranges' must be a GRanges object")
@@ -107,56 +141,36 @@ simulateData <- function (template.ranges,
     if ( is.null(amr.ranges$sample) | !all(amr.ranges$sample %in% sample.names) )
       stop("Malformed 'amr.ranges' object: 'sample' field is missing or its elements are absent from 'sample.names'")
     if ( !is.numeric(amr.ranges$dbeta) | !all(stats::na.omit(amr.ranges$dbeta)>=0) | !all(stats::na.omit(amr.ranges$dbeta)<=1) )
-      stop("Malformed 'amr.ranges' object: 'dbeta' field is missing or is outside the range c(0,1)")
+      stop("Malformed 'amr.ranges' object: 'dbeta' field is missing or is outside the closed interval [0,1]")
   }
+
+  template.mcols <- GenomicRanges::mcols(template.ranges)
+  template.samples <- colnames(template.mcols)
+  template.coverage <- as.data.frame( sapply(template.samples, function (s) integer(0)) )
+  compute.estimate <- match.arg(compute.estimate)
+  compute.weights <- match.arg(compute.weights)
+
+  if (compute.estimate=="nmle")
+    stop("compute.estimate=='nmle' is not available yet")
 
   #####################################################################################
 
-  getRandomBeta <- function(data.chunk) {
-    chunk.filt <- apply(data.chunk, 1, function(x) {
-      x.median    <- stats::median(x, na.rm=TRUE)
-      x[is.na(x)] <- x.median
-      beta.fit    <- suppressWarnings( EnvStats::ebeta(as.numeric(x)) )
-      random.beta <- stats::rbeta(nsamples, beta.fit$parameters[1], beta.fit$parameters[2])
-      return(random.beta)
-    })
-    return(t(chunk.filt))
-  }
+  .data <- .preprocessData(
+    data.ranges=template.ranges, data.samples=template.samples,
+    data.coverage=template.coverage, transform="identity",
+    exclude.range=c(2,0), ncores=ncores, verbose=verbose
+  )
 
-  #####################################################################################
-
-  if (verbose) message("Simulating data", appendLF=FALSE)
-  tm <- proc.time()
-
-  template.betas <- as.matrix(GenomicRanges::mcols(template.ranges, use.names=FALSE))
-  chunks <- split(seq_len(nrow(template.betas)), if (cores>1) cut(seq_len(nrow(template.betas)), cores) else 1)
-
-  doParallel::registerDoParallel(cores)
-  cl <- parallel::makeCluster(cores)
-  random.betas <- foreach (chunk=chunks) %dorng% getRandomBeta(template.betas[chunk,])
-  random.betas <- do.call(rbind, random.betas)
-  colnames(random.betas) <- sample.names
-  parallel::stopCluster(cl)
-
-  if (verbose) message(sprintf(" [%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
+  random.betas <- .getRandomValues(
+    data.list=.data, estimate=compute.estimate, weights=compute.weights,
+    nsamples=nsamples, sample.names=sample.names, verbose=verbose
+  )
 
   if (!is.null(amr.ranges)) {
-    if (verbose) message("Introducing epimutations", appendLF=FALSE)
-    tm <- proc.time()
-
-    amr.mcols <- data.frame(GenomicRanges::mcols(amr.ranges))
-    for (i in seq_len(nrow(amr.mcols))) {
-      revmap <- unlist(amr.mcols[i,"revmap"])
-      dbeta  <- sign(0.5 - mean(random.betas[revmap,], na.omit=TRUE)) * amr.mcols[i,"dbeta"]
-      sample <- amr.mcols[i,"sample"]
-      random.betas[revmap, sample] <- random.betas[revmap, sample] + dbeta
-    }
-
-    if (verbose) message(sprintf(" [%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
+    random.betas <- .addEpimutations(
+      random.data=random.betas, amr.ranges=amr.ranges, verbose=verbose
+    )
   }
-
-  random.betas[random.betas>max.beta] <- max.beta
-  random.betas[random.betas<min.beta] <- min.beta
 
   data.ranges <- GenomicRanges::granges(template.ranges)
   GenomicRanges::mcols(data.ranges) <- random.betas

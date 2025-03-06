@@ -1,35 +1,35 @@
-ramr
-========
+# ramr
 
-[![](https://github.com/BBCG/ramr/workflows/R-CMD-check-bioc/badge.svg)](https://github.com/BBCG/ramr/actions)
-[![](https://codecov.io/gh/BBCG/ramr/branch/devel/graph/badge.svg)](https://app.codecov.io/gh/BBCG/ramr/tree/devel)
-[![](https://bioconductor.org/shields/years-in-bioc/ramr.svg)](https://bioconductor.org/packages/release/bioc/html/ramr.html)
+[![](https://github.com/BBCG/ramr/workflows/R-CMD-check-bioc/badge.svg)](https://github.com/BBCG/ramr/actions) [![](https://codecov.io/gh/BBCG/ramr/branch/devel/graph/badge.svg)](https://app.codecov.io/gh/BBCG/ramr/tree/devel) [![](https://bioconductor.org/shields/years-in-bioc/ramr.svg)](https://bioconductor.org/packages/release/bioc/html/ramr.html)
 
 # Introduction
 
-*`ramr`* is an R package for detection of low-frequency aberrant methylation events in large data sets
-obtained by methylation profiling using array or high-throughput bisulfite sequencing. In addition, package provides
-functions to visualize found aberrantly methylated regions (AMRs), to generate sets of all possible regions to be used
-as reference sets for enrichment analysis, and to generate biologically relevant test data sets for
-performance evaluation of AMR/DMR search algorithms.
+`ramr` is an R package for detection of low-frequency aberrant methylation events (epimutations) in large data sets obtained by methylation profiling using array or high-throughput methylation sequencing. In addition, package provides functions to visualize found aberrantly methylated regions (AMRs), to generate sets of all possible regions to be used as reference sets for enrichment analysis, and to generate biologically relevant test data sets for performance evaluation of AMR/DMR search algorithms.
 
-This readme contains condensed info on *`ramr`* usage. For more, please check function-specific help pages and vignettes within the R environment or at [GitHub pages](https://bbcg.github.io/ramr/articles/ramr.html).
+This readme contains condensed info on `ramr` usage. For more, please check function-specific help pages and vignettes within the R environment or at [GitHub pages](https://bbcg.github.io/ramr/articles/ramr.html).
 
-## Current Features
+### Current Features
 
- * Identification of aberrantly methylated regions (AMRs)
-   - filtering by interquartile range (IQR)
-   - filtering by fitting non-weighted, weighted, or one-and-zero inflated beta distributions
- * AMR visualization
- * Generation of reference sets for third-party analyses (e.g. enrichment)
- * Generation of test data sets for performance evaluation of algorithms for search of differentially (DMR) or aberrantly (AMR) methylated regions
+-   Identification of aberrantly methylated regions (AMRs, i.e., epimutations)
+-   AMR visualization
+-   Generation of reference sets for third-party analyses (e.g., enrichment)
+-   Generation of test data sets for performance evaluation of algorithms for search of differentially (DMR) or aberrantly (AMR) methylated regions
 
--------
+### Major improvements
+
+##### v1.16 [BioC 3.21]
+
+-   Major rewrite of `getAMR` and `simulateData` functions, which are now much faster (C/C++, OpenMP threads) and more robust (correctly deal with methylation sequencing data that often contains 0 and 1 values)
+-   Old functions `getAMR` and `simulateData` as they were described in the `ramr` paper are now obsolete, but kept under different names (`getAMR.obsolete` and `simulateData.obsolete`, respectively) for consistency
+-   Cleaner and more robust AMR plotting
+
+------------------------------------------------------------------------
 
 ## Installation
 
 ### install via Bioconductor
-```r
+
+``` r
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
@@ -37,39 +37,37 @@ BiocManager::install("ramr")
 ```
 
 ### Install the latest version via install_github
-```r
+
+``` r
 library(devtools)
 install_github("BBCG/ramr", build_vignettes=FALSE,
   repos=BiocManager::repositories(),
   dependencies=TRUE, type="source")
 ```
 
+------------------------------------------------------------------------
 
--------
+### Citing the `ramr` package
 
-### Citing the *`ramr`* package
-Oleksii Nikolaienko, Per Eystein Lønning, Stian Knappskog, *ramr*: an R/Bioconductor package for detection of rare aberrantly methylated regions, Bioinformatics, 2021;, btab586, [https://doi.org/10.1093/bioinformatics/btab586](https://doi.org/10.1093/bioinformatics/btab586)
+Oleksii Nikolaienko, Per Eystein Lønning, Stian Knappskog, *ramr*: an R/Bioconductor package for detection of rare aberrantly methylated regions, Bioinformatics, 2021;, btab586, <https://doi.org/10.1093/bioinformatics/btab586>
 
-### The data underlying *`ramr`* manuscript
-Replication Data for: "ramr: an R package for detection of rare aberrantly methylated regions, [https://doi.org/10.18710/ED8HSD](https://doi.org/10.18710/ED8HSD)
+### The data underlying `ramr` manuscript
 
-### *`ramr`* at Bioconductor
-[release](https://bioconductor.org/packages/release/bioc/html/ramr.html), 
-[development version](https://bioconductor.org/packages/devel/bioc/html/ramr.html)
+Replication Data for: "ramr: an R package for detection of rare aberrantly methylated regions, <https://doi.org/10.18710/ED8HSD>
 
--------
+### `ramr` at Bioconductor
+
+[release](https://bioconductor.org/packages/release/bioc/html/ramr.html), [development version](https://bioconductor.org/packages/devel/bioc/html/ramr.html)
+
+------------------------------------------------------------------------
 
 # How to Use
 
-Please read package vignettes
-at [GitHub pages](https://bbcg.github.io/ramr/articles/ramr.html)
-or within the R environment: `vignette("ramr", package="ramr")`, or
-consult the function's help pages for the extensive information on usage,
-parameters and output values.
+Please read package vignettes at [GitHub pages](https://bbcg.github.io/ramr/articles/ramr.html) or within the R environment: `vignette("ramr", package="ramr")`, or consult the function's help pages for the extensive information on usage, parameters and output values.
 
-*`ramr`* methods operate on objects of the class *`GRanges`*. The input object for AMR search must in addition contain metadata columns with sample beta values. A typical input object looks like this:
+`ramr` methods operate on objects of the class `GRanges`. The input object for AMR search must in addition contain metadata columns with sample beta values. A typical input object looks like this:
 
-```
+```         
 GRanges object with 383788 ranges and 845 metadata columns:
              seqnames    ranges strand |         GSM1235534         GSM1235535         GSM1235536 ...
                 <Rle> <IRanges>  <Rle> |          <numeric>          <numeric>          <numeric> ...
@@ -84,22 +82,21 @@ GRanges object with 383788 ranges and 845 metadata columns:
   cg08423507    chr22  51177982      * |  0.886406345093286  0.882430879852752  0.887241923657461 ...
   cg19565306    chr22  51222011      * | 0.0719084295670266 0.0845209871264646 0.0689074604483659 ...
   cg09226288    chr22  51225561      * |  0.724145303755024  0.696281176451351  0.711459675603635 ...
-
 ```
 
-This code shows how to do basic analysis with *`ramr`* using provided data files:
+This code shows how to do basic analysis with `ramr` using provided data files:
 
-```r
+``` r
 library(ramr)
 data(ramr)
 
 # search for AMRs
-amrs <- getAMR(ramr.data, ramr.samples, ramr.method="beta", min.cpgs=5,
-               merge.window=1000, qval.cutoff=1e-3)
+amrs <- getAMR(data.ranges=ramr.data, compute="beta+binom", compute.estimate="amle",
+               compute.weights="logInvDist", combine.min.cpgs=5, combine.threshold=1e-2, combine.window=1000)
 
 # inspect
 amrs
-plotAMR(ramr.data, ramr.samples, amrs[1])
+plotAMR(data.ranges=ramr.data, amr.ranges=amrs[1])
 
 # generate the set of all possible genomic regions using sample data set and
 # the same parameters as for AMR search
@@ -113,27 +110,30 @@ core.hits   <- runLOLA(amrs, universe, hg19.coredb, cores=1, redefineUserSets=TR
 
 The following code generates random AMRs and methylation beta values using provided data set as a template:
 
-```r
+``` r
+# set the seed for reproducibility
+set.seed(1)
+
 # unique random AMRs
 amrs.unique <- simulateAMR(ramr.data, nsamples=10, regions.per.sample=2,
                            min.cpgs=5, merge.window=1000, dbeta=0.2)
 
 # methylation data with AMRs
-data.with.amrs <- simulateData(ramr.data, nsamples=10,
-                               amr.ranges=amrs.unique, cores=2)
+data.with.amrs <- simulateData(template.ranges=ramr.data, nsamples=99,
+                               amr.ranges=amrs.unique, ncores=2)
   
 # that's how regions look like
 library(gridExtra)
 do.call("grid.arrange", c(plotAMR(data.with.amrs, amr.ranges=amrs.unique[1:2]), ncol=2))
 ```
 
-
 The input (or template) object may be obtained using data from various sources. Here we provide two examples:
 
 ### Using data from NCBI GEO
 
-The following code pulls (NB: very large) raw files from NCBI GEO database, performs normalization and creates *`GRanges`* object for further analysis using *`ramr`* (system requirements: 22GB of disk space, 64GB of RAM)
-```r
+The following code pulls (NB: very large) raw files from NCBI GEO database, performs normalization and creates *`GRanges`* object for further analysis using `ramr` (system requirements: 22GB of disk space, 64GB of RAM)
+
+``` r
 library(minfi)
 library(GEOquery)
 library(GenomicRanges)
@@ -169,7 +169,7 @@ mcols(data.ranges) <- data.betas
 
 ### Using Bismark cytosine report files
 
-```r
+``` r
 library(methylKit)
 library(GenomicRanges)
 
@@ -203,7 +203,6 @@ mcols(data.ranges) <- data.betas
 # data.ranges and sample.ids objects are now ready for AMR search using ramr
 ```
 
+## License
 
-License
----------
 Artistic License/GPL

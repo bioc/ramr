@@ -68,6 +68,7 @@
 #' usage and sample data.
 #' @examples
 #'   data(ramr)
+#'   set.seed(1)
 #'   amrs.unique <-
 #'     simulateAMR(ramr.data, nsamples=4, regions.per.sample=2,
 #'                 min.cpgs=5, merge.window=1000, dbeta=0.2)
@@ -110,7 +111,7 @@ simulateAMR <- function (template.ranges,
   if (methods::is(exclude.ranges,"GRanges"))
     universe.ranges <- IRanges::subsetByOverlaps(universe.ranges, exclude.ranges, invert=TRUE)
   if (is.null(sample.names))
-    sample.names <- paste0("sample", seq_len(nsamples))
+    sample.names <- sprintf(paste0("sample%0", nchar(as.character(nsamples)), "i"), seq_len(nsamples))
 
   if (nsamples > length(universe.ranges)) {
     nsamples <- length(universe.ranges)

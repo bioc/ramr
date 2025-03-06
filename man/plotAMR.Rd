@@ -6,24 +6,34 @@
 \usage{
 plotAMR(
   data.ranges,
-  data.samples = NULL,
   amr.ranges,
+  data.samples = NULL,
+  window = 300,
+  ignore.strand = FALSE,
   highlight = NULL,
   title = NULL,
   labs = c("genomic position", "beta value"),
-  window = 300
+  transform = c("identity", "log1p", "log10"),
+  limits = NULL,
+  breaks = NULL,
+  verbose = TRUE
 )
 }
 \arguments{
 \item{data.ranges}{A `GRanges` object with genomic locations and
 corresponding beta values included as metadata.}
 
+\item{amr.ranges}{An output of `getAMR` - a `GRanges` object that contain
+aberrantly methylated regions (AMRs).}
+
 \item{data.samples}{A character vector with sample names (a subset of
 metadata column names) to be included in the plot. If `NULL` (the default),
 then all samples (metadata columns) are included.}
 
-\item{amr.ranges}{An output of `getAMR` - a `GRanges` object that contain
-aberrantly methylated regions (AMRs).}
+\item{window}{An optional integer constant to expand genomic ranges of the
+`amr.ranges` object (the default: 300).}
+
+\item{ignore.strand}{Boolean to ignore strand of AMR region. Default: FALSE.}
 
 \item{highlight}{An optional list of samples to highlight. If NULL (the
 default), will contain sample IDs from the `sample` metadata column of
@@ -35,8 +45,17 @@ title is set to a genomic location of particular AMR.}
 \item{labs}{Optional axis labels for the plot. Default: c("genomic position",
 "beta value").}
 
-\item{window}{An optional integer constant to expand genomic ranges of the
-`amr.ranges` object (the default: 300).}
+\item{transform}{Optional transformation of y-axis. Default: "identity"
+(no transformation).}
+
+\item{limits}{Optional limits of y-axis. When default (NULL), limits
+are c(NA,1) for `transform=="log10"` and c(0,1) otherwise.}
+
+\item{breaks}{Optional breaks of y-axis. When default (NULL), breaks
+are `10**(seq(from=-5, to=0, length.out=6))` for `transform=="log10"` and
+`seq(from=0, to=1, length.out=6)` otherwise.}
+
+\item{verbose}{Boolean to report progress and timings (default: TRUE).}
 }
 \value{
 The output is a list of `ggplot` objects.
@@ -54,10 +73,10 @@ significantly different methylation profiles ('sample' column of
 }
 \examples{
   data(ramr)
-  plotAMR(ramr.data, ramr.samples, ramr.tp.unique[1])
+  plotAMR(data.ranges=ramr.data, amr.ranges=ramr.tp.unique[1])
   library(gridExtra)
   do.call("grid.arrange",
-          c(plotAMR(ramr.data, ramr.samples, ramr.tp.nonunique), ncol=2))
+          c(plotAMR(data.ranges=ramr.data, amr.ranges=ramr.tp.nonunique), ncol=2))
 }
 \seealso{
 \code{\link{getAMR}} for identification of AMRs,

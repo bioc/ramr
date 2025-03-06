@@ -25,10 +25,12 @@ increased/decreased by 0.5.
 }
 \examples{
   data(ramr)
-  amrs <- getAMR(ramr.data, ramr.samples, ramr.method="beta", min.cpgs=5,
-                 merge.window=1000, qval.cutoff=1e-3, cores=2)
-  plotAMR(ramr.data, ramr.samples, amrs[1])
-  plotAMR(ramr.data, ramr.samples, ramr.tp.nonunique[4],
+  amrs <- getAMR(
+    data.ranges=ramr.data, compute="IQR",
+    combine.min.cpgs=5, combine.window=1000, combine.threshold=5
+  )
+  plotAMR(data.ranges=ramr.data, amr.ranges=amrs[1])
+  plotAMR(data.ranges=ramr.data, amr.ranges=ramr.tp.nonunique[4],
           highlight=c("sample7","sample8","sample9"))
 
 }

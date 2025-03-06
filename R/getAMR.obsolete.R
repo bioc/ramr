@@ -1,0 +1,256 @@
+#' [OBSOLETE] Search for aberrantly methylated regions
+#'
+#' @description
+#' This function is fully functional but obsolete. It will remain a part of the
+#' package for consistency, as it was used in `ramr` publication
+#' (\doi{10.1093/bioinformatics/btab586}). Please use faster and more capable
+#' \code{\link{getAMR}} instead.
+#'
+#' `getAMR.obsolete` returns a `GRanges` object with all the aberrantly
+#' methylated regions (AMRs) for all samples in a data set.
+#'
+#' @details
+#' In the provided data set, `getAMR.obsolete` compares methylation beta values
+#' of each sample with other samples to identify rare long-range methylation
+#' aberrations (epimutations).
+#' For `ramr.method=="IQR"`: for every genomic location (CpG) in
+#' `data.ranges` the IQR-normalized deviation from the median value is
+#' calculated, and all CpGs with such normalized deviation not smaller than the
+#' `iqr.cutoff` are retained. For
+#' `ramr.method %in% c("beta", "wbeta", "beinf")`: parameters of beta
+#' distribution are estimated by means of `EnvStats::ebeta` (beta distribution),
+#' `ExtDist::eBeta` (weighted beta destribution), or `gamlss.dist::BEINF` (zero
+#' and one inflated beta distribution) functions, respectively. These
+#' parameters are then used to calculate the probability values, followed by the
+#' filtering when all CpGs with p-values not greater than `qval.cutoff` are
+#' retained. Another filtering is then performed to exclude all CpGs within
+#' `exclude.range`. Next, the retained (significant) CpGs are merged within
+#' the window of `merge.window`, and final filtering is applied to AMR genomic
+#' ranges (by `min.cpgs` and `min.width`).
+#'
+#' @param data.ranges A `GRanges` object with genomic locations and
+#' corresponding beta values included as metadata.
+#' @param data.samples A character vector with sample names (a subset of
+#' metadata column names). If `NULL` (the default), then all samples (metadata
+#' columns) are included in the analysis.
+#' @param ramr.method A character scalar: when ramr.method is "IQR" (the
+#' default), the filtering based on interquantile range is used (`iqr.cutoff`
+#' value is then used as a threshold). When "beta", "wbeta" or "beinf" -
+#' filtering based on fitting non-weighted (`EnvStats::ebeta`), weighted
+#' (`ExtDist::eBeta`) or zero-and-one inflated (`gamlss.dist::BEINF`)
+#' beta distributions, respectively, is used, and `pval.cutoff` or `qval.cutoff`
+#' (if not `NULL`) is used as a threshold. For "wbeta", weights directly
+#' correlate with bin contents (number of values per bin) and inversly - with
+#' the distances from the median value, thus narrowing the estimated
+#' distribution and emphasizing outliers.
+#' @param iqr.cutoff A single integer >= 1. Methylation beta values differing
+#' from the median value by more than `iqr.cutoff` interquartile ranges are
+#' considered to be significant (the default: 5).
+#' @param pval.cutoff A numeric scalar (the default: 5e-2). Bonferroni
+#' correction of `pval.cutoff` by the length of the `data.samples` object is
+#' used to calculate `qval.cutoff` if the latter is `NULL`.
+#' @param qval.cutoff A numeric scalar. Used as a threshold for filtering based
+#' on fitting non-weighted or weighted beta distributions: all p-values lower
+#' than `qval.cutoff` are considered to be significant. If `NULL` (the default),
+#' it is calculated using `pval.cutoff`
+#' @param merge.window A positive integer. All significant (survived the
+#' filtering stage) `data.ranges` genomic locations within this distance will be
+#' merged to create AMRs (the default: 300).
+#' @param min.cpgs A single integer >= 1. All AMRs containing less than
+#' `min.cpgs` significant genomic locations are filtered out (the default: 7).
+#' @param min.width A single integer >= 1 (the default). Only AMRs with the
+#' width of at least `min.width` are returned.
+#' @param exclude.range A numeric vector of length two. If not `NULL` (the
+#' default), all `data.ranges` genomic locations with their median methylation
+#' beta value within the `exclude.range` interval are filtered out.
+#' @param cores A single integer >= 1. Number of processes for parallel
+#' computation (the default: all but one cores). Results of parallel processing
+#' are fully reproducible when the same seed is used (thanks to doRNG).
+#' @param verbose boolean to report progress and timings (default: TRUE).
+#' @param ... Further arguments to be passed to `EnvStats::ebeta` or
+#' `ExtDist::eBeta` functions.
+#' @return The output is a `GRanges` object that contains all the aberrantly
+#' methylated regions (AMRs) for all `data.samples` samples in `data.ranges`
+#' object. The following metadata columns may be present:
+#' \itemize{
+#'   \item `revmap` -- integer list of significant CpGs (`data.ranges` genomic
+#'   locations) that are included in this AMR region
+#'   \item `ncpg` -- number of significant CpGs within this AMR region
+#'   \item `sample` -- contains an identifier of a sample to which
+#'   corresponding AMR belongs
+#'   \item `dbeta` -- average deviation of beta values for significant CpGs from
+#'   their corresponding median values
+#'   \item `pval` -- geometric mean of p-values for significant CpGs
+#'   \item `xiqr` -- average IQR-normalised deviation of beta values for
+#'   significant CpGs from their corresponding median values
+#' }
+#' @seealso \code{\link{plotAMR}} for plotting AMRs, \code{\link{getUniverse}}
+#' for info on enrichment analysis, \code{\link{simulateAMR}} and
+#' \code{\link{simulateData}} for the generation of simulated test data sets,
+#' and `ramr` vignettes for the description of usage and sample data.
+#' @examples
+#'   data(ramr)
+#'   getAMR.obsolete(ramr.data, ramr.samples, ramr.method="beta",
+#'                   min.cpgs=5, merge.window=1000, qval.cutoff=1e-3, cores=2)
+#' @export
+getAMR.obsolete <- function (data.ranges,
+                             data.samples=NULL,
+                             ramr.method=c("IQR", "beta", "wbeta", "beinf"),
+                             iqr.cutoff=5,
+                             pval.cutoff=5e-2,
+                             qval.cutoff=NULL,
+                             merge.window=300,
+                             min.cpgs=7,
+                             min.width=1,
+                             exclude.range=NULL,
+                             cores=max(1,parallel::detectCores()-1),
+                             verbose=TRUE,
+                             ...)
+{
+  if (interactive() | Sys.getenv("R_COVR")!="")
+    message("This function is fully functional but *obsolete*.\n",
+            "Please use faster and more capable 'getAMR' instead.\n")
+  for (ns in c("EnvStats", "ExtDist", "gamlss", "gamlss.dist", "doParallel",
+               "parallel", "doRNG", "foreach", "matrixStats"))
+    if (!requireNamespace(ns, quietly=TRUE) | exists(x="is.test.environment"))
+      stop(ns, " is required for this function. Please install")
+  `%dorng%` <- doRNG::`%dorng%`
+
+  if (!methods::is(data.ranges,"GRanges"))
+    stop("'data.ranges' must be a GRanges object")
+  if (is.null(data.samples))
+    data.samples <- colnames(GenomicRanges::mcols(data.ranges))
+  if (!all(data.samples %in% colnames(GenomicRanges::mcols(data.ranges))))
+    stop("'data.ranges' metadata must include 'data.samples'")
+  if (length(data.samples)<3)
+    stop("at least three 'data.samples' must be provided")
+  ramr.method <- match.arg(ramr.method)
+
+  #####################################################################################
+
+  getPValues.beta <- function (data.chunk, ...) {
+    chunk.filt <- apply(data.chunk, 1, function (x) {
+      x.median    <- stats::median(x, na.rm=TRUE)
+      x[is.na(x)] <- x.median
+      beta.fit <- suppressWarnings( EnvStats::ebeta(as.numeric(x), ...) )
+      pvals    <- stats::pbeta(x, beta.fit$parameters[1], beta.fit$parameters[2])
+      pvals[x>x.median] <- 1 - pvals[x>x.median]
+      return(pvals)
+    })
+    return(t(chunk.filt))
+  }
+  getPValues.wbeta<- function (data.chunk, ...) {
+    chunk.filt  <- apply(data.chunk, 1, function (x) {
+      x.median    <- stats::median(x, na.rm=TRUE)
+      x[is.na(x)] <- x.median
+      # weight directly correlates with bin contents (number of values per bin)
+      # and inversely - with the distance from the median value, thus narrowing
+      # the estimated distribution and emphasizing outliers
+      c           <- cut(x, c(0:100)/100)
+      b           <- table(c)
+      w           <- as.numeric(b[c]) * (1 - abs(x-x.median))
+      beta.fit    <- suppressWarnings( ExtDist::eBeta(as.numeric(x), w, ...) )
+      pvals       <- ExtDist::pBeta(x, params=beta.fit)
+      pvals[x>x.median] <- 1 - pvals[x>x.median]
+      return(pvals)
+    })
+    return(t(chunk.filt))
+  }
+  inv.logit <- function (x) exp(x)/(1+exp(x))
+  getPValues.beinf <- function (data.chunk, ...) {
+    chunk.filt <- apply(data.chunk, 1, function (x) {
+      x.median    <- stats::median(x, na.rm=TRUE)
+      x[is.na(x)] <- x.median
+      beinf.fit <- gamlss::gamlss(
+        as.numeric(x)~1, sigma.formula=~1, nu.formula=~1, tau.formula=~1,
+        family=gamlss.dist::BEINF(mu.link="logit", sigma.link="logit",
+                                  nu.link="log", tau.link="log"),
+        control=gamlss::gamlss.control(trace=FALSE), ...
+      )
+      pvals <- gamlss.dist::pBEINF(
+        q=x, mu=inv.logit(beinf.fit$mu.coefficients),
+        sigma=inv.logit(beinf.fit$sigma.coefficients),
+        nu=exp(beinf.fit$nu.coefficients),
+        tau=exp(beinf.fit$tau.coefficients),
+        lower.tail=TRUE, log.p=FALSE
+      )
+      pvals[x>x.median] <- 1 - pvals[x>x.median]
+      return(pvals)
+    })
+    return(t(chunk.filt))
+  }
+
+
+  #####################################################################################
+
+  if (verbose) message("Identifying AMRs", appendLF=FALSE)
+  tm <- proc.time()
+
+  doParallel::registerDoParallel(cores)
+  cl <- parallel::makeCluster(cores)
+
+  universe      <- getUniverse(data.ranges, merge.window=merge.window, min.cpgs=min.cpgs, min.width=min.width)
+  universe.cpgs <- unlist(universe$revmap)
+
+  betas <- as.matrix(mcols(data.ranges)[universe.cpgs, data.samples, drop=FALSE])
+  if (is.null(qval.cutoff))
+    qval.cutoff <- pval.cutoff/ncol(betas)
+
+  chunks  <- split(seq_len(nrow(betas)), if (cores>1) cut(seq_len(nrow(betas)), cores) else 1)
+  medians <- foreach::foreach (chunk=chunks, .combine=c) %dorng% matrixStats::rowMedians(betas[chunk, ], na.rm=TRUE)
+
+  if (ramr.method=="IQR") {
+    iqrs <- foreach::foreach (chunk=chunks, .combine=c) %dorng% matrixStats::rowIQRs(betas[chunk, ], na.rm=TRUE)
+    betas.filtered <- (betas-medians)/iqrs
+    betas.filtered[abs(betas.filtered)<iqr.cutoff]  <- NA
+  } else if (ramr.method=="beta") {
+    # multi-threaded EnvStats::ebeta (speed: mme=mmue>mle>>>fitdistrplus::fitdist)
+    betas.filtered <- foreach::foreach (chunk=chunks) %dorng% getPValues.beta(betas[chunk, ], ...)
+    betas.filtered <- do.call(rbind, betas.filtered)
+    betas.filtered[betas.filtered>=qval.cutoff] <- NA
+  } else if (ramr.method=="wbeta") {
+    betas.filtered <- foreach::foreach (chunk=chunks) %dorng% getPValues.wbeta(betas[chunk, ], ...)
+    betas.filtered <- do.call(rbind, betas.filtered)
+    betas.filtered[betas.filtered>=qval.cutoff] <- NA
+  } else if (ramr.method=="beinf") {
+    betas.filtered <- foreach::foreach (chunk=chunks) %dorng% getPValues.beinf(betas[chunk, ], ...)
+    betas.filtered <- do.call(rbind, betas.filtered)
+    betas.filtered[betas.filtered>=qval.cutoff] <- NA
+  }
+
+  if (!is.null(exclude.range))
+    betas.filtered[medians>=exclude.range[1] & medians<=exclude.range[2]] <- NA
+
+
+  getMergedRanges <- function (column) {
+    not.na <- which(!is.na(betas.filtered[,column]))
+    ranges <- GenomicRanges::reduce(data.ranges[universe.cpgs[not.na]], min.gapwidth=merge.window, with.revmap=TRUE)
+    if (length(ranges)>0) {
+      ranges$ncpg   <- unlist(lapply(ranges$revmap, length))
+      ranges$sample <- column
+      ranges        <- subset(ranges, `ncpg`>=min.cpgs & `width`>=max(1,min.width))
+      ranges$dbeta  <- vapply(ranges$revmap, function (revmap) {
+        mean(betas[not.na[revmap],column,drop=FALSE] - medians[not.na[revmap]])
+      }, numeric(1))
+
+      if (ramr.method=="IQR") {
+        ranges$xiqr   <- vapply(ranges$revmap, function (revmap) {
+          mean(betas.filtered[not.na[revmap],column,drop=FALSE], na.rm=TRUE)
+        }, numeric(1))
+      } else {
+        ranges$pval <- vapply(ranges$revmap, function (revmap) {
+          return( 10**mean(log10(betas.filtered[not.na[revmap],column] + .Machine$double.xmin), na.rm=TRUE) )
+        }, numeric(1))
+      }
+
+      ranges$revmap <- lapply(ranges$revmap, function (i) {universe.cpgs[not.na[i]]})
+    }
+    return(ranges)
+  }
+
+  amr.ranges <- foreach::foreach (column=colnames(betas.filtered)) %dorng% getMergedRanges(column)
+
+  parallel::stopCluster(cl)
+  if (verbose) message(sprintf(" [%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
+  return(unlist(methods::as(amr.ranges, "GRangesList")))
+}

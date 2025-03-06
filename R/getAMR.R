@@ -1,72 +1,242 @@
 #' Search for aberrantly methylated regions
 #'
 #' @description
-#' `getAMR` returns a `GRanges` object with all the aberrantly methylated
-#' regions (AMRs) for all samples in a data set.
+#' `getAMR` returns a `GRanges` object with aberrantly methylated
+#' regions (AMRs / epimutations) for all samples in a data set.
 #'
 #' @details
-#' In the provided data set, `getAMR` compares methylation beta values of each
-#' sample with other samples to identify rare long-range methylation
-#' aberrations (epimutations).
-#' For `ramr.method=="IQR"`: for every genomic location (CpG) in
-#' `data.ranges` the IQR-normalized deviation from the median value is
-#' calculated, and all CpGs with such normalized deviation not smaller than the
-#' `iqr.cutoff` are retained. For
-#' `ramr.method %in% c("beta", "wbeta", "beinf")`: parameters of beta
-#' distribution are estimated by means of `EnvStats::ebeta` (beta distribution),
-#' `ExtDist::eBeta` (weighted beta destribution), or `gamlss.dist::BEINF` (zero
-#' and one inflated beta distribution) functions, respectively. These
-#' parameters are then used to calculate the probability values, followed by the
-#' filtering when all CpGs with p-values not greater than `qval.cutoff` are
-#' retained. Another filtering is then performed to exclude all CpGs within
-#' `exclude.range`. Next, the retained (significant) CpGs are merged within
-#' the window of `merge.window`, and final filtering is applied to AMR genomic
-#' ranges (by `min.cpgs` and `min.width`).
+#' In the provided data set, `getAMR` finds stretches of outlier beta values
+#' to identify rare long-range methylation
+#' aberrations (epimutations) in one or several samples. As a rule, methods for
+#' differential methylation analysis rely on between-group comparisons ---
+#' `getAMR` performs this comparison within-group, which is not only faster,
+#' but also more sensitive. The logic of computations is described below.
+#'
+#' \subsection{Compute}{
+#' This section describes computations that are performed in order to identify
+#' individual outlier beta values --- but
+#' \bold{before values are deemed as outliers}.
+#' At the moment, the two supported methods are:
+#'
+#' \describe{
+#'   \item{"IQR"}{
+#'     When `compute=="IQR"`, for every genomic location (CpG) in
+#'     `data.ranges` the IQR-normalized deviation from the median value is
+#'     calculated using the following formula:
+#'     \deqn{xIQR_i=\frac{x_i-M}{IQR}}
+#'     where \eqn{x_i} is a beta value for i-th sample,
+#'     \eqn{M} and \eqn{IQR} are a median and an interquartile range
+#'     of all beta values at this genomic location, respectively.
+#'   }
+#'   \item{"beta+binom"}{
+#'     When `compute=="beta+binom"`, for every genomic location (CpG),
+#'     `getAMR` will estimate the probability of each beta value to occur.
+#'     For all beta values inside the open \eqn{(0,1)} interval, beta
+#'     distribution is used. For all \eqn{\{0;1\}} endpoint (extreme) values
+#'     where beta distribution is not defined, binomial probability is
+#'     calculated using coverage data (supplied using `data.coverage`
+#'     parameter).
+#'
+#'     Alpha \eqn{{\alpha}} and beta \eqn{{\beta}} parameters of beta
+#'     distribution can be estimated using one of the following methods:
+#'
+#'     \enumerate{
+#'       \item{
+#'         Method of moments (`compute.estimate="mom"`) based on
+#'         (both optionally weighted) mean and unbiased variance
+#'         \deqn{\text{sample mean} = \bar{x} = \frac{ \sum\limits_{i=1}^n w_i x_i}{\sum\limits_{i=1}^n w_i}}
+#'         \deqn{\text{unbiased variance} =\bar{v} = \frac {\sum\limits_{i=1}^N w_i (x_i - \bar{x})^2} {\sum_{i=1}^N w_i - (\sum_{i=1}^N w_i^2 / \sum_{i=1}^N w_i)} }
+#'         where \eqn{x_i} and \eqn{w_i} are a beta value and its reliability
+#'         weight for i-th sample.
+#'         \deqn{\hat{\alpha} = \bar{x} \left(\frac{\bar{x} (1 - \bar{x})}{\bar{v}} - 1 \right)}
+#'         \deqn{\hat{\beta} = (1-\bar{x}) \left(\frac{\bar{x} (1 - \bar{x})}{\bar{v}} - 1 \right)}
+#'         Note: all beta values from the closed \eqn{[0,1]} interval are used
+#'         for calculation of arithmetic mean value.
+#'         For more details on used formulas, visit
+#'         \href{https://en.wikipedia.org/wiki/Weighted_arithmetic_mean#Mathematical_definition}{Weighted arithmetic mean},
+#'         \href{https://en.wikipedia.org/wiki/Weighted_arithmetic_mean#Reliability_weights}{Weighted variance with reliability weights},
+#'         and \href{https://en.wikipedia.org/wiki/Beta_distribution#Method_of_moments}{Method of moments for beta distribution}
+#'       }
+#'       \item{
+#'         Approximate maximum likelihood (`compute.estimate="amle"`) based on
+#'         (both optionally weighted) geometric means of \eqn{x} and \eqn{(1-x)}
+#'         \deqn{ \hat{G}_x = \left(\prod_{i=1}^n x_i^{w_i}\right)^{1 / \sum_{i=1}^n w_i} }
+#'         \deqn{ \hat{G}_{(1-x)} = \left(\prod_{i=1}^n {(1-x_i)}^{w_i}\right)^{1 / \sum_{i=1}^n w_i} }
+#'         where \eqn{x_i} and \eqn{w_i} are a beta value and its reliability
+#'         weight for i-th sample.
+#'         \deqn{ \hat{\alpha}\approx \tfrac{1}{2} + \frac{\hat{G}_{x}}{2(1-\hat{G}_x-\hat{G}_{(1-x)})} }
+#'         \deqn{ \hat{\beta}\approx \tfrac{1}{2} + \frac{\hat{G}_{(1-x)}}{2(1-\hat{G}_x-\hat{G}_{(1-x)})} }
+#'         Note: only beta values from the open \eqn{(0,1)} interval are used
+#'         for calculation of geometric means.
+#'         For more details, visit
+#'         \href{https://en.wikipedia.org/wiki/Weighted_geometric_mean}{Weighted geometric mean},
+#'         and \href{https://en.wikipedia.org/wiki/Beta_distribution#Two_unknown_parameters_2}{Maximum likelihood for beta distribution}
+#'       }
+#'       \item{
+#'         And a numerical maximum likelihood (`compute.estimate="nmle"`) which
+#'         is yet to be implemented.
+#'       }
+#'     }
+#'
+#'     After estimating parameters of beta distribution,
+#'     probabilities of observed beta values from the open \eqn{(0,1)} interval
+#'     are computed using regularized incomplete beta function
+#'     \eqn{I_x(\alpha, \beta)}. For more details, visit
+#'     \href{https://en.wikipedia.org/wiki/Beta_distribution#Cumulative_distribution_function}{Cumulative distribution function for beta distribution}.
+#'
+#'     Probabilities of \eqn{\{0;1\}} endpoint values are computed using
+#'     mean value (either arithmetic for `compute.estimate="mom"` or geometric
+#'     for `compute.estimate="*mle"`) using the following formulas:
+#'     \deqn{{p^0}_i=(1-\bar{x})^k}
+#'     \deqn{{p^1}_i=\bar{x}^k}
+#'     where \eqn{{p^0}_i} and \eqn{{p^1}_i} are probabilities of
+#'     observing 0 or 1 for i-th sample, respectively,
+#'     \eqn{\bar{x}} is a mean of all beta values for this genomic
+#'     position, and \eqn{k} is a sequencing coverage of this genomic
+#'     position for i-th sample.
+#'   }
+#' }
+#'
+#'
+#' }
+#'
+#' \subsection{Combine}{
+#' This section describes how individual beta values are deemed as outliers
+#' and how these outliers are combined into extended genomic regions
+#' (aberrantly methylated regions, AMRs, or epimutations).
+#' The only method supported at the moment is thresholding as
+#' described below.
+#'
+#' \describe{
+#'   \item{"threshold"}{
+#'     This method applies a fixed threshold (specified using
+#'     `combine.threshold` parameter) to all `xIQR` or probability
+#'     values computed at the previous step. All observed beta values that
+#'     are passing this threshold (above or equal to the threshold for `xIQR`;
+#'     below or equal in case of probability values) are considered to be
+#'     outliers and therefore retained.
+#'
+#'     Next, for all outlier beta values per sample, corresponding genomic
+#'     positions are merged into genomic intervals using the window of
+#'     `combine.window` and keeping the strand information unless
+#'     `combine.ignore.strand` is TRUE.
+#'   }
+#'   \item{"comb-p"}{
+#'     This method of combining outliers into genomic ranges is yet to be
+#'     implemented.
+#'   }
+#' }
+#'
+#' Resulting genomic intervals are then filtered:
+#' only the regions containing at least `combine.min.cpgs`
+#' outliers and which are at leas as wide as `combine.min.width` are
+#' reported back.
+#'
+#' As a final step, the following average values are computed for every
+#' aberrantly methylated region:
+#' \enumerate{
+#'   \item{
+#'     arithmetic mean of distances of all outlier beta values to
+#'     a median beta value (`dbeta`)
+#'   }
+#'   \item{
+#'     if `compute=="IQR"`, arithmetic mean of xIQR values of all outlier
+#'     genomic position (`xiqr`) OR
+#'   }
+#'   \item{
+#'     if `compute=="beta+binom"`, geometric mean of probability values
+#'     of all outlier genomic position (`pval`)
+#'   }
+#' }
+#'
+#' }
+#'
+#' @note
+#' NA values within metadata columns of `data.ranges` are silently dropped
+#' in all computations.
 #'
 #' @param data.ranges A `GRanges` object with genomic locations and
 #' corresponding beta values included as metadata.
-#' @param data.samples A character vector with sample names (a subset of
+#' @param data.samples A character vector with sample names (e.g., a subset of
 #' metadata column names). If `NULL` (the default), then all samples (metadata
 #' columns) are included in the analysis.
-#' @param ramr.method A character scalar: when ramr.method is "IQR" (the
-#' default), the filtering based on interquantile range is used (`iqr.cutoff`
-#' value is then used as a threshold). When "beta", "wbeta" or "beinf" -
-#' filtering based on fitting non-weighted (`EnvStats::ebeta`), weighted
-#' (`ExtDist::eBeta`) or zero-and-one inflated (`gamlss.dist::BEINF`)
-#' beta distributions, respectively, is used, and `pval.cutoff` or `qval.cutoff`
-#' (if not `NULL`) is used as a threshold. For "wbeta", weights directly
-#' correlate with bin contents (number of values per bin) and inversly - with
-#' the distances from the median value, thus narrowing the estimated
-#' distribution and emphasizing outliers.
-#' @param iqr.cutoff A single integer >= 1. Methylation beta values differing
-#' from the median value by more than `iqr.cutoff` interquartile ranges are
-#' considered to be significant (the default: 5).
-#' @param pval.cutoff A numeric scalar (the default: 5e-2). Bonferroni
-#' correction of `pval.cutoff` by the length of the `data.samples` object is
-#' used to calculate `qval.cutoff` if the latter is `NULL`.
-#' @param qval.cutoff A numeric scalar. Used as a threshold for filtering based
-#' on fitting non-weighted or weighted beta distributions: all p-values lower
-#' than `qval.cutoff` are considered to be significant. If `NULL` (the default),
-#' it is calculated using `pval.cutoff`
-#' @param merge.window A positive integer. All significant (survived the
+#' @param data.coverage An optional `data.frame` object with coverage data. If
+#' provided, must be an all-integer `data.frame`, with the same dimensions
+#' and column names as the `data.ranges` metadata columns.
+#' @param transform A character scalar specifying if beta values should be
+#' used as supplied ("identity", the default) or linearly transformed ("linear")
+#' to force all \eqn{\{0;1\}} endpoint (extreme) values within open \eqn{(0,1)}
+#' interval using the following formula: \deqn{x'=\frac{x(N-1)+0.5}{N}}
+#' where \eqn{x} is the beta value before transformation, and \eqn{N} is the
+#' number of samples. Such transformation is recommended only
+#' if beta values contain \eqn{\{0;1\}} values \bold{and} coverage data is NOT
+#' available. See \href{https://doi.org/10.1037/1082-989x.11.1.54}{doi: 10.1037/1082-989X.11.1.54}
+#' and \href{https://stats.stackexchange.com/questions/31300/dealing-with-0-1-values-in-a-beta-regression}{Dealing with 0,1 values in a beta regression} for more details.
+#' @param exclude.range A numeric vector of length two. Unless `NULL`
+#' (the default), all `data.ranges` genomic locations with their median
+#' methylation beta value within the `exclude.range` interval are filtered out.
+#' @param compute A character scalar: when "IQR" (the
+#' default), AMR search based on interquantile range is performed.
+#' When "beta+binom" - search is based on fitting optionally weighted
+#' beta distribution (with the possibility of estimating binomial probability
+#' of \eqn{\{0;1\}} endpoint values). See Details section for explanation.
+#' @param compute.estimate A character scalar for the method of parameter
+#' estimation of beta distribution. The default ("mom") stands for the method
+#' of moments based on the unbiased estimator of variance and includes
+#' \eqn{\{0;1\}} endpoints in calculation of moments (mean, unbiased variance).
+#' Other options are "amle" (approximation of maximum likelihood estimation)
+#' and "nmle" (numeric maximum likelihood estimation) - both ignore
+#' \eqn{\{0;1\}} endpoints in calculations. See Details section for explanation.
+#' @param compute.weights A character scalar for the weights assigned to
+#' individual observations (beta values) and used to compute weighted
+#' means and variance as described in "Compute" section below. Four available
+#' weighing schemes result in different sensitivity of outlier detection and
+#' rate of false positive (FP) findings: "equal" (the default) is the least
+#' sensitive and gives least number of FPs, while "invDist" is the most
+#' sensitive but may result in a very high number of FPs especially when
+#' `combine.threshold` is too high (1e-3 or higher).
+#' "logInvDist" is recommended when one desires a balance between relatively
+#' low type I error rate and higher
+#' detection sensitivity for both unique and non-unique AMRs.
+#'
+#' If "equal", all weights are equal to 1 (\eqn{w_i=1}).
+#' Otherwise, weights of observations inversely depend on their distance from
+#' the median (thus emphasizing outliers) and are calculated using the
+#' following formulas:
+#' \deqn{\text{"logInvDist": } w_i = \log{\frac{1}{|M-x_i|+\epsilon}}}
+#' \deqn{\text{"sqrtInvDist": } w_i = \sqrt{\frac{1}{|M-x_i|+\epsilon}}}
+#' \deqn{\text{"invDist": } w_i = \frac{1}{|M-x_i|+\epsilon}}
+#' where \eqn{x_i} is a beta value for i-th sample, \eqn{M} is a median of
+#' all beta values at this genomic location, and \eqn{\epsilon} is a very
+#' small number (= FLT_EPSILON \eqn{\approx} 1.192093e-07).
+#' @param combine A character scalar for the method used to combine individual
+#' outlier genomic positions into genomic intervals (ranges). When "threshold"
+#' (the default) is used, simple thresholding is applied.
+#' More details are given in the "Combine" subsection below.
+#' @param combine.threshold A numeric scalar setting the threshold for an
+#' outlier value. When `compute=="IQR"`, methylation beta values differing
+#' from the median value by at least `combine.threshold` interquartile ranges
+#' are considered to be outliers (the default: 5). When `compute=="beta+binom"`,
+#' all probability values not higher than `combine.threshold` are considered
+#' to be outliers (the default: 0.001).
+#' @param combine.window A positive integer. All significant (survived the
 #' filtering stage) `data.ranges` genomic locations within this distance will be
 #' merged to create AMRs (the default: 300).
-#' @param min.cpgs A single integer >= 1. All AMRs containing less than
-#' `min.cpgs` significant genomic locations are filtered out (the default: 7).
-#' @param min.width A single integer >= 1 (the default). Only AMRs with the
-#' width of at least `min.width` are returned.
-#' @param exclude.range A numeric vector of length two. If not `NULL` (the
-#' default), all `data.ranges` genomic locations with their median methylation
-#' beta value within the `exclude.range` interval are filtered out.
-#' @param cores A single integer >= 1. Number of processes for parallel
-#' computation (the default: all but one cores). Results of parallel processing
-#' are fully reproducible when the same seed is used (thanks to doRNG).
-#' @param verbose boolean to report progress and timings (default: TRUE).
-#' @param ... Further arguments to be passed to `EnvStats::ebeta` or
-#' `ExtDist::eBeta` functions.
+#' @param combine.min.cpgs A single integer >= 1. All AMRs containing less than
+#' `combine.min.cpgs` significant genomic locations are filtered out (the
+#' default: 7).
+#' @param combine.min.width A single integer >= 1 (the default).
+#' Only AMRs with the width of at least `combine.min.width` are returned.
+#' @param combine.ignore.strand A boolean scalar to ignore strand information
+#' in the input `data.ranges` and when outlier genomic positions are combined
+#' into genomic intervals (the default: FALSE).
+#' @param ncores A single integer >= 1. Number of OpenMP threads for parallel
+#' computation (the default: half of the available cores). Results of parallel
+#' processing are fully reproducible.
+#' @param verbose Boolean to report progress and timings (default: TRUE).
 #' @return The output is a `GRanges` object that contains all the aberrantly
-#' methylated regions (AMRs) for all `data.samples` samples in `data.ranges`
-#' object. The following metadata columns may be present:
+#' methylated regions (AMRs / epimutations) for all `data.samples` samples in
+#' `data.ranges` object. The following metadata columns may be present:
 #' \itemize{
 #'   \item `revmap` -- integer list of significant CpGs (`data.ranges` genomic
 #'   locations) that are included in this AMR region
@@ -85,158 +255,103 @@
 #' and `ramr` vignettes for the description of usage and sample data.
 #' @examples
 #'   data(ramr)
-#'   getAMR(ramr.data, ramr.samples, ramr.method="beta",
-#'          min.cpgs=5, merge.window=1000, qval.cutoff=1e-3, cores=2)
+#'   getAMR(data.ranges=ramr.data, data.samples=ramr.samples,
+#'          compute="beta+binom", compute.estimate="amle",
+#'          combine.min.cpgs=5, combine.window=1000, combine.threshold=1e-3)
 #' @export
 getAMR <- function (data.ranges,
                     data.samples=NULL,
-                    ramr.method=c("IQR", "beta", "wbeta", "beinf"),
-                    iqr.cutoff=5,
-                    pval.cutoff=5e-2,
-                    qval.cutoff=NULL,
-                    merge.window=300,
-                    min.cpgs=7,
-                    min.width=1,
+                    data.coverage=NULL,
+                    transform=c("identity", "linear"),
                     exclude.range=NULL,
-                    cores=max(1,parallel::detectCores()-1),
-                    verbose=TRUE,
-                    ...)
+                    compute=c("IQR", "beta+binom"),
+                    compute.estimate=c("mom", "amle", "nmle"),
+                    compute.weights=c("equal", "logInvDist", "sqrtInvDist", "invDist"),
+                    combine=c("threshold", "comb-p"),
+                    combine.threshold=ifelse(compute=="IQR", 5, 1e-3),
+                    combine.window=300,
+                    combine.min.cpgs=7,
+                    combine.min.width=1,
+                    combine.ignore.strand=FALSE,
+                    ncores=NULL,
+                    verbose=TRUE)
 {
   if (!methods::is(data.ranges,"GRanges"))
     stop("'data.ranges' must be a GRanges object")
-  if (is.null(data.samples))
-    data.samples <- colnames(GenomicRanges::mcols(data.ranges))
-  if (!all(data.samples %in% colnames(GenomicRanges::mcols(data.ranges))))
-    stop("'data.ranges' metadata must include 'data.samples'")
+  data.mcols <- GenomicRanges::mcols(data.ranges)
+
+  if (is.null(data.samples)) {
+    data.samples <- colnames(data.mcols)
+  } else {
+    if (!all(data.samples %in% colnames(data.mcols)))
+      stop("'data.ranges' metadata must include 'data.samples'")
+  }
   if (length(data.samples)<3)
     stop("at least three 'data.samples' must be provided")
-  ramr.method <- match.arg(ramr.method)
+
+  if (is.null(data.coverage)) {
+    data.coverage <- as.data.frame(
+      sapply(data.samples, function (s) integer(0))
+    )
+    is.coverage <- FALSE
+  } else {
+    if (!methods::is(data.coverage, "data.frame") |
+        !identical(dim(data.mcols), dim(data.coverage)) |
+        !identical(colnames(data.mcols), colnames(data.coverage)) |
+        !all(apply(data.coverage, 2, is.integer)))
+      stop("When provided, 'data.coverage' must be",
+           " an all-integer 'data.frame' object",
+           " of the same dimensions as, and with the colnames identical to",
+           " 'data.ranges' metadata")
+    is.coverage <- TRUE
+  }
+
+  if (is.null(exclude.range))
+    exclude.range <- c(2,0) # // exclude those that are >= than 2 and <= than 0
+
+  transform <- match.arg(transform)
+  compute <- match.arg(compute)
+  compute.estimate <- match.arg(compute.estimate)
+  compute.weights <- match.arg(compute.weights)
+  combine <- match.arg(combine)
+
+  if (compute.estimate=="nmle")
+    stop("compute.estimate=='nmle' is not available yet")
+  if (combine=="comb-p")
+    stop("combine=='comb-p' is not available yet")
 
   #####################################################################################
 
-  getPValues.beta <- function (data.chunk, ...) {
-    chunk.filt <- apply(data.chunk, 1, function (x) {
-      x.median    <- stats::median(x, na.rm=TRUE)
-      x[is.na(x)] <- x.median
-      beta.fit <- suppressWarnings( EnvStats::ebeta(as.numeric(x), ...) )
-      pvals    <- stats::pbeta(x, beta.fit$parameters[1], beta.fit$parameters[2])
-      pvals[x>x.median] <- 1 - pvals[x>x.median]
-      return(pvals)
-    })
-    return(t(chunk.filt))
-  }
-  getPValues.wbeta<- function (data.chunk, ...) {
-    chunk.filt  <- apply(data.chunk, 1, function (x) {
-      x.median    <- stats::median(x, na.rm=TRUE)
-      x[is.na(x)] <- x.median
-      # weight directly correlates with bin contents (number of values per bin)
-      # and inversely - with the distance from the median value, thus narrowing
-      # the estimated distribution and emphasizing outliers
-      c           <- cut(x, c(0:100)/100)
-      b           <- table(c)
-      w           <- as.numeric(b[c]) * (1 - abs(x-x.median))
-      beta.fit    <- suppressWarnings( ExtDist::eBeta(as.numeric(x), w, ...) )
-      pvals       <- ExtDist::pBeta(x, params=beta.fit)
-      pvals[x>x.median] <- 1 - pvals[x>x.median]
-      return(pvals)
-    })
-    return(t(chunk.filt))
-  }
-  inv.logit <- function (x) exp(x)/(1+exp(x))
-  getPValues.beinf <- function (data.chunk, ...) {
-    chunk.filt <- apply(data.chunk, 1, function (x) {
-      x.median    <- stats::median(x, na.rm=TRUE)
-      x[is.na(x)] <- x.median
-      beinf.fit <- gamlss::gamlss(
-        as.numeric(x)~1, sigma.formula=~1, nu.formula=~1, tau.formula=~1,
-        family=gamlss.dist::BEINF(mu.link="logit", sigma.link="logit",
-                                  nu.link="log", tau.link="log"),
-        control=gamlss::gamlss.control(trace=FALSE), ...
-      )
-      pvals <- gamlss.dist::pBEINF(
-        q=x, mu=inv.logit(beinf.fit$mu.coefficients),
-        sigma=inv.logit(beinf.fit$sigma.coefficients),
-        nu=exp(beinf.fit$nu.coefficients),
-        tau=exp(beinf.fit$tau.coefficients),
-        lower.tail=TRUE, log.p=FALSE
-      )
-      pvals[x>x.median] <- 1 - pvals[x>x.median]
-      return(pvals)
-    })
-    return(t(chunk.filt))
-  }
-  
+  .data <- .preprocessData(
+    data.ranges=data.ranges, data.samples=data.samples,
+    data.coverage=data.coverage, transform=transform,
+    exclude.range=exclude.range, ncores=ncores, verbose=verbose
+  )
 
-  #####################################################################################
-
-  if (verbose) message("Identifying AMRs", appendLF=FALSE)
-  tm <- proc.time()
-
-  doParallel::registerDoParallel(cores)
-  cl <- parallel::makeCluster(cores)
-
-  universe      <- getUniverse(data.ranges, merge.window=merge.window, min.cpgs=min.cpgs, min.width=min.width)
-  universe.cpgs <- unlist(universe$revmap)
-
-  betas <- as.matrix(mcols(data.ranges)[universe.cpgs, data.samples, drop=FALSE])
-  if (is.null(qval.cutoff))
-    qval.cutoff <- pval.cutoff/ncol(betas)
-
-  chunks  <- split(seq_len(nrow(betas)), if (cores>1) cut(seq_len(nrow(betas)), cores) else 1)
-  medians <- foreach (chunk=chunks, .combine=c) %dorng% matrixStats::rowMedians(betas[chunk, ], na.rm=TRUE)
-
-  if (ramr.method=="IQR") {
-    iqrs <- foreach (chunk=chunks, .combine=c) %dorng% matrixStats::rowIQRs(betas[chunk, ], na.rm=TRUE)
-    betas.filtered <- (betas-medians)/iqrs
-    betas.filtered[abs(betas.filtered)<iqr.cutoff]  <- NA
-  } else if (ramr.method=="beta") {
-    # multi-threaded EnvStats::ebeta (speed: mme=mmue>mle>>>fitdistrplus::fitdist)
-    betas.filtered <- foreach (chunk=chunks) %dorng% getPValues.beta(betas[chunk, ], ...)
-    betas.filtered <- do.call(rbind, betas.filtered)
-    betas.filtered[betas.filtered>=qval.cutoff] <- NA
-  } else if (ramr.method=="wbeta") {
-    betas.filtered <- foreach (chunk=chunks) %dorng% getPValues.wbeta(betas[chunk, ], ...)
-    betas.filtered <- do.call(rbind, betas.filtered)
-    betas.filtered[betas.filtered>=qval.cutoff] <- NA
-  } else if (ramr.method=="beinf") {
-    betas.filtered <- foreach (chunk=chunks) %dorng% getPValues.beinf(betas[chunk, ], ...)
-    betas.filtered <- do.call(rbind, betas.filtered)
-    betas.filtered[betas.filtered>=qval.cutoff] <- NA
+  if (compute=="IQR") {
+    .getAMR.IQR(
+      data.list=.data, threshold=combine.threshold, verbose=verbose
+    )
+  } else if (compute=="beta+binom") {
+    .getAMR.beta(
+      data.list=.data,
+      estimate=compute.estimate,
+      weights=compute.weights,
+      coverage=is.coverage,
+      threshold=log(combine.threshold),
+      verbose=verbose
+    )
   }
 
-  if (!is.null(exclude.range))
-    betas.filtered[medians>=exclude.range[1] & medians<=exclude.range[2]] <- NA
+  amr.ranges <- .createGranges(
+    data.list=.data,
+    compute=compute,
+    window=combine.window,
+    min.cpgs=combine.min.cpgs,
+    min.width=combine.min.width,
+    ignore.strand=combine.ignore.strand,
+    verbose=verbose
+  )
 
-
-  getMergedRanges <- function (column) {
-    not.na <- which(!is.na(betas.filtered[,column]))
-    ranges <- GenomicRanges::reduce(data.ranges[universe.cpgs[not.na]], min.gapwidth=merge.window, with.revmap=TRUE)
-    if (length(ranges)>0) {
-      ranges$ncpg   <- unlist(lapply(ranges$revmap, length))
-      ranges$sample <- column
-      ranges        <- subset(ranges, `ncpg`>=min.cpgs & `width`>=max(1,min.width))
-      ranges$dbeta  <- vapply(ranges$revmap, function (revmap) {
-        mean(betas[not.na[revmap],column,drop=FALSE] - medians[not.na[revmap]])
-      }, numeric(1))
-
-      if (ramr.method=="IQR") {
-        ranges$xiqr   <- vapply(ranges$revmap, function (revmap) {
-          mean(betas.filtered[not.na[revmap],column,drop=FALSE], na.rm=TRUE)
-        }, numeric(1))
-      } else {
-        ranges$pval <- vapply(ranges$revmap, function (revmap) {
-          return( 10**mean(log10(betas.filtered[not.na[revmap],column] + .Machine$double.xmin), na.rm=TRUE) )
-        }, numeric(1))
-      }
-
-      ranges$revmap <- lapply(ranges$revmap, function (i) {universe.cpgs[not.na[i]]})
-    }
-    return(ranges)
-  }
-
-  amr.ranges <- foreach (column=colnames(betas.filtered)) %dorng% getMergedRanges(column)
-
-  parallel::stopCluster(cl)
-  if (verbose) message(sprintf(" [%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
-  return(unlist(methods::as(amr.ranges, "GRangesList")))
+  return(amr.ranges)
 }
