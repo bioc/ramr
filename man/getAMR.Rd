@@ -27,34 +27,44 @@ getAMR(
 \item{data.ranges}{A `GRanges` object with genomic locations and
 corresponding beta values included as metadata.}
 
-\item{data.samples}{A character vector with sample names (a subset of
+\item{data.samples}{A character vector with sample names (e.g., a subset of
 metadata column names). If `NULL` (the default), then all samples (metadata
 columns) are included in the analysis.}
 
 \item{data.coverage}{An optional `data.frame` object with coverage data. If
-provided, its dimensions must be the same as the dimensions of}
+provided, must be an all-integer `data.frame`, with the same dimensions
+and column names as the `data.ranges` metadata columns.}
 
-\item{transform}{description}
+\item{transform}{A character scalar specifying if beta values should be
+used as supplied ("identity", the default) or linearly transformed ("linear")
+to force all \eqn{\{0;1\}} endpoint (extreme) values within open \eqn{(0,1)}
+interval using the following formula: \deqn{x'=\frac{x(N-1)+0.5}{N}}
+where \eqn{x} is the beta value before transformation, and \eqn{N} is the
+number of samples. Such transformation is recommended only
+if beta values contain \eqn{\{0;1\}} values \bold{and} coverage data is NOT
+available. See \href{https://doi.org/10.1037/1082-989x.11.1.54}{doi: 10.1037/1082-989X.11.1.54}
+and \href{https://stats.stackexchange.com/questions/31300/dealing-with-0-1-values-in-a-beta-regression}{Dealing with 0,1 values in a beta regression} for more details.}
 
-\item{exclude.range}{A numeric vector of length two. If \emph{not} `NULL`
+\item{exclude.range}{A numeric vector of length two. Unless `NULL`
 (the default), all `data.ranges` genomic locations with their median
 methylation beta value within the `exclude.range` interval are filtered out.}
 
-\item{compute}{A character scalar: when ramr.method is "IQR" (the
-default), the filtering based on interquantile range is used (`iqr.cutoff`
-value is then used as a threshold). When "beta", "wbeta" or "beinf" -
-filtering based on fitting non-weighted (`EnvStats::ebeta`), weighted
-(`ExtDist::eBeta`) or zero-and-one inflated (`gamlss.dist::BEINF`)
-beta distributions, respectively, is used, and `pval.cutoff` or `qval.cutoff`
-(if not `NULL`) is used as a threshold. For "wbeta", weights directly
-correlate with bin contents (number of values per bin) and inversly - with
-the distances from the median value, thus narrowing the estimated
-distribution and emphasizing outliers.}
+\item{compute}{A character scalar: when "IQR" (the
+default), AMR search based on interquantile range is performed.
+When "beta+binom" - search is based on fitting optionally weighted
+beta distribution (with the possibility of estimating binomial probability
+of \eqn{\{0;1\}} endpoint values). See Details section for explanation.}
 
-\item{compute.estimate}{description}
+\item{compute.estimate}{A character scalar for the method of parameter
+estimation of beta distribution. The default ("mom") stands for the method
+of moments based on the unbiased estimator of variance and includes
+\eqn{\{0;1\}} endpoints in calculation of moments (mean, unbiased variance).
+Other options are "amle" (approximation of maximum likelihood estimation)
+and "nmle" (numeric maximum likelihood estimation) - both ignore
+\eqn{\{0;1\}} endpoints in calculations. See Details section for explanation.}
 
-\item{compute.weights}{A single string for the weights assigned to individual
-observations (beta values) and used to compute weighted
+\item{compute.weights}{A character scalar for the weights assigned to
+individual observations (beta values) and used to compute weighted
 means and variance as described in "Compute" section below. Four available
 weighing schemes result in different sensitivity of outlier detection and
 rate of false positive (FP) findings: "equal" (the default) is the least
@@ -76,34 +86,36 @@ where \eqn{x_i} is a beta value for i-th sample, \eqn{M} is a median of
 all beta values at this genomic location, and \eqn{\epsilon} is a very
 small number (= FLT_EPSILON \eqn{\approx} 1.192093e-07).}
 
-\item{combine}{description}
+\item{combine}{A character scalar for the method used to combine individual
+outlier genomic positions into genomic intervals (ranges). When "threshold"
+(the default) is used, simple thresholding is applied.
+More details are given in the "Combine" subsection below.}
 
-\item{combine.threshold}{A single integer >= 1. Methylation beta values differing
-from the median value by more than `iqr.cutoff` interquartile ranges are
-considered to be significant (the default: 5).
-param pval.cutoff A numeric scalar (the default: 5e-2). Bonferroni
-correction of `pval.cutoff` by the length of the `data.samples` object is
-used to calculate `qval.cutoff` if the latter is `NULL`.
-param qval.cutoff A numeric scalar. Used as a threshold for filtering based
-on fitting non-weighted or weighted beta distributions: all p-values lower
-than `qval.cutoff` are considered to be significant. If `NULL` (the default),
-it is calculated using `pval.cutoff`}
+\item{combine.threshold}{A numeric scalar setting the threshold for an
+outlier value. When `compute=="IQR"`, methylation beta values differing
+from the median value by at least `combine.threshold` interquartile ranges
+are considered to be outliers (the default: 5). When `compute=="beta+binom"`,
+all probability values not higher than `combine.threshold` are considered
+to be outliers (the default: 0.001).}
 
 \item{combine.window}{A positive integer. All significant (survived the
 filtering stage) `data.ranges` genomic locations within this distance will be
 merged to create AMRs (the default: 300).}
 
 \item{combine.min.cpgs}{A single integer >= 1. All AMRs containing less than
-`min.cpgs` significant genomic locations are filtered out (the default: 7).}
+`combine.min.cpgs` significant genomic locations are filtered out (the
+default: 7).}
 
-\item{combine.min.width}{A single integer >= 1 (the default). Only AMRs with the
-width of at least `min.width` are returned.}
+\item{combine.min.width}{A single integer >= 1 (the default).
+Only AMRs with the width of at least `combine.min.width` are returned.}
 
-\item{combine.ignore.strand}{description}
+\item{combine.ignore.strand}{A boolean scalar to ignore strand information
+in the input `data.ranges` and when outlier genomic positions are combined
+into genomic intervals (the default: FALSE).}
 
-\item{ncores}{A single integer >= 1. Number of processes for parallel
-computation (the default: all but one cores). Results of parallel processing
-are fully reproducible when the same seed is used (thanks to doRNG).}
+\item{ncores}{A single integer >= 1. Number of OpenMP threads for parallel
+computation (the default: half of the available cores). Results of parallel
+processing are fully reproducible.}
 
 \item{verbose}{Boolean to report progress and timings (default: TRUE).}
 }
@@ -274,6 +286,10 @@ aberrantly methylated region:
 }
 
 }
+
+#' @note
+NA values within metadata columns of `data.ranges` are silently dropped
+in all computations.
 }
 \examples{
   data(ramr)
