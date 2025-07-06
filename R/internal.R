@@ -1,6 +1,6 @@
 #' @importFrom BiocGenerics relist start strand
 #' @importFrom data.table as.data.table foverlaps melt.data.table setkeyv
-#' @importFrom GenomeInfoDb seqnames
+#' @importFrom Seqinfo seqnames
 #' @importFrom GenomicRanges findOverlaps GRanges granges mcols `mcols<-` reduce
 #' @importFrom IRanges IRanges subsetByOverlaps
 #' @importFrom methods as is
@@ -95,14 +95,14 @@ utils::globalVariables(c(
   }
 
   chunks <- .getPartitions(
-    seqrunlens=S4Vectors::runLength(GenomeInfoDb::seqnames(data.ranges)),
+    seqrunlens=S4Vectors::runLength(Seqinfo::seqnames(data.ranges)),
     ncores=ncores
   )
 
   fn <- paste("rcpp_prepare_data", transform, sep="_")
   data.object <- do.call(what=fn, args=list(
-    seqnames=S4Vectors::runValue(GenomeInfoDb::seqnames(data.ranges)),
-    seqrunlens=S4Vectors::runLength(GenomeInfoDb::seqnames(data.ranges)),
+    seqnames=S4Vectors::runValue(Seqinfo::seqnames(data.ranges)),
+    seqrunlens=S4Vectors::runLength(Seqinfo::seqnames(data.ranges)),
     start=BiocGenerics::start(data.ranges),
     strand=S4Vectors::as.factor(BiocGenerics::strand(data.ranges)),
     mcols=as.data.frame(GenomicRanges::mcols(data.ranges), optional=TRUE)[, data.samples],
