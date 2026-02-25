@@ -1,8 +1,39 @@
 #!/usr/bin/env sh
 
-CUSTOM_CXXFLAGS="-Xclang -fopenmp"
-CUSTOM_LIBS="-lomp"
+# check if OpenMP libs are in place and _OPENMP macro is defined
+cat <<EOF > test_omp.cpp
+#include <omp.h>
+int test_omp () {
+#if defined(_OPENMP)
+  return omp_get_max_threads();
+#else
+  return res;
+#endif
+}
+EOF
 
+CUSTOM_CXXFLAGS=""
+CUSTOM_LIBS=""
+
+# able to compile it?
+if "${R_HOME}/bin/R" CMD SHLIB test_omp.cpp > test_omp.log 2>&1; then
+  echo "OpenMP is enabled by default"
+elif PKG_CXXFLAGS="${PKG_CXXFLAGS} -fopenmp" "${R_HOME}/bin/R" CMD SHLIB test_omp.cpp > test_omp.log 2>&1; then
+  echo "OpenMP is enabled using -fopenmp"
+  CUSTOM_CXXFLAGS="-fopenmp"
+elif PKG_CXXFLAGS="${PKG_CXXFLAGS} -Xclang -fopenmp" PKG_LIBS="-lomp" "${R_HOME}/bin/R" CMD SHLIB test_omp.cpp > test_omp.log 2>&1; then
+  echo "OpenMP is enabled using -Xclang -fopenmp"
+  CUSTOM_CXXFLAGS="-Xclang -fopenmp"
+  CUSTOM_LIBS="-lomp"
+else
+  echo "OpenMP is not supported"
+fi
+
+# clean up
+rm -f test_omp.*
+
+# update Makevars
 sed -e "s|CUSTOM_CXXFLAGS|$CUSTOM_CXXFLAGS|" -e "s|CUSTOM_LIBS|$CUSTOM_LIBS|" src/Makevars.in > src/Makevars
 
+# done
 exit 0

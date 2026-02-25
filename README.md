@@ -1,6 +1,9 @@
 # ramr
 
-[![](https://github.com/BBCG/ramr/workflows/R-CMD-check-bioc/badge.svg)](https://github.com/BBCG/ramr/actions) [![](https://codecov.io/gh/BBCG/ramr/branch/devel/graph/badge.svg)](https://app.codecov.io/gh/BBCG/ramr/tree/devel) [![](https://bioconductor.org/shields/years-in-bioc/ramr.svg)](https://bioconductor.org/packages/release/bioc/html/ramr.html)
+[![](https://github.com/BBCG/ramr/workflows/R-CMD-check-bioc/badge.svg)](https://github.com/BBCG/ramr/actions)
+[![](https://codecov.io/gh/BBCG/ramr/branch/devel/graph/badge.svg)](https://app.codecov.io/gh/BBCG/ramr/tree/devel)
+[![](https://bioconductor.org/shields/years-in-bioc/ramr.svg)](https://bioconductor.org/packages/release/bioc/html/ramr.html)
+[![install from r-universe](https://bioc.r-universe.dev/ramr/badges/version)](https://bioc.r-universe.dev/ramr)
 
 # Introduction
 

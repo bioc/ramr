@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+
+# clean up
+rm -f src/Makevars
+
+# done
+exit 0
