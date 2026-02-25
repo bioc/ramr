@@ -1,9 +1,8 @@
 #!/usr/bin/env sh
 
-export CUSTOM_CXXFLAGS="-Xclang -fopenmp"
-export CUSTOM_LIBS="-lomp"
+CUSTOM_CXXFLAGS="-Xclang -fopenmp"
+CUSTOM_LIBS="-lomp"
 
-# sed -e "s|CUSTOM_CXXFLAGS|$CUSTOM_CXXFLAGS|" src/Makevars > src/Makevars.tmp && mv src/Makevars.tmp src/Makevars
-# sed -e "s|CUSTOM_LIBS|$CUSTOM_LIBS|" src/Makevars > src/Makevars.tmp && mv src/Makevars.tmp src/Makevars
+sed -e "s|CUSTOM_CXXFLAGS|$CUSTOM_CXXFLAGS|" -e "s|CUSTOM_LIBS|$CUSTOM_LIBS|" src/Makevars.in > src/Makevars
 
 exit 0
