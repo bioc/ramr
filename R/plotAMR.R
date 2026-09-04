@@ -105,7 +105,7 @@ plotAMR <- function (data.ranges,
       amr.revmaps <- plot.ranges$revmap
 
       colorify       <- c("median", if (is.null(highlight)) unique(as.character(amr.samples)), highlight)
-      plot.data.melt <- data.table::melt.data.table(plot.data, id.vars=c("seqnames","start","end","width","strand"),
+      plot.data.melt <- data.table::melt.data.table(plot.data, measure.vars=c(intersect(colnames(plot.data), c("median", data.samples))), #id.vars=c("seqnames","start","end","width","strand"),
                                                     variable.name="sample", value.name="beta")
       plot.data.melt[, `:=` (
         size=0,
