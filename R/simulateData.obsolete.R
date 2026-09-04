@@ -143,7 +143,7 @@ simulateData.obsolete <- function (template.ranges,
   if (verbose) message("Simulating data", appendLF=FALSE)
   tm <- proc.time()
 
-  template.betas <- as.matrix(GenomicRanges::mcols(template.ranges, use.names=FALSE))
+  template.betas <- as.matrix(S4Vectors::mcols(template.ranges, use.names=FALSE))
   chunks <- split(seq_len(nrow(template.betas)), if (cores>1) cut(seq_len(nrow(template.betas)), cores) else 1)
 
   doParallel::registerDoParallel(cores)
@@ -159,7 +159,7 @@ simulateData.obsolete <- function (template.ranges,
     if (verbose) message("Introducing epimutations", appendLF=FALSE)
     tm <- proc.time()
 
-    amr.mcols <- data.frame(GenomicRanges::mcols(amr.ranges))
+    amr.mcols <- data.frame(S4Vectors::mcols(amr.ranges))
     for (i in seq_len(nrow(amr.mcols))) {
       revmap <- unlist(amr.mcols[i,"revmap"])
       dbeta  <- sign(0.5 - mean(random.betas[revmap,], na.omit=TRUE)) * amr.mcols[i,"dbeta"]
@@ -174,7 +174,7 @@ simulateData.obsolete <- function (template.ranges,
   random.betas[random.betas<min.beta] <- min.beta
 
   data.ranges <- GenomicRanges::granges(template.ranges)
-  GenomicRanges::mcols(data.ranges) <- random.betas
+  S4Vectors::mcols(data.ranges) <- random.betas
 
   return(data.ranges)
 }

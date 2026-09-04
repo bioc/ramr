@@ -145,7 +145,7 @@ simulateData <- function (template.ranges,
       stop("Malformed 'amr.ranges' object: 'dbeta' field is missing or is outside the closed interval [0,1]")
   }
 
-  template.mcols <- GenomicRanges::mcols(template.ranges)
+  template.mcols <- S4Vectors::mcols(template.ranges)
   template.samples <- colnames(template.mcols)
   template.coverage <- as.data.frame( sapply(template.samples, function (s) integer(0)) )
   compute.estimate <- match.arg(compute.estimate)
@@ -174,7 +174,7 @@ simulateData <- function (template.ranges,
   }
 
   data.ranges <- GenomicRanges::granges(template.ranges)
-  GenomicRanges::mcols(data.ranges) <- random.betas
+  S4Vectors::mcols(data.ranges) <- random.betas
 
   return(data.ranges)
 }

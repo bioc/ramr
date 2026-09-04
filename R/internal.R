@@ -1,11 +1,11 @@
 #' @importFrom BiocGenerics relist start strand
 #' @importFrom data.table as.data.table foverlaps melt.data.table setkeyv
 #' @importFrom Seqinfo seqnames
-#' @importFrom GenomicRanges findOverlaps GRanges granges mcols `mcols<-` reduce
+#' @importFrom GenomicRanges findOverlaps GRanges granges reduce
 #' @importFrom IRanges IRanges subsetByOverlaps
 #' @importFrom methods as is
 #' @importFrom Rcpp sourceCpp
-#' @importFrom S4Vectors as.factor DataFrame I queryHits runLength runValue
+#' @importFrom S4Vectors as.factor DataFrame I queryHits runLength runValue mcols
 #' @importFrom stats median na.omit setNames
 #' @importFrom utils globalVariables head packageVersion tail
 #' @useDynLib ramr, .registration=TRUE
@@ -105,7 +105,7 @@ utils::globalVariables(c(
     seqrunlens=S4Vectors::runLength(Seqinfo::seqnames(data.ranges)),
     start=BiocGenerics::start(data.ranges),
     strand=S4Vectors::as.factor(BiocGenerics::strand(data.ranges)),
-    mcols=as.data.frame(GenomicRanges::mcols(data.ranges), optional=TRUE)[, data.samples],
+    mcols=as.data.frame(S4Vectors::mcols(data.ranges), optional=TRUE)[, data.samples],
     coverage=as.data.frame(data.coverage, optional=TRUE)[, data.samples],
     exclude_lower=exclude.range[1],
     exclude_upper=exclude.range[2],
@@ -259,7 +259,7 @@ utils::globalVariables(c(
   if (verbose) message("Introducing epimutations", appendLF=FALSE)
   tm <- proc.time()
 
-  amr.mcols <- data.frame(GenomicRanges::mcols(amr.ranges))
+  amr.mcols <- data.frame(S4Vectors::mcols(amr.ranges))
   for (i in seq_len(nrow(amr.mcols))) {
     revmap <- unlist(amr.mcols[i,"revmap"])
     dbeta  <- sign(0.5 - mean(random.data[revmap,], na.omit=TRUE)) * amr.mcols[i,"dbeta"]

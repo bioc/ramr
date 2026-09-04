@@ -7,36 +7,51 @@ export(plotAMR)
 export(simulateAMR)
 export(simulateData)
 export(simulateData.obsolete)
-importFrom(BiocGenerics,relist)
-importFrom(BiocGenerics,start)
-importFrom(BiocGenerics,strand)
-importFrom(GenomicRanges,GRanges)
-importFrom(GenomicRanges,`mcols<-`)
-importFrom(GenomicRanges,findOverlaps)
-importFrom(GenomicRanges,granges)
-importFrom(GenomicRanges,mcols)
-importFrom(GenomicRanges,reduce)
-importFrom(IRanges,IRanges)
-importFrom(IRanges,subsetByOverlaps)
+importFrom(BiocGenerics,
+  relist,
+  start,
+  strand
+)
+importFrom(GenomicRanges,
+  GRanges,
+  findOverlaps,
+  granges,
+  reduce
+)
+importFrom(IRanges,
+  IRanges,
+  subsetByOverlaps
+)
 importFrom(Rcpp,sourceCpp)
-importFrom(S4Vectors,DataFrame)
-importFrom(S4Vectors,I)
-importFrom(S4Vectors,as.factor)
-importFrom(S4Vectors,queryHits)
-importFrom(S4Vectors,runLength)
-importFrom(S4Vectors,runValue)
+importFrom(S4Vectors,
+  DataFrame,
+  I,
+  as.factor,
+  mcols,
+  queryHits,
+  runLength,
+  runValue
+)
 importFrom(Seqinfo,seqnames)
-importFrom(data.table,as.data.table)
-importFrom(data.table,foverlaps)
-importFrom(data.table,melt.data.table)
-importFrom(data.table,setkeyv)
-importFrom(methods,as)
-importFrom(methods,is)
-importFrom(stats,median)
-importFrom(stats,na.omit)
-importFrom(stats,setNames)
-importFrom(utils,globalVariables)
-importFrom(utils,head)
-importFrom(utils,packageVersion)
-importFrom(utils,tail)
+importFrom(data.table,
+  as.data.table,
+  foverlaps,
+  melt.data.table,
+  setkeyv
+)
+importFrom(methods,
+  as,
+  is
+)
+importFrom(stats,
+  median,
+  na.omit,
+  setNames
+)
+importFrom(utils,
+  globalVariables,
+  head,
+  packageVersion,
+  tail
+)
 useDynLib(ramr, .registration=TRUE)
