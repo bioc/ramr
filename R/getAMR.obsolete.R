@@ -115,7 +115,8 @@ getAMR.obsolete <- function (data.ranges,
     if (!requireNamespace(ns, quietly=TRUE) | exists(x="is.test.environment"))
       stop(ns, " is required for this function. Please install")
   `%dorng%` <- doRNG::`%dorng%`
-
+  `%dopar%` <- foreach::`%dopar%`
+  
   if (!methods::is(data.ranges,"GRanges"))
     stop("'data.ranges' must be a GRanges object")
   if (is.null(data.samples))
@@ -215,6 +216,7 @@ getAMR.obsolete <- function (data.ranges,
   } else if (ramr.method=="beinf") {
     betas.filtered <- foreach::foreach (chunk=chunks) %dorng% getPValues.beinf(betas[chunk, ], ...)
     betas.filtered <- do.call(rbind, betas.filtered)
+    colnames(betas.filtered) <- colnames(betas)
     betas.filtered[betas.filtered>=qval.cutoff] <- NA
   }
 
@@ -248,7 +250,7 @@ getAMR.obsolete <- function (data.ranges,
     return(ranges)
   }
 
-  amr.ranges <- foreach::foreach (column=colnames(betas.filtered)) %dorng% getMergedRanges(column)
+  amr.ranges <- foreach::foreach (column=colnames(betas.filtered)) %dopar% getMergedRanges(column)
 
   parallel::stopCluster(cl)
   if (verbose) message(sprintf(" [%.3fs]",(proc.time()-tm)[3]), appendLF=TRUE)
