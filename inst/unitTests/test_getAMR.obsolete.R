@@ -14,7 +14,7 @@ test_getAMR.obsolete <- function () {
     getAMR.obsolete(ramr.data, ramr.samples, ramr.method="zzz")
   )
 
-  amr.iqr.1 <- getAMR.obsolete(ramr.data, ramr.method="IQR", min.cpgs=5, merge.window=10000, iqr.cutoff=5, cores=1)
+  amr.iqr.1 <- getAMR.obsolete(ramr.data, ramr.method="IQR", min.cpgs=5, merge.window=10000, iqr.cutoff=5, cores=2)
   amr.iqr.2 <- getAMR.obsolete(ramr.data, ramr.method="IQR", min.cpgs=5, merge.window=10000, iqr.cutoff=5, cores=2)
   RUnit::checkIdentical(
     amr.iqr.1,
