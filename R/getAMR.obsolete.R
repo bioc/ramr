@@ -215,6 +215,7 @@ getAMR.obsolete <- function (data.ranges,
   } else if (ramr.method=="beinf") {
     betas.filtered <- foreach::foreach (chunk=chunks) %dorng% getPValues.beinf(betas[chunk, ], ...)
     betas.filtered <- do.call(rbind, betas.filtered)
+    colnames(betas.filtered) <- colnames(betas)
     betas.filtered[betas.filtered>=qval.cutoff] <- NA
   }
 
