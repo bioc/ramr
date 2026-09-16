@@ -71,7 +71,7 @@ plotAMR <- function (data.ranges,
   if (is.null(breaks))
     breaks <- if (transform=="log10") 10**seq(from=-5, to=0, length.out=6) else seq(from=0, to=1, length.out=6)
   if (is.null(data.samples))
-    data.samples <- colnames(GenomicRanges::mcols(data.ranges))
+    data.samples <- colnames(S4Vectors::mcols(data.ranges))
 
   amr.ranges.reduced  <- GenomicRanges::reduce(amr.ranges, min.gapwidth=window, with.revmap=TRUE, ignore.strand=ignore.strand)
   amr.ranges.relisted <- BiocGenerics::relist(amr.ranges[unlist(amr.ranges.reduced$revmap)], amr.ranges.reduced$revmap)

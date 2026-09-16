@@ -119,8 +119,8 @@ getAMR.obsolete <- function (data.ranges,
   if (!methods::is(data.ranges,"GRanges"))
     stop("'data.ranges' must be a GRanges object")
   if (is.null(data.samples))
-    data.samples <- colnames(GenomicRanges::mcols(data.ranges))
-  if (!all(data.samples %in% colnames(GenomicRanges::mcols(data.ranges))))
+    data.samples <- colnames(S4Vectors::mcols(data.ranges))
+  if (!all(data.samples %in% colnames(S4Vectors::mcols(data.ranges))))
     stop("'data.ranges' metadata must include 'data.samples'")
   if (length(data.samples)<3)
     stop("at least three 'data.samples' must be provided")
@@ -192,7 +192,7 @@ getAMR.obsolete <- function (data.ranges,
   universe      <- getUniverse(data.ranges, merge.window=merge.window, min.cpgs=min.cpgs, min.width=min.width)
   universe.cpgs <- unlist(universe$revmap)
 
-  betas <- as.matrix(mcols(data.ranges)[universe.cpgs, data.samples, drop=FALSE])
+  betas <- as.matrix(S4Vectors::mcols(data.ranges)[universe.cpgs, data.samples, drop=FALSE])
   if (is.null(qval.cutoff))
     qval.cutoff <- pval.cutoff/ncol(betas)
 

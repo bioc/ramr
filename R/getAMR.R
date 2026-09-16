@@ -278,7 +278,7 @@ getAMR <- function (data.ranges,
 {
   if (!methods::is(data.ranges,"GRanges"))
     stop("'data.ranges' must be a GRanges object")
-  data.mcols <- GenomicRanges::mcols(data.ranges)
+  data.mcols <- S4Vectors::mcols(data.ranges)
 
   if (is.null(data.samples)) {
     data.samples <- colnames(data.mcols)

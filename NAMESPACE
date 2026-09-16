@@ -14,10 +14,8 @@ importFrom(BiocGenerics,
 )
 importFrom(GenomicRanges,
   GRanges,
-  `mcols<-`,
   findOverlaps,
   granges,
-  mcols,
   reduce
 )
 importFrom(IRanges,
@@ -29,6 +27,7 @@ importFrom(S4Vectors,
   DataFrame,
   I,
   as.factor,
+  mcols,
   queryHits,
   runLength,
   runValue
